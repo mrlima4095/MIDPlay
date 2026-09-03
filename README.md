@@ -2,11 +2,11 @@
 
 ![AppIcon](/res/Icon.png)
 
-A demo music player for J2ME (Java ME) mobile devices — CLDC 1.1 / MIDP 2.0. Ships with mock sample data; no live streaming.
+An online music player for J2ME (Java ME) mobile devices — CLDC 1.1 / MIDP 2.0.
 
 ## Features
 
-- **Mock/demo playback** — bundled sample data, no live streaming
+- **Multi-source streaming**
 - **Discovery** — browse by category and playlist, search songs / artists / albums
 - **Playback** — seek, resume position, sleep timer
 - **Library** — favorites, playlists, recent history
@@ -15,6 +15,7 @@ A demo music player for J2ME (Java ME) mobile devices — CLDC 1.1 / MIDP 2.0. S
 ## Requirements
 
 - J2ME device supporting MIDP 2.0 / CLDC 1.1
+- Network connectivity for streaming
 
 ## Install
 
@@ -33,7 +34,7 @@ Requires **JDK 8** (the last toolchain emitting CLDC-compatible bytecode). Outpu
 
 - Java ME (J2ME), MIDP 2.0 / CLDC 1.1
 - Record Management System (RMS) for local storage
-- Mock data layer (no external services)
+- REST APIs for streaming and metadata
 
 ## Contributing
 
