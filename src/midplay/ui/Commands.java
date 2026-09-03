@@ -153,5 +153,21 @@ public class Commands {
     return get("details.title", Command.ITEM, 2);
   }
 
+  public static Command download() {
+    return get("download.action", Command.SCREEN, 3);
+  }
+
+  public static Command downloadPlay() {
+    return get("download.play", Command.SCREEN, 2);
+  }
+
+  public static Command downloadDelete() {
+    return get("download.delete", Command.ITEM, 3);
+  }
+
+  public static Command downloadDeleteAll() {
+    return get("download.delete_all", Command.SCREEN, 4);
+  }
+
   private Commands() {}
 }

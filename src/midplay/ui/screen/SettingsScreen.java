@@ -6,6 +6,7 @@ import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.TextField;
 import javax.microedition.rms.RecordStoreException;
 import midplay.MIDPlay;
 import midplay.net.ThemeColorOperation;
@@ -30,6 +31,7 @@ public final class SettingsScreen extends BaseForm {
   private ChoiceGroup qualityGroup;
   private ChoiceGroup togglesGroup;
   private ChoiceGroup playerMethodGroup;
+  private TextField downloadPathField;
   private int autoUpdateIndex;
   private int saveLastSessionIndex;
   private int blackberryWifiIndex = -1;
@@ -43,6 +45,7 @@ public final class SettingsScreen extends BaseForm {
   private int currentSaveLastSession;
   private int currentThumbnails;
   private String currentPlayerMethod;
+  private String currentDownloadPath;
   private int currentColorIndex;
 
   public SettingsScreen(Navigator navigator, Listener listener) {
@@ -95,6 +98,10 @@ public final class SettingsScreen extends BaseForm {
             playerMethodGroup,
             Configuration.ALL_PLAYER_METHODS,
             settingsManager.getDefaultPlayerMethod()))) {
+      return true;
+    }
+    String pathValue = downloadPathField.getString().trim();
+    if (!currentDownloadPath.equals(pathValue)) {
       return true;
     }
     if ((currentAutoUpdate == Configuration.AUTO_UPDATE_ENABLED)
@@ -159,6 +166,14 @@ public final class SettingsScreen extends BaseForm {
     append(qualityGroup);
     append(playerMethodGroup);
     append(togglesGroup);
+
+    downloadPathField =
+        new TextField(
+            Lang.tr("settings.download_path"),
+            settingsManager.getCurrentDownloadPath(),
+            256,
+            TextField.URL);
+    append(downloadPathField);
   }
 
   private ChoiceGroup createChoiceGroup(
@@ -181,6 +196,7 @@ public final class SettingsScreen extends BaseForm {
     currentSaveLastSession = settingsManager.getCurrentSaveLastSession();
     currentThumbnails = settingsManager.getCurrentThumbnails();
     currentPlayerMethod = settingsManager.getCurrentPlayerMethod();
+    currentDownloadPath = settingsManager.getCurrentDownloadPath();
     currentColorIndex = settingsManager.getSavedColorIndex();
     selectChoice(languageGroup, availableLanguages, currentLanguage);
     selectChoice(themeModeGroup, Configuration.ALL_THEME_MODES, currentThemeMode);
@@ -200,6 +216,7 @@ public final class SettingsScreen extends BaseForm {
       togglesGroup.setSelectedIndex(
           blackberryWifiIndex, currentBlackberryWifi == Configuration.BLACKBERRY_WIFI_ON);
     }
+    downloadPathField.setString(currentDownloadPath);
   }
 
   private void selectChoice(ChoiceGroup group, String[] values, String target) {
@@ -271,6 +288,14 @@ public final class SettingsScreen extends BaseForm {
       if (!currentPlayerMethod.equals(selectedPlayerMethod)) {
         hasChanges = true;
         settingsManager.savePlayerMethod(selectedPlayerMethod);
+      }
+      String selectedDownloadPath = downloadPathField.getString().trim();
+      if (selectedDownloadPath.length() == 0) {
+        selectedDownloadPath = Configuration.DEFAULT_DOWNLOAD_PATH;
+      }
+      if (!currentDownloadPath.equals(selectedDownloadPath)) {
+        hasChanges = true;
+        settingsManager.saveDownloadPath(selectedDownloadPath);
       }
 
       if (hasColorChange || hasModeChange) {

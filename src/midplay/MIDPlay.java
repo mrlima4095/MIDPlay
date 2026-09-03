@@ -19,6 +19,7 @@ import midplay.net.NetworkOperation;
 import midplay.player.PlayerGUI;
 import midplay.player.PlayerScreen;
 import midplay.store.Configuration;
+import midplay.store.DownloadManager;
 import midplay.store.FavoritesManager;
 import midplay.store.LastSessionManager;
 import midplay.store.RecentManager;
@@ -34,6 +35,7 @@ import midplay.ui.screen.FavoritesScreen;
 import midplay.ui.screen.RecentListScreen;
 import midplay.ui.screen.SearchScreen;
 import midplay.ui.screen.SettingsScreen;
+import midplay.ui.screen.DownloadsScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 
@@ -110,6 +112,13 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
         new Runnable() {
           public void run() {
             goToRecentScreen();
+          }
+        });
+    menuManager.registerAction(
+        Configuration.MENU_DOWNLOADS,
+        new Runnable() {
+          public void run() {
+            goToDownloadsScreen();
           }
         });
     menuManager.registerAction(
@@ -244,6 +253,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
       RecentManager.getInstance().close();
     } catch (Exception e) {
     }
+    try {
+      DownloadManager.getInstance().cleanup();
+    } catch (Exception e) {
+    }
   }
 
   public void exitApp() {
@@ -356,6 +369,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
   private void goToRecentScreen() {
     RecentListScreen recentScreen = new RecentListScreen(navigator);
     navigator.forward(recentScreen);
+  }
+
+  private void goToDownloadsScreen() {
+    navigator.forward(new DownloadsScreen(navigator));
   }
 
   private void showExitConfirmation() {

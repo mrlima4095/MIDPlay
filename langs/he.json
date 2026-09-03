@@ -43,6 +43,7 @@
     "favorites": "מועדפים",
     "now_playing": "מושמע כעת",
     "recent": "אחרונים",
+    "downloads": "הורדות",
     "reorder": "סדר תפריט",
     "search": "חיפוש",
     "settings": "הגדרות",
@@ -83,6 +84,24 @@
     "unknown_artist": "אמן לא ידוע",
     "unknown_duration": "משך זמן לא ידוע",
     "no_url": "אין כתובת URL"
+  },
+  "download": {
+    "action": "הורדה",
+    "downloading": "מוריד...",
+    "completed": "ההורדה הושלמה",
+    "already_downloaded": "השיר כבר הורד",
+    "in_progress": "ההורדה כבר מתבצעת",
+    "error": "ההורדה נכשלה: {0}",
+    "play": "נגן",
+    "delete": "מחק",
+    "delete_all": "מחק הכל",
+    "status": {
+      "deleted": "ההורדה נמחקה",
+      "cleared": "כל ההורדות נמחקו"
+    },
+    "confirm": {
+      "clear": "למחוק את כל השירים שהורדו?"
+    }
   },
   "playlist": {
     "add_track": "הוסף לרשימת השמעה",
@@ -160,6 +179,7 @@
       "pass_inputstream": "העבר InputStream",
       "pass_url": "העבר URL"
     },
+    "download_path": "נתיב הורדה",
     "error": {
       "save_failed": "שמירת ההגדרות נכשלה",
       "save_theme": "שגיאה בשמירת ערכת הנושא: {0}",

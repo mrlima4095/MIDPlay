@@ -43,6 +43,7 @@
     "favorites": "Favorites",
     "now_playing": "Now Playing",
     "recent": "Recent",
+    "downloads": "Downloads",
     "reorder": "Reorder Menu",
     "search": "Search",
     "settings": "Settings",
@@ -83,6 +84,24 @@
     "unknown_artist": "Unknown Artist",
     "unknown_duration": "Unknown Duration",
     "no_url": "No URL"
+  },
+  "download": {
+    "action": "Download",
+    "downloading": "Downloading...",
+    "completed": "Download completed",
+    "already_downloaded": "Song already downloaded",
+    "in_progress": "Download already in progress",
+    "error": "Download failed: {0}",
+    "play": "Play",
+    "delete": "Delete",
+    "delete_all": "Delete All",
+    "status": {
+      "deleted": "Download deleted",
+      "cleared": "All downloads cleared"
+    },
+    "confirm": {
+      "clear": "Delete all downloaded songs?"
+    }
   },
   "playlist": {
     "add_track": "Add to Playlist",
@@ -161,6 +180,7 @@
       "pass_inputstream": "Pass InputStream",
       "pass_url": "Pass URL"
     },
+    "download_path": "Download Path",
     "error": {
       "save_failed": "Failed to save settings",
       "save_theme": "Error saving theme: {0}",

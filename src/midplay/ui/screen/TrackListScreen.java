@@ -14,6 +14,7 @@ import midplay.store.Configuration;
 import midplay.store.FavoritesManager;
 import midplay.ui.BaseList;
 import midplay.ui.Commands;
+import midplay.ui.DownloadActions;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.util.Lang;
@@ -41,6 +42,7 @@ public class TrackListScreen extends BaseList {
     this.playlist = playlist;
     addCommand(Commands.addToQueue());
     addCommand(Commands.playerAddToPlaylist());
+    addCommand(Commands.download());
     addCommand(Commands.details());
     if (playlist != null && playlist.isCustom()) {
       addCommand(Commands.playlistRemove());
@@ -130,7 +132,17 @@ public class TrackListScreen extends BaseList {
       removeFromPlaylist();
     } else if (c == Commands.details()) {
       showTrackDetails();
+    } else if (c == Commands.download()) {
+      downloadSelected();
     }
+  }
+
+  private void downloadSelected() {
+    int selectedIndex = getSelectedIndex();
+    if (!isValidSelection(selectedIndex, tracks.length)) {
+      return;
+    }
+    DownloadActions.downloadTrack(navigator, tracks[selectedIndex]);
   }
 
   private void addToQueueSelected() {

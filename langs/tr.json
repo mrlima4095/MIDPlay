@@ -43,6 +43,7 @@
     "favorites": "Favoriler",
     "now_playing": "Şimdi Çalıyor",
     "recent": "Son çalınanlar",
+    "downloads": "İndirilenler",
     "reorder": "Menüyü Yeniden Sırala",
     "search": "Arama",
     "settings": "Ayarlar",
@@ -83,6 +84,24 @@
     "unknown_artist": "Bilinmeyen Sanatçı",
     "unknown_duration": "Bilinmeyen Süre",
     "no_url": "URL yok"
+  },
+  "download": {
+    "action": "İndir",
+    "downloading": "İndiriliyor...",
+    "completed": "İndirme tamamlandı",
+    "already_downloaded": "Şarkı zaten indirildi",
+    "in_progress": "İndirme zaten devam ediyor",
+    "error": "İndirme başarısız: {0}",
+    "play": "Çal",
+    "delete": "Sil",
+    "delete_all": "Tümünü Sil",
+    "status": {
+      "deleted": "İndirme silindi",
+      "cleared": "Tüm indirmeler silindi"
+    },
+    "confirm": {
+      "clear": "İndirilen tüm şarkılar silinsin mi?"
+    }
   },
   "playlist": {
     "add_track": "Çalma Listesine Ekle",
@@ -161,6 +180,7 @@
       "pass_inputstream": "InputStream Geçir",
       "pass_url": "URL Geçir"
     },
+    "download_path": "İndirme Yolu",
     "error": {
       "save_failed": "Ayarlar kaydedilemedi",
       "save_theme": "Tema kaydedilirken hata: {0}",

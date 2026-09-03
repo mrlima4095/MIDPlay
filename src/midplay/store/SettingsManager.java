@@ -16,6 +16,7 @@ public class SettingsManager {
   private static String currentSearchType;
   private static int currentAutoUpdate;
   private static String currentPlayerMethod;
+  private static String currentDownloadPath;
   private static String detectedDefaultMethod;
   private static boolean detectedDefaultMethodResolved;
   private static int currentRepeatMode;
@@ -110,6 +111,8 @@ public class SettingsManager {
     currentSearchType = settings.getString("searchType", Configuration.SEARCH_PLAYLIST);
     currentAutoUpdate = settings.getInt("autoUpdate", Configuration.AUTO_UPDATE_ENABLED);
     currentPlayerMethod = settings.getString("playerMethod", getDefaultPlayerMethod());
+    currentDownloadPath =
+        settings.getString("downloadPath", Configuration.DEFAULT_DOWNLOAD_PATH);
     currentRepeatMode = settings.getInt("repeatMode", Configuration.PLAYER_REPEAT_ALL);
     currentShuffleMode = settings.getInt("shuffleMode", Configuration.PLAYER_SHUFFLE_OFF);
     currentVolumeLevel = settings.getInt("volumeLevel", Configuration.PLAYER_MAX_VOLUME);
@@ -140,6 +143,7 @@ public class SettingsManager {
     settings.put("searchType", Configuration.SEARCH_PLAYLIST);
     settings.put("autoUpdate", Configuration.AUTO_UPDATE_ENABLED);
     settings.put("playerMethod", getDefaultPlayerMethod());
+    settings.put("downloadPath", Configuration.DEFAULT_DOWNLOAD_PATH);
     settings.put("themeMode", Configuration.THEME_LIGHT);
     settings.put("blackberryWifi", Configuration.BLACKBERRY_WIFI_ON);
     settings.put("saveLastSession", Configuration.SAVE_LAST_SESSION_OFF);
@@ -220,6 +224,18 @@ public class SettingsManager {
   public void savePlayerMethod(String playerMethod) throws RecordStoreException {
     saveSetting("playerMethod", playerMethod);
     currentPlayerMethod = playerMethod;
+  }
+
+  public void saveDownloadPath(String downloadPath) throws RecordStoreException {
+    saveSetting("downloadPath", downloadPath);
+    currentDownloadPath = downloadPath;
+  }
+
+  public String getCurrentDownloadPath() {
+    if (currentDownloadPath == null || currentDownloadPath.length() == 0) {
+      currentDownloadPath = Configuration.DEFAULT_DOWNLOAD_PATH;
+    }
+    return currentDownloadPath;
   }
 
   public void saveRepeatMode(int repeatMode) throws RecordStoreException {

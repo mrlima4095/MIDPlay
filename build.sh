@@ -32,7 +32,7 @@ VERSION="1.7.1"
 # ProGuard (and only ProGuard) runs on any modern JDK.
 RUN_JAVA="${RUN_JAVA:-$(command -v java)}"
 PROGUARD_JAR="lib/proguard-ant.jar"
-BOOTCP="lib/cldc_1.1.jar:lib/midp_2.0.jar:lib/jsr234_1.0.jar"   # J2ME core APIs + JSR-234 (AMMS, compile-time only)
+BOOTCP="lib/cldc_1.1.jar:lib/midp_2.0.jar:lib/jsr234_1.0.jar:lib/jsr75.jar"   # J2ME core APIs + JSR-234 (AMMS) + JSR-75 (FileConnection)
 
 # ---------------------------------------------------------------------------
 # Locate JDK 8.
@@ -85,6 +85,10 @@ if [ ! -f "$PROGUARD_JAR" ]; then
   echo "✗ ProGuard not found at $PROGUARD_JAR" >&2; exit 1
 fi
 
+if [ ! -f "lib/jsr75.jar" ]; then
+  echo "✗ JSR-75 API jar (FileConnection) not found at lib/jsr75.jar" >&2; exit 1
+fi
+
 # ---------------------------------------------------------------------------
 # Shared MIDlet descriptor attributes (go into both the jar manifest and the
 # .jad). Values mirror nbproject/project.properties (manifest.midlets/others).
@@ -96,7 +100,7 @@ MIDlet-Version: $VERSION
 MIDlet-1: MIDPlay, /Icon.png, midplay.MIDPlay
 MicroEdition-Profile: MIDP-2.0
 MicroEdition-Configuration: CLDC-1.1
-MIDlet-Permissions: javax.microedition.io.Connector.http
+MIDlet-Permissions: javax.microedition.io.Connector.http, javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.file.delete
 Nokia-UI-Enhancement: IgnoreProfilesBasedSoundMuting,MusicKeysSupported
 progressive_download: enabled
 Nokia-MIDlet-S60-Selection-Key-Compatibility: true

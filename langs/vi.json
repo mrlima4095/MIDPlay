@@ -43,6 +43,7 @@
     "favorites": "Yêu thích",
     "now_playing": "Đang phát",
     "recent": "Gần đây",
+    "downloads": "Đã tải xuống",
     "reorder": "Sắp xếp menu",
     "search": "Tìm kiếm",
     "settings": "Cài đặt",
@@ -83,6 +84,24 @@
     "unknown_artist": "Không rõ nghệ sĩ",
     "unknown_duration": "Không rõ thời lượng",
     "no_url": "Không có liên kết"
+  },
+  "download": {
+    "action": "Tải xuống",
+    "downloading": "Đang tải xuống...",
+    "completed": "Tải xuống hoàn tất",
+    "already_downloaded": "Bài hát đã được tải xuống",
+    "in_progress": "Đang tải xuống rồi",
+    "error": "Tải xuống thất bại: {0}",
+    "play": "Phát",
+    "delete": "Xóa",
+    "delete_all": "Xóa tất cả",
+    "status": {
+      "deleted": "Đã xóa bản tải xuống",
+      "cleared": "Đã xóa toàn bộ bản tải xuống"
+    },
+    "confirm": {
+      "clear": "Xóa tất cả bài hát đã tải xuống?"
+    }
   },
   "playlist": {
     "add_track": "Thêm vào playlist",
@@ -161,6 +180,7 @@
       "pass_inputstream": "Truyền InputStream",
       "pass_url": "Truyền URL"
     },
+    "download_path": "Đường dẫn tải xuống",
     "error": {
       "save_failed": "Không thể lưu cài đặt",
       "save_theme": "Lỗi lưu giao diện: {0}",

@@ -43,6 +43,7 @@
     "favorites": "Ulubione",
     "now_playing": "Teraz odtwarzane",
     "recent": "Ostatnie",
+    "downloads": "Pobrane",
     "reorder": "Przestaw menu",
     "search": "Wyszukaj",
     "settings": "Ustawienia",
@@ -83,6 +84,24 @@
     "unknown_artist": "Nieznany wykonawca",
     "unknown_duration": "Nieznany czas",
     "no_url": "Brak URL"
+  },
+  "download": {
+    "action": "Pobierz",
+    "downloading": "Pobieranie...",
+    "completed": "Pobieranie zakończone",
+    "already_downloaded": "Utwór został już pobrany",
+    "in_progress": "Pobieranie już trwa",
+    "error": "Nie udało się pobrać: {0}",
+    "play": "Odtwórz",
+    "delete": "Usuń",
+    "delete_all": "Usuń wszystkie",
+    "status": {
+      "deleted": "Usunięto pobrany plik",
+      "cleared": "Usunięto wszystkie pobrane pliki"
+    },
+    "confirm": {
+      "clear": "Usunąć wszystkie pobrane utwory?"
+    }
   },
   "playlist": {
     "add_track": "Dodaj do playlisty",
@@ -160,6 +179,7 @@
       "pass_inputstream": "Przekaż strumień wejściowy",
       "pass_url": "Przekaż URL"
     },
+    "download_path": "Ścieżka pobierania",
     "error": {
       "save_failed": "Nie udało się załadować ustawień",
       "save_theme": "Błąd zapisywania motywu: {0}",

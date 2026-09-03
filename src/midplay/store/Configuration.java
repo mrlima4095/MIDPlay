@@ -17,6 +17,9 @@ public class Configuration {
   public static final String STORAGE_TRACKS = "storage.tracks";
   public static final String STORAGE_LAST_SESSION = "storage.last_session";
   public static final String STORAGE_RECENT = "storage.recent";
+  public static final String STORAGE_DOWNLOADS = "storage.downloads";
+
+  public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
 
   public static final String MENU_SEARCH = "menu.search";
   public static final String MENU_FAVORITES = "menu.favorites";
@@ -25,6 +28,7 @@ public class Configuration {
   public static final String MENU_ABOUT = "menu.about";
   public static final String MENU_RECENT = "menu.recent";
   public static final String MENU_EQUALIZER = "menu.equalizer";
+  public static final String MENU_DOWNLOADS = "menu.downloads";
 
   public static final String THEME_LIGHT = "light";
   public static final String THEME_DARK = "dark";
