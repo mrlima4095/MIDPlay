@@ -487,10 +487,10 @@ public class DownloadManager {
     String prefix = "";
     if (rest.startsWith("file:///")) {
       rest = rest.substring(8);
-      prefix = "file://";
+      prefix = "file:///";
     } else if (rest.startsWith("file://")) {
       rest = rest.substring(7);
-      prefix = "file://";
+      prefix = "file:///";
     }
     String cumulative = prefix;
     StringBuffer token = new StringBuffer();
@@ -498,7 +498,7 @@ public class DownloadManager {
       char c = rest.charAt(i);
       if (c == '/') {
         if (token.length() > 0) {
-          cumulative = cumulative + "/" + token.toString();
+          cumulative = cumulative + token.toString() + "/";
           if (!ensureDirExists(cumulative)) {
             return false;
           }
@@ -509,7 +509,7 @@ public class DownloadManager {
       }
     }
     if (token.length() > 0) {
-      cumulative = cumulative + "/" + token.toString();
+      cumulative = cumulative + token.toString() + "/";
       if (!ensureDirExists(cumulative)) {
         return false;
       }
@@ -521,13 +521,11 @@ public class DownloadManager {
     FileConnection conn = null;
     try {
       conn = (FileConnection) Connector.open(dirUrl, Connector.READ_WRITE);
-      if (conn.exists()) {
-        return true;
+      if (!conn.exists()) {
+        conn.mkdir();
       }
       conn.close();
       conn = null;
-      conn = (FileConnection) Connector.open(dirUrl, Connector.READ_WRITE);
-      conn.mkdir();
       return true;
     } catch (Exception e) {
       return false;
