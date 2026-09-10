@@ -96,6 +96,7 @@
     "play": "Phát",
     "delete": "Xóa",
     "delete_all": "Xóa tất cả",
+    "refresh": "Làm mới",
     "status": {
       "deleted": "Đã xóa bản tải xuống",
       "cleared": "Đã xóa toàn bộ bản tải xuống"

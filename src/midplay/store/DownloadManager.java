@@ -5,6 +5,7 @@ import cc.nnproject.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.TimerTask;
 import java.util.Vector;
 import javax.microedition.io.Connector;
@@ -131,6 +132,7 @@ public class DownloadManager {
       return false;
     }
     String key = makeTrackKey(track);
+    String url = track.getUrl();
     if (key == null) {
       return false;
     }
@@ -138,7 +140,8 @@ public class DownloadManager {
     for (int i = 0; i < index.size(); i++) {
       try {
         JSONObject entry = index.getObject(i);
-        if (key.equals(entry.getString("key", ""))) {
+        if (key.equals(entry.getString("key", ""))
+            || (url != null && url.length() > 0 && url.equals(entry.getString("url", "")))) {
           String path = entry.getString("path", "");
           if (path.length() > 0) {
             return exists(path);
@@ -154,13 +157,20 @@ public class DownloadManager {
     if (track == null) {
       return null;
     }
+    String url = track.getUrl();
     String key = makeTrackKey(track);
     JSONArray index = getIndex();
     for (int i = 0; i < index.size(); i++) {
       try {
         JSONObject entry = index.getObject(i);
-        if (key.equals(entry.getString("key", ""))) {
-          String path = entry.getString("path", "");
+        String indexedUrl = entry.getString("url", "");
+        // Downloads made before URL indexing used the track key, so retain that lookup.
+        boolean sameUrl = url != null && url.length() > 0 && url.equals(indexedUrl);
+        String path = entry.getString("path", "");
+        boolean samePath = url != null && url.length() > 0 && url.equals(path);
+        if (sameUrl
+            || samePath
+            || (indexedUrl.length() == 0 && key.equals(entry.getString("key", "")))) {
           if (path.length() > 0 && exists(path)) {
             return path;
           }
@@ -366,16 +376,19 @@ public class DownloadManager {
   private void addToIndex(Track track, String key, String filePath) {
     JSONArray index = getIndex();
     try {
+      String url = track.getUrl() != null ? track.getUrl() : "";
       for (int i = 0; i < index.size(); i++) {
         JSONObject entry = index.getObject(i);
-        if (key.equals(entry.getString("key", ""))) {
+        if (url.equals(entry.getString("url", "")) || key.equals(entry.getString("key", ""))) {
           entry.put("path", filePath);
+          entry.put("url", url);
           saveIndex();
           return;
         }
       }
       JSONObject entry = new JSONObject();
       entry.put("key", key);
+      entry.put("url", url);
       entry.put("name", track.getName() != null ? track.getName() : "");
       entry.put("artist", track.getArtist() != null ? track.getArtist() : "");
       entry.put("path", filePath);
@@ -390,12 +403,15 @@ public class DownloadManager {
       return false;
     }
     String key = makeTrackKey(track);
+    String trackPath = track.getUrl();
     JSONArray index = getIndex();
     for (int i = 0; i < index.size(); i++) {
       try {
         JSONObject entry = index.getObject(i);
-        if (key.equals(entry.getString("key", ""))) {
-          String path = entry.getString("path", "");
+        String path = entry.getString("path", "");
+        if (path.equals(trackPath)
+            || ((trackPath == null || !trackPath.startsWith("file://"))
+                && key.equals(entry.getString("key", "")))) {
           if (path.length() > 0) {
             deleteFileIfExists(path);
           }
@@ -404,6 +420,10 @@ public class DownloadManager {
         }
       } catch (Exception e) {
       }
+    }
+    if (trackPath != null && trackPath.length() > 0 && exists(trackPath)) {
+      deleteFileIfExists(trackPath);
+      return true;
     }
     return false;
   }
@@ -438,48 +458,112 @@ public class DownloadManager {
     }
     downloads = new JSONArray();
     saveIndex();
+    deleteFilesInDownloadDirectory();
   }
 
   public Track[] getDownloadedTracks() {
+    return getDownloadedTracks(false);
+  }
+
+  public Track[] refreshDownloadedTracks() {
+    return getDownloadedTracks(true);
+  }
+
+  private Track[] getDownloadedTracks(boolean includeExternalFiles) {
     JSONArray index = getIndex();
-    Track[] tracks = new Track[index.size()];
+    Vector trackList = new Vector();
+    Vector indexedPaths = new Vector();
+    Vector diskPaths = includeExternalFiles ? getDownloadFilePaths() : null;
     for (int i = 0; i < index.size(); i++) {
       try {
         JSONObject entry = index.getObject(i);
         String path = entry.getString("path", "");
-        if (!exists(path)) {
-          tracks[i] = null;
+        if (diskPaths != null && !diskPaths.contains(path)) {
           continue;
         }
-        tracks[i] =
+        indexedPaths.addElement(path);
+        trackList.addElement(
             new Track(
                 entry.getString("key", ""),
                 entry.getString("name", ""),
                 path,
                 0,
                 entry.getString("artist", ""),
-                "");
+                ""));
       } catch (Exception e) {
-        tracks[i] = null;
       }
     }
-    int count = 0;
-    for (int i = 0; i < tracks.length; i++) {
-      if (tracks[i] != null) {
-        count++;
-      }
+    if (includeExternalFiles) {
+      addExternalFiles(trackList, indexedPaths, diskPaths);
     }
-    if (count == tracks.length) {
-      return tracks;
-    }
-    Track[] result = new Track[count];
-    int idx = 0;
-    for (int i = 0; i < tracks.length; i++) {
-      if (tracks[i] != null) {
-        result[idx++] = tracks[i];
-      }
+    Track[] result = new Track[trackList.size()];
+    for (int i = 0; i < result.length; i++) {
+      result[i] = (Track) trackList.elementAt(i);
     }
     return result;
+  }
+
+  private Vector getDownloadFilePaths() {
+    Vector paths = new Vector();
+    String basePath = getDownloadDirectory();
+    FileConnection directory = null;
+    try {
+      directory = (FileConnection) Connector.open(basePath, Connector.READ);
+      if (!directory.exists() || !directory.isDirectory()) {
+        return paths;
+      }
+      Enumeration files = directory.list();
+      while (files.hasMoreElements()) {
+        String fileName = (String) files.nextElement();
+        if (!fileName.endsWith("/")) {
+          paths.addElement(basePath + fileName);
+        }
+      }
+    } catch (Exception e) {
+    } finally {
+      closeConnection(directory);
+    }
+    return paths;
+  }
+
+  private void addExternalFiles(Vector tracks, Vector indexedPaths, Vector diskPaths) {
+    for (int i = 0; i < diskPaths.size(); i++) {
+      String path = (String) diskPaths.elementAt(i);
+      if (indexedPaths.contains(path)) {
+        continue;
+      }
+      String fileName = path.substring(getDownloadDirectory().length());
+      tracks.addElement(new Track("local_" + sanitize(fileName), fileName, path, 0, "", ""));
+    }
+  }
+
+  private void deleteFilesInDownloadDirectory() {
+    String basePath = getDownloadDirectory();
+    FileConnection directory = null;
+    try {
+      directory = (FileConnection) Connector.open(basePath, Connector.READ);
+      if (!directory.exists() || !directory.isDirectory()) {
+        return;
+      }
+      Enumeration files = directory.list();
+      while (files.hasMoreElements()) {
+        String fileName = (String) files.nextElement();
+        if (!fileName.endsWith("/")) {
+          deleteFileIfExists(basePath + fileName);
+        }
+      }
+    } catch (Exception e) {
+    } finally {
+      closeConnection(directory);
+    }
+  }
+
+  private String getDownloadDirectory() {
+    String path = SettingsManager.getInstance().getCurrentDownloadPath();
+    if (path == null || path.length() == 0) {
+      path = Configuration.DEFAULT_DOWNLOAD_PATH;
+    }
+    return path.endsWith("/") ? path : path + "/";
   }
 
   private boolean ensureDirectories(String basePath) {

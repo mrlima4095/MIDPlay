@@ -67,6 +67,22 @@ public class MediaResolver implements MediaHttpClient.ResolveContext {
       throws IOException, MediaException {
     String trackUrl = track.getUrl();
 
+    if (trackUrl != null && trackUrl.startsWith("file://")) {
+      PendingPlayback local = new PendingPlayback();
+      boolean keepLocal = false;
+      try {
+        local.usedInputStream = false;
+        local.pendingResolvedUrl = trackUrl;
+        local.pendingPlayer = Manager.createPlayer(trackUrl);
+        keepLocal = true;
+        return local;
+      } finally {
+        if (!keepLocal) {
+          closePendingPlayback(local);
+        }
+      }
+    }
+
     String localPath = DownloadManager.getInstance().getDownloadedFilePath(track);
     if (localPath != null) {
       PendingPlayback local = new PendingPlayback();

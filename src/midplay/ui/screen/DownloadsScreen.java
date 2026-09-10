@@ -24,18 +24,13 @@ public final class DownloadsScreen extends BaseList {
     addCommand(Commands.downloadPlay());
     addCommand(Commands.downloadDelete());
     addCommand(Commands.downloadDeleteAll());
+    addCommand(Commands.downloadRefresh());
     populateItems();
   }
 
   protected void populateItems() {
     tracks = downloadManager.getDownloadedTracks();
-    if (tracks == null || tracks.length == 0) {
-      return;
-    }
-    for (int i = 0; i < tracks.length; i++) {
-      String label = DOWNLOADED_MARKER + buildTrackLabel(tracks[i]);
-      this.append(label, Configuration.musicIcon);
-    }
+    populateTrackItems();
   }
 
   private String buildTrackLabel(Track track) {
@@ -69,6 +64,8 @@ public final class DownloadsScreen extends BaseList {
       }
     } else if (c == Commands.downloadDeleteAll()) {
       confirmClearAll();
+    } else if (c == Commands.downloadRefresh()) {
+      refreshFromDisk();
     }
   }
 
@@ -104,6 +101,22 @@ public final class DownloadsScreen extends BaseList {
           }
         },
         AlertType.WARNING);
+  }
+
+  private void refreshFromDisk() {
+    tracks = downloadManager.refreshDownloadedTracks();
+    this.deleteAll();
+    populateTrackItems();
+  }
+
+  private void populateTrackItems() {
+    if (tracks == null || tracks.length == 0) {
+      return;
+    }
+    for (int i = 0; i < tracks.length; i++) {
+      String label = DOWNLOADED_MARKER + buildTrackLabel(tracks[i]);
+      this.append(label, Configuration.musicIcon);
+    }
   }
 
   protected void showNotify() {

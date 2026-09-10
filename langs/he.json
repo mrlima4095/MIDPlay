@@ -96,6 +96,7 @@
     "play": "נגן",
     "delete": "מחק",
     "delete_all": "מחק הכל",
+    "refresh": "Refresh",
     "status": {
       "deleted": "ההורדה נמחקה",
       "cleared": "כל ההורדות נמחקו"

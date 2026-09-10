@@ -96,6 +96,7 @@
     "play": "Çal",
     "delete": "Sil",
     "delete_all": "Tümünü Sil",
+    "refresh": "Yenile",
     "status": {
       "deleted": "İndirme silindi",
       "cleared": "Tüm indirmeler silindi"

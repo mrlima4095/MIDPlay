@@ -169,5 +169,9 @@ public class Commands {
     return get("download.delete_all", Command.SCREEN, 4);
   }
 
+  public static Command downloadRefresh() {
+    return get("download.refresh", Command.SCREEN, 5);
+  }
+
   private Commands() {}
 }

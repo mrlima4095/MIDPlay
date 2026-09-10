@@ -96,6 +96,7 @@
     "play": "Play",
     "delete": "Delete",
     "delete_all": "Delete All",
+    "refresh": "Refresh",
     "status": {
       "deleted": "Download deleted",
       "cleared": "All downloads cleared"

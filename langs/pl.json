@@ -96,6 +96,7 @@
     "play": "Odtwórz",
     "delete": "Usuń",
     "delete_all": "Usuń wszystkie",
+    "refresh": "Odśwież",
     "status": {
       "deleted": "Usunięto pobrany plik",
       "cleared": "Usunięto wszystkie pobrane pliki"
