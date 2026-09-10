@@ -30,6 +30,9 @@ public class SettingsManager {
   private static boolean currentEqEnabled;
   private static int currentEqPreset; // -1 = manual/custom levels
   private static int[] currentEqLevels;
+  private static int currentCacheEnabled;
+  private static String currentCacheStorage;
+  private static String currentCacheDirectory;
 
   public static SettingsManager getInstance() {
     if (instance == null) {
@@ -125,6 +128,9 @@ public class SettingsManager {
     currentEqEnabled = settings.getBoolean("eqEnabled", false);
     currentEqPreset = settings.getInt("eqPreset", -1);
     currentEqLevels = parseLevelsCsv(settings.getString("eqLevels", ""));
+    currentCacheEnabled = settings.getInt("cacheEnabled", Configuration.CACHE_OFF);
+    currentCacheStorage = settings.getString("cacheStorage", Configuration.CACHE_STORAGE_RMS);
+    currentCacheDirectory = settings.getString("cacheDirectory", Configuration.DEFAULT_CACHE_PATH);
   }
 
   private JSONObject getSettingsJSON() {
@@ -154,6 +160,9 @@ public class SettingsManager {
     settings.put("eqEnabled", false);
     settings.put("eqPreset", -1);
     settings.put("eqLevels", "");
+    settings.put("cacheEnabled", Configuration.CACHE_OFF);
+    settings.put("cacheStorage", Configuration.CACHE_STORAGE_RMS);
+    settings.put("cacheDirectory", Configuration.DEFAULT_CACHE_PATH);
     return settings;
   }
 
@@ -244,6 +253,21 @@ public class SettingsManager {
       currentDownloadPath = Configuration.DEFAULT_DOWNLOAD_PATH;
     }
     return currentDownloadPath;
+  }
+
+  public int getCurrentCacheEnabled() {
+    return currentCacheEnabled;
+  }
+
+  public String getCurrentCacheStorage() {
+    return currentCacheStorage;
+  }
+
+  public String getCurrentCacheDirectory() {
+    if (currentCacheDirectory == null || currentCacheDirectory.length() == 0) {
+      currentCacheDirectory = Configuration.DEFAULT_CACHE_PATH;
+    }
+    return currentCacheDirectory;
   }
 
   public void saveRepeatMode(int repeatMode) throws RecordStoreException {

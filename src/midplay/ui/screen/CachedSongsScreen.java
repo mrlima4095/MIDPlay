@@ -63,7 +63,7 @@ public final class CachedSongsScreen extends BaseList {
     } else if (c == Commands.cacheDelete()) {
       deleteCurrent();
     } else if (c == Commands.cacheDeleteAll()) {
-      deleteAll();
+      confirmDeleteAll();
     }
   }
 
@@ -86,7 +86,7 @@ public final class CachedSongsScreen extends BaseList {
     refresh();
   }
 
-  private void deleteAll() {
+  private void confirmDeleteAll() {
     if (cachedTracks.length == 0) {
       return;
     }

@@ -104,6 +104,15 @@
       "clear": "Excluir todas as músicas baixadas?"
     }
   },
+  "cache": {
+    "listen": "Ouvir",
+    "delete": "Excluir",
+    "delete_all": "Excluir tudo",
+    "title": "Músicas em cache",
+    "unknown": "Música desconhecida",
+    "status": {"removed": "Música removida do cache", "cleared": "Cache limpo"},
+    "confirm": {"delete_all": "Excluir todas as músicas em cache?"}
+  },
   "playlist": {
     "add_track": "Adicionar à Playlist",
     "create": "Criar Playlist",

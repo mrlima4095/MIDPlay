@@ -18,8 +18,17 @@ public class Configuration {
   public static final String STORAGE_LAST_SESSION = "storage.last_session";
   public static final String STORAGE_RECENT = "storage.recent";
   public static final String STORAGE_DOWNLOADS = "storage.downloads";
+  public static final String STORAGE_CACHE = "storage.cache";
+  public static final String STORAGE_CACHE_AUDIO = "storage.cache_audio";
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
+  public static final String DEFAULT_CACHE_PATH = "file:///SDCard/MIDPlay/Cache/";
+
+  public static final int CACHE_OFF = 0;
+  public static final int CACHE_ON = 1;
+  public static final String CACHE_STORAGE_RMS = "rms";
+  public static final String CACHE_STORAGE_FILE = "file";
+  public static final int MAX_CACHE_ENTRY_BYTES = 8 * 1024 * 1024;
 
   public static final String MENU_SEARCH = "menu.search";
   public static final String MENU_FAVORITES = "menu.favorites";

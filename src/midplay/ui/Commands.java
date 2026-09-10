@@ -173,5 +173,17 @@ public class Commands {
     return get("download.refresh", Command.SCREEN, 5);
   }
 
+  public static Command cacheListen() {
+    return get("cache.listen", Command.OK, 1);
+  }
+
+  public static Command cacheDelete() {
+    return get("cache.delete", Command.ITEM, 2);
+  }
+
+  public static Command cacheDeleteAll() {
+    return get("cache.delete_all", Command.SCREEN, 3);
+  }
+
   private Commands() {}
 }

@@ -105,6 +105,15 @@
       "clear": "Delete all downloaded songs?"
     }
   },
+  "cache": {
+    "listen": "Listen",
+    "delete": "Delete",
+    "delete_all": "Delete All",
+    "title": "Cached Songs",
+    "unknown": "Unknown Song",
+    "status": {"removed": "Cached song removed", "cleared": "Cache cleared"},
+    "confirm": {"delete_all": "Delete all cached songs?"}
+  },
   "playlist": {
     "add_track": "Add to Playlist",
     "create": "Create Playlist",
