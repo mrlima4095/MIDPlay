@@ -307,7 +307,9 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
     f.append(getAppProperty("MIDlet-Name") + "\n");
     f.append("Version " + APP_VERSION + "\n");
     f.append("Author: " + getAppProperty("MIDlet-Vendor") + "\n");
+    f.append("Maintained by: Mr Lima\n");
     f.append("Contributors: " + "symbuzzer, GoldenDragon, Spajciuch, gtrxAC\n");
+    f.append("This fork is based on MIDPlay 1.7.1\n");
 
     f.addCommand(Commands.back());
     f.setCommandListener(
