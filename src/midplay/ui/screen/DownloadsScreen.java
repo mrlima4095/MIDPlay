@@ -70,11 +70,10 @@ public final class DownloadsScreen extends BaseList {
   }
 
   private void playSelected(int index) {
-    Track track = tracks[index];
-    Tracks single = new Tracks();
-    single.setTracks(new Track[] {track});
+    Tracks downloaded = new Tracks();
+    downloaded.setTracks(tracks);
     PlayerNavHelper.playTrackFromList(
-        Lang.tr("menu.downloads"), single, 0, 0L, navigator);
+        Lang.tr("menu.downloads"), downloaded, index, 0L, navigator);
   }
 
   private void deleteSelected(int index) {
