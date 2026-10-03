@@ -1,0 +1,1156 @@
+package midplay.opentty;
+
+import javax.microedition.lcdui.*;
+import javax.microedition.midlet.MIDlet;
+import javax.microedition.media.control.*;
+import javax.microedition.io.file.*;
+import javax.microedition.media.*;
+import javax.microedition.rms.*;
+import javax.microedition.io.*;
+import java.util.*;
+import java.io.*;
+// |
+// OpenTTY MIDlet
+public class OpenTTY implements CommandListener {
+    private static final String HOST_PROCESS = "MIDPlay";
+    // Kept in sync by res/swap_lite.sh so Lua need not load ELF at startup.
+    public static final boolean ELF_LITE = false;
+    // Behavior Settings
+    public long uptime = System.currentTimeMillis();
+    public boolean useCache = true, debug = false;
+    // |
+    // System Objects
+    public int lastID = 1000, memory_size = 512;
+    public Random random = new Random();
+    public Runtime runtime = Runtime.getRuntime();
+    public Object shell;
+    // |
+    public Hashtable attributes = new Hashtable(), fs = new Hashtable(), sys = new Hashtable(), exited = new Hashtable(), tmp = new Hashtable(), cacheLua = new Hashtable(), graphics = new Hashtable(), servers = new Hashtable(), globals = new Hashtable(), userID = new Hashtable();
+    private Hashtable vfsFiles = new Hashtable();
+    private boolean vfsReady = false;
+    public String username = read("/home/OpenRMS", globals), build = "2026-1.18.2-04x43";
+    // | (Boot Menu / chroot)
+    public String chroot = "";
+    public Vector bootEntries = null;
+    private List bootList = null;
+    private Form bootManual = null;
+    // |
+    // Graphics
+    public Display display;
+    public Displayable previous = null;
+    public List taskMngr = null;
+    private Vector taskMngrPids = null;
+    // |
+    private MIDlet host;
+    private Displayable returnScreen;
+    private Displayable lastScreen;
+
+    public OpenTTY(MIDlet host, Displayable returnScreen) {
+        this.host = host;
+        this.returnScreen = returnScreen;
+        display = Display.getDisplay(host);
+    }
+
+    // Runs inside the host MIDlet, sharing its Display and lifecycle.
+    public void open() {
+        if (!sys.containsKey("1")) { loadBootMenu(); }
+        else { resume(); }
+    }
+
+    public void registerHostScreen(Displayable screen) {
+        returnScreen = screen;
+        Process process = (Process) sys.get(HOST_PROCESS);
+        if (process == null) {
+            process = new Process(this, HOST_PROCESS, "", "root", 0, HOST_PROCESS, new StringBuffer(), globals);
+            sys.put(HOST_PROCESS, process);
+        }
+        process.screen = screen;
+    }
+
+    private void resume() {
+        if (lastScreen != null && lastScreen != returnScreen) { display.setCurrent(lastScreen); }
+        else { showTaskManager(); }
+    }
+
+    public void destroyApp(boolean unconditional) {
+        if (display.getCurrent() != taskMngr) { lastScreen = display.getCurrent(); }
+        if (returnScreen != null) { display.setCurrent(returnScreen); }
+    }
+
+    private void shutdown() {
+        for (Enumeration processes = sys.elements(); processes.hasMoreElements();) {
+            Process process = (Process) processes.nextElement();
+            if (process != null && process.elf != null) { process.elf.kill(); }
+        }
+        sys.clear();
+        lastScreen = null;
+        previous = null;
+        if (returnScreen != null) { display.setCurrent(returnScreen); }
+    }
+
+    public String getAppProperty(String key) { return host.getAppProperty(key); }
+    public boolean platformRequest(String url) throws ConnectionNotFoundException { return host.platformRequest(url); }
+    // |
+    // | -=-=-=-=-=-=-=-=-=-=-
+    // | (Boot Menu)
+    public boolean loadBootMenu() {
+        String cfg = read("/boot/grub.cfg", globals);
+
+        int count = countBootEntries(cfg);
+        if (count == 1) {
+            Hashtable entry = parseBootEntry(cfg);
+            cfg = null;
+            bootEntry(entry);
+        }
+        else if (count > 1) {
+            bootEntries = parseBootMenu(cfg);
+            cfg = null;
+            showBootMenu();
+        }
+        else { cfg = null; bootEntry(null); }
+        return true;
+    }
+    public int countBootEntries(String cfg) {
+        int count = 0, at = 0;
+        if (cfg == null) { return 0; }
+        while ((at = cfg.indexOf("menuentry", at)) >= 0) { count++; at += 9; }
+        return count;
+    }
+    public Hashtable parseBootEntry(String cfg) {
+        String title = null, root = null, init = null;
+        if (cfg != null) {
+            int m = cfg.indexOf("menuentry");
+            if (m >= 0) {
+                int brace = cfg.indexOf('{', m), close = brace < 0 ? cfg.length() : cfg.indexOf('}', brace);
+                if (close < 0) { close = cfg.length(); }
+                int q1 = cfg.indexOf('"', m);
+                if (q1 >= 0 && (brace < 0 || q1 < brace)) {
+                    int q2 = cfg.indexOf('"', q1 + 1);
+                    if (q2 > q1) { title = cfg.substring(q1 + 1, q2); }
+                }
+                String body = (brace >= 0 && close > brace) ? cfg.substring(brace + 1, close) : "";
+                String[] lines = split(body, '\n');
+                for (int i = 0; i < lines.length; i++) {
+                    String line = lines[i].trim();
+                    if (line.length() == 0 || line.startsWith("#")) { continue; }
+                    int eq = line.indexOf('=');
+                    if (eq > 0) {
+                        String key = line.substring(0, eq).trim(), val = replace(line.substring(eq + 1).trim(), "\"", "");
+                        if (key.equals("root")) { root = val; }
+                        else if (key.equals("init")) { init = val; }
+                    }
+                }
+            }
+        }
+        if (title == null || title.length() == 0) { title = "OpenTTY"; }
+        if (root == null || root.length() == 0) { root = "/"; }
+        if (init == null || init.length() == 0) { init = "/bin/init"; }
+        Hashtable entry = new Hashtable();
+        entry.put("title", title);
+        entry.put("root", root);
+        entry.put("init", init);
+        return entry;
+    }
+    public Vector parseBootMenu(String cfg) {
+        Vector entries = new Vector();
+        if (cfg == null || cfg.length() == 0) { return entries; }
+
+        String[] lines = split(cfg, '\n');
+        Hashtable cur = null;
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.length() == 0 || line.startsWith("#")) { continue; }
+
+            if (line.startsWith("set ")) { continue; }
+            else if (line.startsWith("menuentry")) {
+                int q1 = line.indexOf('"'), q2 = q1 >= 0 ? line.indexOf('"', q1 + 1) : -1;
+                Hashtable entry = new Hashtable();
+                entry.put("title", q1 >= 0 && q2 > q1 ? line.substring(q1 + 1, q2) : "OpenTTY");
+                entry.put("root", "/");
+                entry.put("init", "/bin/init");
+                cur = entry;
+                entries.addElement(cur);
+            }
+            else if (cur != null) {
+                if (line.equals("}")) { cur = null; continue; }
+                int eq = line.indexOf('=');
+                if (eq > 0) {
+                    String key = line.substring(0, eq).trim(), val = replace(line.substring(eq + 1).trim(), "\"", "");
+                    if (key.equals("root")) { cur.put("root", val); }
+                    else if (key.equals("init")) { cur.put("init", val.length() == 0 ? "/bin/init" : val); }
+                }
+            }
+        }
+        return entries;
+    }
+    public void showBootMenu() {
+        bootList = new List("OpenTTY - Boot", List.IMPLICIT);
+        bootList.addCommand(new Command("Boot", Command.OK, 1));
+        bootList.addCommand(new Command("Manual Boot", Command.ITEM, 2));
+        bootList.addCommand(new Command("Exit", Command.EXIT, 3));
+        bootList.setSelectCommand(List.SELECT_COMMAND);
+        bootList.setCommandListener(this);
+
+        for (int i = 0; i < bootEntries.size(); i++) {
+            Hashtable e = (Hashtable) bootEntries.elementAt(i);
+            Object title = e.get("title");
+            bootList.append(title != null ? (String) title : ("Entry " + i), null);
+        }
+        display.setCurrent(bootList);
+    }
+    public void showBootManual() {
+        bootManual = new Form("OpenTTY - Manual Boot");
+        bootManual.append(new TextField("Root", "/", 256, TextField.ANY));
+        bootManual.append(new TextField("Init", "/bin/init", 256, TextField.ANY));
+        bootManual.addCommand(new Command("Back", Command.BACK, 1));
+        bootManual.addCommand(new Command("Boot", Command.OK, 2));
+        bootManual.setCommandListener(this);
+        display.setCurrent(bootManual);
+    }
+    public void bootSelect(int index) {
+        if (bootList == null) { return; }
+
+        if (bootEntries == null || bootEntries.size() == 0) { bootEntry(null); return; }
+        if (index < 0 || index >= bootEntries.size()) { index = 0; }
+        bootEntry(bootEntries.elementAt(index));
+    }
+    public void bootEntry(Object entry) {
+        Hashtable e = entry instanceof Hashtable ? (Hashtable) entry : null;
+        String root = e != null && e.get("root") != null ? (String) e.get("root") : "/";
+        String init = e != null && e.get("init") != null ? (String) e.get("init") : "/bin/init";
+        if (root == null || root.length() == 0) { root = "/"; }
+        if (init == null || init.length() == 0) { init = "/bin/init"; }
+        e = null;
+        entry = null;
+        if (root.equals("/") && init.equals("/bin/init")) { defaultBoot(root, init); }
+        else { bootKernel(root, init); }
+    }
+    public void clearBoot() {
+        if (bootEntries != null) { bootEntries.removeAllElements(); }
+        if (bootList != null) { bootList.deleteAll(); bootList.setCommandListener(null); }
+        if (bootManual != null) { bootManual.deleteAll(); bootManual.setCommandListener(null); }
+        bootEntries = null;
+        bootList = null;
+        bootManual = null;
+        System.gc();
+    }
+    private void defaultBoot(String root, String init) {
+        boolean user = username.equals(""), pword = passwd().equals("");
+        if (user || pword) {
+            Form screen = new Form("OpenTTY - Login");
+            screen.append(env(":: Create " + (user && pword ? "your credentials (user and password)" : user ? "an username" : "a password") + " to your account"));
+            if (user) { screen.append(new TextField("Username", "", 256, TextField.ANY)); }
+            if (pword) { screen.append(new TextField("Password", "", 256, TextField.ANY | TextField.PASSWORD)); }
+            screen.addCommand(new Command("Login", Command.OK, 1));
+            screen.addCommand(new Command("Exit", Command.SCREEN, 1));
+            screen.setCommandListener(this);
+            display.setCurrent(screen);
+            clearBoot();
+        } else { bootKernel(root, init); }
+    }
+    private void bootKernel(String root, String init) {
+        try {
+            String[] parts = splitArgs(init != null ? init : "");
+            String program = parts.length > 0 ? parts[0] : init;
+            Hashtable args = new Hashtable(); args.put(new Double(0), program);
+            for (int i = 1; i < parts.length; i++) { args.put(new Double(i), parts[i]); }
+            String r = (root == null || root.length() == 0) ? "/" : root;
+            chroot = r.equals("/") ? "" : r;
+            globals.put("PWD", "/home/"); globals.put("USER", "root"); globals.put("ROOT", r); globals.put("ALIAS", new Hashtable()); userID.put(username, new Integer(1000));
+
+            Process proc = new Process(this, "init", program, "root", 0, "1", new StringBuffer(), globals);
+
+            sys.put("1", proc); proc.lua.globals.put("arg", args); proc.handler = proc.lua.getKernel();
+            proc.lua.currentSource = program;
+            String code = read(program, globals);
+            if (code == null || code.length() == 0) {
+                Form screen = new Form("Boot Error");
+                screen.append("init not found: " + program);
+                screen.addCommand(new Command("Exit", Command.OK, 1));
+                screen.setCommandListener(this);
+                display.setCurrent(screen);
+                return;
+            }
+            clearBoot();
+            proc.lua.tokens = proc.lua.tokenize(code);
+
+            while (proc.lua.peek().type != 0) { Object res = proc.lua.statement(globals); if (proc.lua.doreturn) { break; } }
+        }
+        catch (IllegalStateException e) { }
+        catch (OutOfMemoryError e) {
+            Form screen = new Form("SandBox");
+            screen.append("Insufficient Memory");
+            screen.append("Used Memory: " + ((runtime.totalMemory() / 1024) - (runtime.freeMemory())) + " KB\nFree Memory: " + (runtime.freeMemory() / 1024) + " KB\nTotal Memory: " + (runtime.totalMemory() / 1024) + "KB total");
+
+            screen.addCommand(new Command("Exit", Command.OK, 1));
+            screen.setCommandListener(this);
+            display.setCurrent(screen);
+        }
+        catch (Throwable e) {
+            Form screen = new Form(e instanceof Exception ? "SandBox" : "Kernel Panic");
+            screen.append("An error occurred while OpenTTY tried to start!\n\nError: " + getCatch(e));
+            screen.append(e instanceof Exception ? "If you tried to install a program in /bin/init it can be the error" : "Try to clear your data or update OpenTTY");
+
+            screen.addCommand(new Command("Exit", Command.OK, 1));
+            screen.setCommandListener(this);
+            display.setCurrent(screen);
+        }
+    }
+    private void logged() { Alert alert = new Alert("OpenTTY", "Reopen MIDlet to access console", null, AlertType.INFO); alert.setTimeout(Alert.FOREVER); alert.addCommand(new Command("Exit", Command.EXIT, 1)); alert.setCommandListener(this); display.setCurrent(alert); }
+    // | (Graphical Handler)
+    public static Hashtable cloneScope(Hashtable src) {
+        Hashtable dst = new Hashtable();
+        for (Enumeration e = src.keys(); e.hasMoreElements();) { Object k = e.nextElement(); dst.put(k, src.get(k)); }
+        return dst;
+    }
+    public void showTaskManager() {
+        if (taskMngr == null) {
+            taskMngr = new List("Running", List.IMPLICIT);
+            taskMngr.addCommand(new Command("Back", Command.BACK, 1));
+            taskMngr.addCommand(new Command("Interrupt", Command.STOP, 2));
+            taskMngr.setSelectCommand(List.SELECT_COMMAND);
+            taskMngr.setCommandListener(this);
+        } else {
+            taskMngr.deleteAll();
+        }
+
+        Displayable current = display.getCurrent();
+        if (current != taskMngr) { previous = display.getCurrent(); }
+
+        taskMngrPids = new Vector();
+        for (Enumeration keys = sys.keys(); keys.hasMoreElements();) {
+            String pid = (String) keys.nextElement();
+            Process p = (Process) sys.get(pid);
+            if (p != null && p.screen != null) {
+                taskMngr.append((p.screen.getTitle()) + " [" + pid + "]", null);
+                taskMngrPids.addElement(pid);
+            }
+        }
+
+        display.setCurrent(taskMngr);
+    }
+    public void commandAction(Command c, Displayable d) {
+        if (c.getLabel() == "Exit") { destroyApp(true); }
+        else if (d == taskMngr) {
+            if (c.getLabel() == "Back") { if (taskMngrPids.size() == 0) { destroyApp(true); } else if (previous != null) { display.setCurrent(previous); } }
+            else if (c.getLabel() == "Interrupt") {
+                int sel = taskMngr.getSelectedIndex();
+                if (sel >= 0 && sel < taskMngrPids.size()) {
+                    String pid = (String) taskMngrPids.elementAt(sel);
+                    if (HOST_PROCESS.equals(pid)) { return; }
+                    Process p = (Process) sys.get(pid);
+                    if (p != null) {
+                        if (p.sighandler != null) { try { Vector sa = new Vector(); sa.addElement("15"); ((Lua.LuaFunction) p.sighandler).call(sa); } catch (Throwable e) { } }
+                        if (p.elf != null) { p.elf.kill(); }
+                        else { sys.remove(pid); }
+                        showTaskManager();
+                    }
+                }
+            }
+            else if (c == List.SELECT_COMMAND) {
+                int sel = taskMngr.getSelectedIndex();
+                if (sel >= 0 && sel < taskMngrPids.size()) {
+                    String pid = (String) taskMngrPids.elementAt(sel);
+                    Process p = (Process) sys.get(pid);
+                    if (p != null && p.screen != null) {
+                        if (HOST_PROCESS.equals(pid) && taskMngrPids.size() == 1) {
+                            shutdown();
+                            return;
+                        }
+                        if (HOST_PROCESS.equals(pid)) { lastScreen = previous; }
+                        display.setCurrent(p.screen);
+                    }
+                }
+            }
+        }
+        else if (d == bootList) {
+            if (c == List.SELECT_COMMAND || c.getLabel().equals("Boot")) {
+                int sel = bootList.getSelectedIndex();
+                if (sel >= 0) { bootSelect(sel); }
+            }
+            else if (c.getLabel().equals("Manual Boot")) { showBootManual(); }
+        }
+        else if (d == bootManual) {
+            if (c.getLabel().equals("Back")) { showBootMenu(); }
+            else if (c.getLabel().equals("Boot")) {
+                String root = ((TextField) bootManual.get(0)).getString().trim();
+                String init = ((TextField) bootManual.get(1)).getString().trim();
+                if (root.length() == 0) { root = "/"; }
+                if (init.length() == 0) { init = "/bin/init"; }
+                Hashtable entry = new Hashtable();
+                entry.put("root", root);
+                entry.put("init", init);
+                bootEntry(entry);
+            }
+        }
+        else {
+            int size = ((Form) d).size();
+            if (size == 2) {
+                TextField userquest = (TextField) ((Form) d).get(1);
+                String value = userquest.getString().trim();
+                if (value.equals("")) { warn("Login", "Missing Credentials!"); }
+                else if (userquest.getLabel().equals("Username")) {
+                    if (value.equals("root")) { warn("Login", "Invalid user name!"); }
+                    else { writeRMS("OpenRMS", value.getBytes(), 1); logged(); }
+                }
+                else { writeRMS("OpenRMS", String.valueOf(value.hashCode()).getBytes(), 2); logged(); }
+            } else {
+                TextField userquest = (TextField) ((Form) d).get(1), pwquest = (TextField) ((Form) d).get(2);
+
+                String user = userquest.getString().trim(), password = pwquest.getString().trim();
+                if (user.equals("") || password.equals("")) { warn("Login", "Missing Credentials!"); }
+                else if (user.equals("root")) { warn("Login", "Invalid user name!"); }
+                else {
+                    writeRMS("OpenRMS", user.getBytes(), 1);
+                    writeRMS("OpenRMS", String.valueOf(password.hashCode()).getBytes(), 2);
+                    logged();
+                }
+            }
+        }
+    }
+    // |
+    // Control Thread
+    public OpenTTY getInstance() { return this; }
+    public String getThreadName(Thread thr) { String name = thr.getName(); String[] generic = { "Thread-0", "Thread-1", "MIDletEventQueue", "main" }; for (int i = 0; i < generic.length; i++) { if (name.equals(generic[i])) { name = "MIDlet"; break; } } return name; }
+    // |
+    public static String passwd() { return loadRMS("OpenRMS", 2); }
+    public static boolean passwd(String query) { return query != null && String.valueOf(query.hashCode()).equals(loadRMS("OpenRMS", 2)); }
+    // |
+    // String Utils
+    // | (Get Command Parts)
+    public String getCommand(String text) { int spaceIndex = text.indexOf(' '); if (spaceIndex == -1) { return text; } else { return text.substring(0, spaceIndex); } }
+    public String getArgument(String text) { int spaceIndex = text.indexOf(' '); if (spaceIndex == -1) { return ""; } else { return text.substring(spaceIndex + 1).trim(); } }
+    // | (Modify String)
+    public String replace(String source, String target, String replacement) { if (target.length() == 0 || source.indexOf(target) < 0) { return source; } StringBuffer result = new StringBuffer(); int start = 0, end; while ((end = source.indexOf(target, start)) >= 0) { result.append(source.substring(start, end)); result.append(replacement); start = end + target.length(); } result.append(source.substring(start)); return result.toString(); }
+    public String env(String text, Hashtable scope) { if (scope != null) { text = replace(text, "$PATH", (String) scope.get("PWD")); for (Enumeration keys = scope.keys(); keys.hasMoreElements();) { String key = (String) keys.nextElement(); text = replace(text, "$" + key, (String) scope.get(key)); } } return env(text); }
+    public String env(String text) { text = replace(text, "$USER", username); for (Enumeration keys = attributes.keys(); keys.hasMoreElements();) { String key = (String) keys.nextElement(); text = replace(text, "$" + key, (String) attributes.get(key)); } text = replace(text, "$.", "$"); return escape(text); }
+    public String escape(String text) { if (text.indexOf('\\') < 0 && text.indexOf('.') < 0) { return text; } text = replace(text, "\\n", "\n"); text = replace(text, "\\r", "\r"); text = replace(text, "\\t", "\t"); text = replace(text, "\\b", "\b"); text = replace(text, "\\\\", "\\"); text = replace(text, "\\.", "\\"); return text; }
+    public String getCatch(Throwable e) { String message = e.getMessage(); return message == null || message.length() == 0 || message.equals("null") ? e.getClass().getName() : e.getClass().getName() + ": " + message; }
+    // |
+    public String getcontent(String file, Hashtable scope) { return file.startsWith("/") ? read(file, scope) : read(((String) scope.get("PWD")) + file, scope); }
+    public String getpattern(String text) { return text.trim().startsWith("\"") && text.trim().endsWith("\"") ? text.substring(1, text.length() - 1) : text.trim(); } // replace(text, "\"", "")
+    // | (Arrays)
+    public String[] split(String content, char div) { Vector lines = new Vector(); int start = 0; for (int i = 0; i < content.length(); i++) { if (content.charAt(i) == div) { lines.addElement(content.substring(start, i)); start = i + 1; } } if (start < content.length()) { lines.addElement(content.substring(start)); } String[] result = new String[lines.size()]; lines.copyInto(result); return result; }
+    public String[] splitArgs(String input) {
+        Vector result = new Vector();
+        StringBuffer current = new StringBuffer();
+        boolean inDoubleQuotes = false;
+        boolean inSingleQuotes = false;
+        boolean escaped = false;
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+
+            if (escaped) {
+                current.append(c);
+                escaped = false;
+                continue;
+            }
+
+            if (c == '\\') {
+                if (inDoubleQuotes || inSingleQuotes) { escaped = true; }
+                else { current.append(c); }
+
+                continue;
+            }
+
+            if (c == '"' && !inSingleQuotes) { inDoubleQuotes = !inDoubleQuotes; current.append(c); continue; }
+            if (c == '\'' && !inDoubleQuotes) { inSingleQuotes = !inSingleQuotes; current.append(c); continue; }
+            if (c == ' ' && !inDoubleQuotes && !inSingleQuotes) { if (current.length() > 0) { result.addElement(current.toString()); current.setLength(0); } continue; }
+
+            current.append(c);
+        }
+
+        if (current.length() > 0) { result.addElement(current.toString()); }
+
+        String[] array = new String[result.size()];
+        for (int i = 0; i < result.size(); i++) { array[i] = getpattern((String) result.elementAt(i)); }
+
+        return array;
+    }
+    // |
+    // | (Generators)
+    public String genpid() { return String.valueOf(1000 + random.nextInt(9000)); }
+    // | (User Manager)
+    public int getUserID(String user) { return user.equals("root") ? 0 : user.equals(username) ? 1000 : userID.containsKey(user) ? ((Integer) userID.get(user)).intValue() : -1; }
+    public String getUser(int uid) {
+        if (uid == 0) { return "root"; } else if (uid == 1000) { return username; }
+        for (Enumeration keys = sys.keys(); keys.hasMoreElements();) {
+            String user = (String) keys.nextElement();
+            Integer id = (Integer) userID.get(user);
+            if (id.intValue() == uid) { return user; }
+        }
+        return null;
+    }
+    // | (Trackers)
+    public String getpid(String name) { for (Enumeration KEYS = sys.keys(); KEYS.hasMoreElements();) { String PID = (String) KEYS.nextElement(); Process process = (Process) sys.get(PID); if (process != null && process.name != null && name != null && name.equals(process.name)) { return PID; } } return null; }
+    // |
+    // | -=-=-=-=-=-=-=-=-=-=-
+    // | (Window-Based Interfaces)
+    public int warn(String title, String message) { if (message == null || message.length() == 0) { return 2; } Alert alert = new Alert(title, message, null, AlertType.WARNING); alert.setTimeout(Alert.FOREVER); display.setCurrent(alert); return 0; }
+    // |
+    public void print(String message, Object stdout) { print(message, stdout, 1000, globals, true); }
+    public void print(String message, Object stdout, int id, Hashtable scope) { print(message, stdout, id, scope, true); }
+    public void print(String message, Object stdout, int id, Hashtable scope, boolean newLine) {
+        String separator = newLine ? "\n" : "";
+        if (stdout == null) { }
+        else if (stdout instanceof StringItem) { String current = ((StringItem) stdout).getText(), output = current == null || current.length() == 0 ? message : current + separator + message; ((StringItem) stdout).setText(output); }
+        else if (stdout instanceof StringBuffer) { ((StringBuffer) stdout).append(separator).append(message); }
+        else if (stdout instanceof String) { write((String) stdout, read((String) stdout, scope) + separator + message, 1000, scope); }
+        else if (stdout instanceof OutputStream) { try { ((OutputStream) stdout).write((message + separator).getBytes()); ((OutputStream) stdout).flush(); } catch (Exception e) { } }
+    }
+    // |
+    // | -=-=-=-=-=-=-=-=-=-=-
+    // API 003 - File System
+    // | (Read)
+    public InputStream getInputStream(String filename, Hashtable scope) throws Exception {
+        if ((filename = redirect(solvepath(filename, scope))).startsWith("/home/")) {
+            RecordStore rs = null;
+            try {
+                rs = RecordStore.openRecordStore(filename.substring(6), false);
+                if (rs.getNumRecords() > 0) { return new ByteArrayInputStream(rs.getRecord(1)); }
+            } finally { if (rs != null) { rs.closeRecordStore(); } }
+
+            return null;
+        }
+        else if (filename.startsWith("/mnt/")) { return ((FileConnection) Connector.open("file:///" + filename.substring(5), Connector.READ)).openInputStream(); }
+        else if (filename.startsWith("/tmp/")) { return tmp.containsKey(filename = filename.substring(5)) ? new ByteArrayInputStream((byte[]) tmp.get(filename)) : null; }
+        else {
+            if (filename.startsWith("/dev/")) {
+                filename = filename.substring(5);
+                String content = filename.equals("random") ? String.valueOf(random.nextInt(256)) : filename.equals("stdin") ? "" : filename.equals("stdout") ? "" : filename.equals("null") ? "\r" : filename.equals("zero") ? "\0" : null;
+                if (content != null) { return new ByteArrayInputStream(content.getBytes("UTF-8")); }
+
+                filename = "/dev/" + filename;
+            }
+            else if (filename.startsWith("/bin/") || filename.startsWith("/etc/") || filename.startsWith("/lib/") || filename.startsWith("/root/") || filename.startsWith("/boot/")) {
+                if (filename.startsWith("/root/") && !isRootCaller(scope)) { return null; }
+                String full = filename;
+                int slash = filename.lastIndexOf('/');
+                String dir = slash < 0 ? filename : filename.substring(0, slash + 1);
+                String name = slash < 0 ? filename : filename.substring(slash + 1);
+                if (vfsDirIndex(dir) != -1) {
+                    byte[] content = readVfsFile(full);
+                    if (content != null) { return new ByteArrayInputStream(content); }
+                }
+                filename = full;
+            }
+            else if (filename.startsWith("/proc/")) {
+                String content = readProc(filename, getCallerUid(scope));
+                if (content != null) { return new ByteArrayInputStream(content.getBytes("UTF-8")); }
+                filename = "/proc/" + filename.substring(6);
+            }
+
+            InputStream is = getClass().getResourceAsStream(filename);
+            return is;
+        }
+    }
+    public Image readImg(String filename, Hashtable scope) { try { InputStream is = getInputStream(filename, scope); Image img = Image.createImage(is); is.close(); return img; } catch (Exception e) { return Image.createImage(16, 16); } }
+    public String read(String filename, Hashtable scope) {
+        try {
+            InputStream is = getInputStream(filename, scope);
+            if (is == null) { return ""; }
+
+            InputStreamReader reader = new InputStreamReader(is, "UTF-8");
+            StringBuffer sb = new StringBuffer();
+            int ch;
+            while ((ch = reader.read()) != -1) { sb.append((char) ch); }
+            reader.close();
+            is.close();
+
+            return filename.startsWith("/home/") ? sb.toString() : env(sb.toString());
+        } catch (Exception e) { return ""; }
+    }
+    public String read(InputStream in, int chunkSize, boolean consume) {
+        try {
+            if (in == null) { return ""; }
+            //if (chunkSize == -1) { consume = true; }
+            if (consume) {
+                InputStreamReader reader = new InputStreamReader(in, "UTF-8");
+                StringBuffer sb = new StringBuffer();
+                int ch;
+                while ((ch = reader.read()) != -1) { sb.append((char) ch); }
+                reader.close();
+
+                return sb.toString();
+            } else {
+                byte[] buffer = new byte[chunkSize];
+                int bytesRead = in.read(buffer, 0, chunkSize);
+                if (bytesRead == -1) { return ""; }
+
+                return new String(buffer, 0, bytesRead, "UTF-8");
+            }
+        } catch (Exception e) { return ""; }
+    }
+    public static String loadRMS(String filename, int index) { String result = ""; RecordStore RMS = null; try { RMS = RecordStore.openRecordStore(filename, true); if (RMS.getNumRecords() >= index) { byte[] data = RMS.getRecord(index); if (data != null) { result = new String(data); } } } catch (RecordStoreException e) { } try { if (RMS != null) { RMS.closeRecordStore(); } } catch (RecordStoreException e) { } return result; }
+    // | (Write)
+    public int write(String filename, String data, int id, Hashtable scope) { return write(filename, data.getBytes(), id, scope); }
+    public int write(String filename, byte[] data, int id, Hashtable scope) {
+        if ((filename = redirect(solvepath(filename, scope))) == null || filename.length() == 0) { return 2; }
+        else if (filename.startsWith("/mnt/")) { FileConnection fs = null; OutputStream out = null; try { fs = (FileConnection) Connector.open("file:///" + filename.substring(5), Connector.READ_WRITE); if (!fs.exists()) { fs.create(); } out = fs.openOutputStream(); out.write(data); out.flush(); } catch (Exception e) { return (e instanceof SecurityException) ? 13 : 1; } finally { try { if (out != null) { out.close(); } if (fs != null) { fs.close(); } } catch (Exception e) { } } }
+        else if (filename.startsWith("/home/")) { return writeRMS(filename.substring(6), data, 1); }
+        else if (filename.startsWith("/bin/") || filename.startsWith("/etc/") || filename.startsWith("/lib/") || filename.startsWith("/root/") || filename.startsWith("/boot/")) {
+            String full = filename;
+            int slash = filename.lastIndexOf('/');
+            String dir = slash < 0 ? filename : filename.substring(0, slash + 1);
+            String name = slash < 0 ? filename : filename.substring(slash + 1);
+            int index = vfsDirIndex(dir);
+
+            if (name.equals("") || index == -1) { return 2; }
+            else if (id != 0) { return 13; }
+            else {
+                if (index >= 6) { registerVfsDir(dir); }
+                int result = writeVfsFile(full, data);
+                return result;
+            }
+        }
+        else if (filename.startsWith("/dev/")) { if ((filename = filename.substring(5)).equals("")) { return 2; } else if (filename.equals("null")) { } else { return 5; } }
+        else if (filename.startsWith("/tmp/")) { if ((filename = filename.substring(5)).equals("")) { return 2; } else { tmp.put(filename, data); } }
+        else if (filename.startsWith("/")) { return 5; }
+
+        return 0;
+    }
+    public int writeRMS(String filename, byte[] data, int index) { try { RecordStore CONN = RecordStore.openRecordStore(filename, true); while (CONN.getNumRecords() < index) { CONN.addRecord("".getBytes(), 0, 0); } CONN.setRecord(index, data, 0, data.length); if (CONN != null) { CONN.closeRecordStore(); } } catch (Exception e) { return 1; } return 0; }
+    public int deleteFile(String filename, int id, Hashtable scope) {
+        if ((filename = redirect(solvepath(filename, scope))) == null || filename.length() == 0) { return 2; }
+        else if (filename.startsWith("/home/")) {
+            try {
+                filename = filename.substring(6);
+                if (filename.equals("")) { return 2; }
+                if (filename.equals("OpenRMS")) { return 13; }
+
+                RecordStore.deleteRecordStore(filename);
+            }
+            catch (RecordStoreNotFoundException e) { return 127; }
+            catch (Exception e) { return 1; }
+        }
+        else if (filename.startsWith("/mnt/")) {
+            try {
+                FileConnection CONN = (FileConnection) Connector.open("file:///" + filename.substring(5), Connector.READ_WRITE);
+                if (CONN.exists()) { CONN.delete(); }
+                else { return 127; }
+
+                CONN.close();
+            }
+            catch (Exception e) { return e instanceof SecurityException ? 13 : 1; }
+        }
+        else if (filename.startsWith("/bin/") || filename.startsWith("/etc/") || filename.startsWith("/lib/") || filename.startsWith("/root/") || filename.startsWith("/boot/")) {
+            String full = filename;
+            int slash = filename.lastIndexOf('/');
+            String dir = slash < 0 ? filename : filename.substring(0, slash + 1);
+            String name = slash < 0 ? filename : filename.substring(slash + 1);
+            if (name.equals("")) { return 2; }
+            if (id != 0) { return 13; }
+
+            String subdir = dir + name + "/";
+            if (fs.containsKey(subdir)) {
+                clearVfsDirectory(subdir);
+                fs.remove(subdir);
+                Vector struct = (Vector) fs.get(dir);
+                if (struct != null) { struct.removeElement(name + "/"); }
+                unpersistVfsMount(subdir);
+                return 0;
+            }
+
+            int index = vfsDirIndex(dir);
+            if (index == -1) { return 5; }
+            int result = deleteVfsFile(full);
+            return result;
+        }
+        else if (filename.startsWith("/tmp/")) {
+            filename = filename.substring(5);
+            if (filename.equals("")) { }
+            else if (tmp.containsKey(filename)) { tmp.remove(filename); }
+            else { return 127; }
+        }
+        else if (filename.startsWith("/")) { return 5; }
+
+        return 0;
+    }
+    // | (VFS Store Index)
+    private static final int VFS_HASH_MOD = 97, VFS_RESERVED = 9;
+    private static final int VFS_INDEX_RECORD = 3;
+    private static final String VFS_STORE_PREFIX = "OpenRMS-", VFS_PROTECTED_RECORD = "System file not modify";
+    private int vfsWriteStore = 2;
+    public int vfsDirIndex(String dir) {
+        while (dir.length() > 1 && dir.endsWith("/")) { dir = dir.substring(0, dir.length() - 1); }
+        if (dir.equals("/bin")) { return 3; }
+        else if (dir.equals("/lib")) { return 4; }
+        else if (dir.equals("/etc")) { return 5; }
+        else if (dir.equals("/root")) { return 6; }
+        else if (dir.equals("/boot")) { return 7; }
+        else if (dir.equals("/dev") || dir.equals("/proc") || dir.equals("/tmp") || dir.equals("/home") || dir.equals("/mnt")) { return -1; }
+        else if (dir.startsWith("/bin/") || dir.startsWith("/lib/") || dir.startsWith("/etc/") || dir.startsWith("/root/") || dir.startsWith("/boot/")) {
+            int h = dir.hashCode();
+            if (h < 0) { h = -h; }
+            return VFS_RESERVED + (h % VFS_HASH_MOD);
+        }
+        return -1;
+    }
+    private void loadVfs() {
+        if (vfsReady) { return; }
+        RecordStore rs = null;
+        try {
+            rs = RecordStore.openRecordStore("OpenRMS", true);
+            while (rs.getNumRecords() < VFS_INDEX_RECORD) { rs.addRecord(new byte[0], 0, 0); }
+            String index = new String(rs.getRecord(VFS_INDEX_RECORD));
+            if (!index.startsWith("VFS3\n")) {
+                rs.closeRecordStore(); rs = null;
+                index = loadExternalVfsIndex();
+                if (index != null && index.startsWith("VFS3\n")) {
+                    rs = RecordStore.openRecordStore("OpenRMS", true);
+                    byte[] data = index.getBytes(); rs.setRecord(VFS_INDEX_RECORD, data, 0, data.length);
+                    rs.closeRecordStore(); rs = null;
+                    try { RecordStore.deleteRecordStore("OpenRMS-VFS"); } catch (Exception e) { }
+                } else { migrateLegacyVfs(); }
+            }
+            if (index != null && index.startsWith("VFS3\n")) { loadVfsIndex(index); }
+            else { rs = RecordStore.openRecordStore("OpenRMS", true); index = new String(rs.getRecord(VFS_INDEX_RECORD)); loadVfsIndex(index); }
+            vfsReady = true;
+        } catch (Exception e) { }
+        finally { try { if (rs != null) { rs.closeRecordStore(); } } catch (Exception e) { } }
+    }
+    private String loadExternalVfsIndex() {
+        String result = null;
+        RecordStore rs = null;
+        try { rs = RecordStore.openRecordStore("OpenRMS-VFS", false); if (rs.getNumRecords() > 0) { result = new String(rs.getRecord(1)); } }
+        catch (Exception e) { }
+        if (rs != null) { try { rs.closeRecordStore(); } catch (Exception e) { } }
+        return result;
+    }
+    private void loadVfsIndex(String index) {
+        if (index == null || !index.startsWith("VFS3\n")) { return; }
+        String[] lines = split(index, '\n');
+        for (int i = 1; i < lines.length; i++) {
+            int tab = lines[i].lastIndexOf('\t'), previous = tab < 0 ? -1 : lines[i].lastIndexOf('\t', tab - 1);
+            if (previous > 0) { try { vfsFiles.put(lines[i].substring(0, previous), lines[i].substring(previous + 1, tab) + "\t" + Integer.parseInt(lines[i].substring(tab + 1))); int store = Integer.parseInt(lines[i].substring(previous + 1, tab).substring(VFS_STORE_PREFIX.length())); if (store > vfsWriteStore) { vfsWriteStore = store; } } catch (Exception e) { } }
+        }
+    }
+    private void migrateLegacyVfs() throws Exception {
+        RecordStore rs = null;
+        try {
+            rs = RecordStore.openRecordStore("OpenRMS", false);
+            int oldCount = rs.getNumRecords();
+        String[] dirs = { "/bin/", "/lib/", "/etc/", "/root/", "/boot/" };
+        int[] records = { 3, 4, 5, 6, 7 };
+            for (int i = 0; i < dirs.length; i++) { migrateLegacyVfsPage(rs, dirs[i], records[i]); }
+            String cfg = legacyVfsFile(rs, "/etc/vfs.conf", 5);
+        if (cfg != null) {
+            String[] mounts = split(cfg, '\n');
+                for (int i = 0; i < mounts.length; i++) { String dir = mounts[i].trim(); if (dir.length() > 0) { if (!dir.endsWith("/")) { dir += "/"; } migrateLegacyVfsPage(rs, dir, vfsDirIndex(dir)); } }
+            }
+        } catch (RecordStoreNotFoundException e) { }
+        finally { try { if (rs != null) { rs.closeRecordStore(); } } catch (Exception e) { } }
+    }
+    private String legacyVfsFile(RecordStore rs, String path, int record) throws Exception {
+        if (record < 3 || record > rs.getNumRecords()) { return null; }
+        String page = new String(rs.getRecord(record));
+        int start = page.indexOf("[\1BEGIN:" + path.substring(path.lastIndexOf('/') + 1) + "\1]");
+        if (start < 0) { return null; }
+        int dataStart = page.indexOf('\n', start), dataEnd = page.indexOf("[\1END\1]", start);
+        if (dataStart < 0 || dataEnd < 0) { return null; }
+        String body = page.substring(dataStart + 1, dataEnd).trim();
+        return body.startsWith("[B64]") ? new String(decodeBase64(body.substring(5))) : body;
+    }
+    private void migrateLegacyVfsPage(RecordStore rs, String dir, int record) throws Exception {
+        if (record < 3 || record > rs.getNumRecords()) { return; }
+        String page = new String(rs.getRecord(record)); int at = 0;
+        while ((at = page.indexOf("[\1BEGIN:", at)) >= 0) {
+            int nameEnd = page.indexOf("\1]", at); if (nameEnd < 0) { break; }
+            int dataStart = page.indexOf('\n', nameEnd), dataEnd = page.indexOf("[\1END\1]", nameEnd);
+            if (dataStart < 0 || dataEnd < 0) { break; }
+            String name = page.substring(at + 8, nameEnd), body = page.substring(dataStart + 1, dataEnd).trim();
+            byte[] data = body.startsWith("[B64]") ? decodeBase64(body.substring(5)) : body.getBytes();
+            if (data != null) { addVfsFile(dir + name, data); }
+            at = dataEnd + 8;
+        }
+    }
+    private void prepareVfsStore(RecordStore rs) throws Exception { if (rs.getNumRecords() == 0) { byte[] marker = VFS_PROTECTED_RECORD.getBytes(); rs.addRecord(marker, 0, marker.length); } }
+    private boolean addVfsFile(String path, byte[] data) {
+        int store = vfsWriteStore;
+        while (true) {
+            RecordStore rs = null;
+            int records = -1;
+            try {
+                rs = RecordStore.openRecordStore(VFS_STORE_PREFIX + store, true);
+                records = rs.getNumRecords();
+                prepareVfsStore(rs);
+                int record = rs.addRecord(data, 0, data.length);
+                vfsFiles.put(path, VFS_STORE_PREFIX + store + "\t" + record);
+                vfsWriteStore = store;
+                rs.closeRecordStore();
+                return true;
+            } catch (Exception e) {
+                try { if (rs != null) { rs.closeRecordStore(); } } catch (Exception ignored) { }
+                if (!(e instanceof RecordStoreFullException) || records == 0) { return false; }
+                store++;
+                vfsWriteStore = store;
+            }
+        }
+    }
+    private String[] vfsLocation(String path) { String location = (String) vfsFiles.get(path); return location == null ? null : split(location, '\t'); }
+    private void saveVfsIndex() throws Exception { RecordStore rs = null; try { rs = RecordStore.openRecordStore("OpenRMS", true); StringBuffer out = new StringBuffer("VFS3\n"); for (Enumeration e = vfsFiles.keys(); e.hasMoreElements();) { String path = (String) e.nextElement(); out.append(path).append('\t').append(vfsFiles.get(path)).append('\n'); } byte[] data = out.toString().getBytes(); rs.setRecord(VFS_INDEX_RECORD, data, 0, data.length); } finally { try { if (rs != null) { rs.closeRecordStore(); } } catch (Exception e) { } } }
+    public byte[] readVfsFile(String path) {
+        RecordStore rs = null;
+        try {
+            loadVfs();
+            String[] location = vfsLocation(path);
+            if (location == null || location.length != 2) { return null; }
+            rs = RecordStore.openRecordStore(location[0], false);
+            byte[] data = rs.getRecord(Integer.parseInt(location[1]));
+            rs.closeRecordStore();
+            return data;
+        } catch (Exception e) {
+            try { if (rs != null) { rs.closeRecordStore(); } } catch (Exception ignored) { }
+            return null;
+        }
+    }
+    public int writeVfsFile(String path, byte[] data) {
+        RecordStore rs = null;
+        try {
+            loadVfs();
+            String[] location = vfsLocation(path);
+            if (location == null) { if (!addVfsFile(path, data)) { return 1; } }
+            else {
+                rs = RecordStore.openRecordStore(location[0], false);
+                try { rs.setRecord(Integer.parseInt(location[1]), data, 0, data.length); }
+                catch (RecordStoreFullException e) { rs.closeRecordStore(); rs = null; if (!addVfsFile(path, data)) { return 1; } }
+            }
+            saveVfsIndex();
+            return 0;
+        } catch (Exception e) {
+            try { if (rs != null) { rs.closeRecordStore(); } } catch (Exception ignored) { }
+            return 1;
+        }
+    }
+    public int deleteVfsFile(String path) {
+        RecordStore rs = null;
+        try {
+            loadVfs();
+            String[] location = vfsLocation(path);
+            if (location == null || location.length != 2) { return 5; }
+            rs = RecordStore.openRecordStore(location[0], false);
+            rs.setRecord(Integer.parseInt(location[1]), new byte[0], 0, 0);
+            vfsFiles.remove(path);
+            saveVfsIndex();
+            rs.closeRecordStore();
+            return 0;
+        } catch (Exception e) {
+            try { if (rs != null) { rs.closeRecordStore(); } } catch (Exception ignored) { }
+            return 1;
+        }
+    }
+    public void clearVfsDirectory(String dir) { loadVfs(); Vector paths = new Vector(); for (Enumeration e = vfsFiles.keys(); e.hasMoreElements();) { String path = (String) e.nextElement(); if (path.startsWith(dir)) { paths.addElement(path); } } for (int i = 0; i < paths.size(); i++) { deleteVfsFile((String) paths.elementAt(i)); } }
+    public Vector listVfsFiles(String dir) { loadVfs(); Vector out = new Vector(); for (Enumeration e = vfsFiles.keys(); e.hasMoreElements();) { String path = (String) e.nextElement(); if (path.startsWith(dir)) { String rest = path.substring(dir.length()); if (rest.indexOf('/') < 0) { out.addElement(rest); } } } return out; }
+    public void registerVfsDir(String dir) {
+        mountVfsDir(dir);
+        if (dir != null && dir.startsWith("/") && dir.endsWith("/") && dir.lastIndexOf('/', dir.length() - 2) > 0) { persistVfsMount(dir); }
+    }
+    public void mountVfsDir(String dir) {
+        if (dir == null || !dir.startsWith("/") || !dir.endsWith("/")) { return; }
+        if (!fs.containsKey(dir)) { Vector self = new Vector(); self.addElement(".."); fs.put(dir, self); }
+
+        int base = dir.lastIndexOf('/', dir.length() - 2);
+        if (base <= 0) { return; }
+
+        String parent = dir.substring(0, base + 1);
+        Vector struct = (Vector) fs.get(parent);
+        if (struct == null) { mountVfsDir(parent); struct = (Vector) fs.get(parent); }
+        if (struct != null) {
+            String entry = dir.substring(base + 1, dir.length() - 1) + "/";
+            if (!struct.contains(entry)) { struct.addElement(entry); }
+        }
+    }
+    public void persistVfsMount(String dir) {
+        try {
+            String mount = dir.trim();
+            String cfg = read("/etc/vfs.conf", globals);
+            if (cfg.indexOf(mount) == -1) { write("/etc/vfs.conf", cfg.length() == 0 ? mount : cfg + "\n" + mount, 0, globals); }
+        } catch (Exception e) { }
+    }
+    public void unpersistVfsMount(String dir) {
+        try {
+            String mount = dir.trim();
+            String cfg = read("/etc/vfs.conf", globals);
+            if (cfg.indexOf(mount) != -1) {
+                String out = replace(cfg, "\n" + mount, "");
+                out = replace(out, mount, "");
+                write("/etc/vfs.conf", out, 0, globals);
+            }
+        } catch (Exception e) { }
+    }
+    public void restoreVfsMounts() {
+        try {
+            String cfg = read("/etc/vfs.conf", globals);
+            if (cfg == null || cfg.length() == 0) { return; }
+            String[] lines = split(cfg, '\n');
+            for (int i = 0; i < lines.length; i++) {
+                String d = lines[i].trim();
+                if (d.length() == 0) { continue; }
+                if (!d.endsWith("/")) { d = d + "/"; }
+                mountVfsDir(d);
+            }
+        } catch (Exception e) { }
+    }
+    public boolean isRootCaller(Hashtable scope) { try { return scope != null && scope.containsKey("USER") && getUserID((String) scope.get("USER")) == 0; } catch (Exception e) { return false; } }
+    public int getCallerUid(Hashtable scope) { try { if (scope != null && scope.containsKey("USER")) { int u = getUserID((String) scope.get("USER")); if (u != -1) { return u; } } } catch (Exception e) { } return 1000; }
+    // | (/proc virtual filesystem)
+    public String[] procFiles() { return new String[] { "cpuinfo", "meminfo", "uptime", "version" }; }
+    public Vector procEntries(int uid) {
+        Vector out = new Vector();
+        for (Enumeration keys = sys.keys(); keys.hasMoreElements();) {
+            String pid = (String) keys.nextElement();
+            Process p = (Process) sys.get(pid);
+            if (p == null) { continue; }
+            if (uid == 0 || p.uid == uid) { out.addElement(pid + "/"); }
+        }
+        return out;
+    }
+    public Vector procDirEntries(String pidStr, int uid) {
+        Vector out = new Vector();
+        Process p = (Process) sys.get(pidStr);
+        if (p == null || (uid != 0 && p.uid != uid)) { return out; }
+        out.addElement("cmdline"); out.addElement("comm"); out.addElement("stat"); out.addElement("status");
+        return out;
+    }
+    public String readProc(String path, int uid) {
+        if (path == null || !path.startsWith("/proc/")) { return null; }
+        String rest = path.substring(6);
+        if (rest.length() == 0) { return null; }
+        String[] parts = split(rest, '/');
+        if (parts.length == 0) { return null; }
+
+        String top = parts[0];
+        if (parts.length == 1) {
+            if (top.equals("uptime")) { return "" + ((System.currentTimeMillis() - uptime) / 1000); }
+            else if (top.equals("version")) { return "OpenTTY " + build + " (J2ME Lua)"; }
+            else if (top.equals("meminfo")) {
+                return "MemTotal:      " + (runtime.totalMemory() / 1024) + " kB\nMemFree:       " + (runtime.freeMemory() / 1024) + " kB\nMemAvailable:  " + (runtime.freeMemory() / 1024) + " kB";
+            }
+            else if (top.equals("cpuinfo")) { return "processor\t: 0\nmodel name\t: J2ME Virtual CPU\nvendor_id\t: OpenTTY\n"; }
+            return null;
+        }
+
+        String pidStr = top, file = parts[1];
+        Process p = (Process) sys.get(pidStr);
+        if (p == null) { return null; }
+        if (uid != 0 && p.uid != uid) { return null; }
+
+        long s = (System.currentTimeMillis() - p.startTime) / 1000;
+        if (file.equals("status")) {
+            return "Name:\t" + p.name + "\nState:\tR (running)\nPid:\t" + p.pid + "\nPPid:\t" + (p.pid.equals("1") ? "0" : "1") + "\nUid:\t" + p.uid + "\nGid:\t" + p.uid + "\nUtime:\t" + s + "\nStime:\t0\nPriority:\t" + p.priority + "\nNice:\t" + (p.priority - 10) + "\nThreads:\t1\nOwner:\t" + p.owner;
+        }
+        else if (file.equals("cmdline")) { return (p.cmd != null && p.cmd.length() > 0 ? p.cmd : p.name) + "\0"; }
+        else if (file.equals("comm")) { return p.name != null ? p.name : ""; }
+        else if (file.equals("stat")) { return p.pid + " (" + (p.name != null ? p.name : "") + ") R " + (p.pid.equals("1") ? "0" : "1") + " " + p.uid + " " + p.uid + " 0 0 0 0 " + s + " 0 0 " + s + " 0 0 20"; }
+        return null;
+    }
+    // | (Normalize Path)
+    public String joinpath(String file, Hashtable scope) {
+        String pwd = scope.containsKey("PWD") ? (String) scope.get("PWD") : "/";
+
+        if (file.startsWith("/")) { return file; }
+
+        String fullPath = pwd + file;
+
+        Vector components = new Vector();
+        String[] parts = split(fullPath, '/');
+
+        for (int i = 0; i < parts.length; i++) {
+            String part = parts[i];
+
+            if (part.equals(".")) {
+                continue;
+            } else if (part.equals("..")) {
+                if (components.size() > 0) {
+                    if (!components.lastElement().equals("")) {
+                        components.removeElementAt(components.size() - 1);
+                    }
+                }
+            } else {
+                components.addElement(part);
+            }
+        }
+
+        if (components.size() == 0) { return "/"; }
+        StringBuffer result = new StringBuffer();
+
+        for (int i = 0; i < components.size(); i++) {
+            String comp = (String) components.elementAt(i);
+            if (i == 0 && comp.equals("")) { result.append("/"); }
+            else if (i > 0 || !comp.equals("")) {
+                result.append(comp);
+                if (i < components.size() - 1) { result.append("/"); }
+            }
+        }
+
+        if (fullPath.endsWith("/") && !result.toString().endsWith("/")) {
+            result.append("/");
+        }
+
+        return result.toString();
+    }
+    public String solvepath(String path, Hashtable scope) {
+        String root = scope.containsKey("ROOT") ? (String) scope.get("ROOT") : "";
+
+        if (path == null) { return "/"; }
+        else if (root.equals("/") || path.startsWith("/dev/") || path.startsWith("/mnt/") || path.startsWith("/proc/") || path.startsWith("/tmp/") || path.startsWith("/boot/") || path.equals("/boot")) { return path; }
+        else if (path.startsWith("/")) { return root.endsWith("/") ? (root.length() > 1 ? root + path.substring(1) : root) : root + path; } return path;
+    }
+    public String redirect(String path) {
+        if (path == null || path.length() == 0 || chroot == null || chroot.length() == 0) { return path; }
+        if (path.equals(chroot) || path.startsWith(chroot + "/")) { return path; }
+        if (path.equals("/boot") || path.startsWith("/boot/") || path.equals("/proc") || path.startsWith("/proc/") || path.equals("/tmp") || path.startsWith("/tmp/") || path.equals("/mnt") || path.startsWith("/mnt/") || path.equals("/dev") || path.startsWith("/dev/")) { return path; }
+        String base = chroot.endsWith("/") ? chroot : chroot + "/";
+        if (path.equals("/")) { return base; }
+        return base + path.substring(1);
+    }
+    // | (Archive Structures)
+    public int addFile(String filename, String content, String archive, int index) { return addFile(filename, content.getBytes(), archive, index); }
+    public int addFile(String filename, byte[] data, String archive, int index) { return writeRMS("OpenRMS", (delFile(filename, archive) + ("[\1BEGIN:" + filename + "\1]\n" + (isPureText(data) ? new String(data) : "[B64]" + encodeBase64(data)) + "\n[\1END\1]\n")).getBytes(), index); }
+
+    public String delFile(String filename, String content) {
+        String startTag = "[\1BEGIN:" + filename + "\1]";
+        int start = content.indexOf(startTag);
+        if (start == -1) { return content; }
+
+        int end = content.indexOf("[\1END\1]", start);
+        if (end == -1) { return content; }
+
+        end += "[\1END\1]".length();
+
+        if (end < content.length() && content.charAt(end) == '\n') { end++; }
+
+        return content.substring(0, start) + content.substring(end);
+    }
+    public byte[] read(String filename, String archive) {
+        String startTag = "[\1BEGIN:" + filename + "\1]";
+        int start = archive.indexOf(startTag);
+        if (start == -1) { return null; }
+
+        int headerEnd = archive.indexOf('\n', start);
+        if (headerEnd == -1) { return null; }
+        headerEnd++;
+
+        int endTag = archive.indexOf("[\1END\1]", headerEnd);
+        if (endTag == -1) { return null; }
+
+        String content = archive.substring(headerEnd, endTag).trim();
+
+        if (content.startsWith("[B64]")) { return decodeBase64(content.substring(5)); }
+        else { return content.getBytes(); }
+    }
+    // | (Base64)
+    public String encodeBase64(byte[] data) {
+        String base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        StringBuffer result = new StringBuffer();
+
+        for (int i = 0; i < data.length; i += 3) {
+            int b1 = data[i] & 0xFF;
+            int b2 = (i + 1 < data.length) ? data[i + 1] & 0xFF : 0;
+            int b3 = (i + 2 < data.length) ? data[i + 2] & 0xFF : 0;
+
+            int triple = (b1 << 16) | (b2 << 8) | b3;
+
+            result.append(base64Chars.charAt((triple >> 18) & 0x3F));
+            result.append(base64Chars.charAt((triple >> 12) & 0x3F));
+
+            if (i + 1 < data.length) { result.append(base64Chars.charAt((triple >> 6) & 0x3F)); } else { result.append('='); }
+            if (i + 2 < data.length) { result.append(base64Chars.charAt(triple & 0x3F)); } else { result.append('='); }
+        }
+
+        return result.toString();
+    }
+    public byte[] decodeBase64(String data) {
+        String base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+        StringBuffer clean = new StringBuffer();
+        for (int i = 0; i < data.length(); i++) {
+            char c = data.charAt(i);
+            if (c != '\n' && c != '\r' && c != ' ' && c != '\t') {
+                clean.append(c);
+            }
+        }
+        data = clean.toString();
+
+        if (data.length() % 4 != 0) { return null; }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        for (int i = 0; i < data.length(); i += 4) {
+            int[] sextets = new int[4];
+            int padding = 0;
+
+            for (int j = 0; j < 4; j++) {
+                char c = data.charAt(i + j);
+                if (c == '=') {
+                    padding++;
+                    sextets[j] = 0;
+                } else {
+                    sextets[j] = base64Chars.indexOf(c);
+                    if (sextets[j] < 0) {
+                        return null;
+                    }
+                }
+            }
+
+            int triple = (sextets[0] << 18) | (sextets[1] << 12) | (sextets[2] << 6) | sextets[3];
+
+            baos.write((triple >> 16) & 0xFF);
+            if (padding < 2) { baos.write((triple >> 8) & 0xFF); }
+            if (padding < 1) { baos.write(triple & 0xFF); }
+        }
+
+        return baos.toByteArray();
+    }
+    // |
+    public boolean isPureText(byte[] data) {
+        int textCount = 0;
+        int sampleSize = Math.min(data.length, 100);
+
+        for (int i = 0; i < sampleSize; i++) {
+            byte b = data[i];
+            if ((b >= 32 && b <= 126) || b == 9 || b == 10 || b == 13) {
+                textCount++;
+            }
+        }
+
+        return (textCount * 100) > (sampleSize * 95);
+    }
+    // |
+    // | -=-=-=-=-=-=-=-=-=-=-
+    // Java Virtual Machine
+    public int javaClass(String name) { try { Class.forName(name); return 0; } catch (ClassNotFoundException e) { return 3; } }
+    public String getName() { String s; StringBuffer BUFFER = new StringBuffer(); if ((s = System.getProperty("java.vm.name")) != null) { BUFFER.append(s).append(", ").append(System.getProperty("java.vm.vendor")); if ((s = System.getProperty("java.vm.version")) != null) { BUFFER.append('\n').append(s); } if ((s = System.getProperty("java.vm.specification.name")) != null) { BUFFER.append('\n').append(s); } } else if ((s = System.getProperty("com.ibm.oti.configuration")) != null) { BUFFER.append("J9 VM, IBM (").append(s).append(')'); if ((s = System.getProperty("java.fullversion")) != null) { BUFFER.append("\n\n").append(s); } } else if ((s = System.getProperty("com.oracle.jwc.version")) != null) { BUFFER.append("OJWC v").append(s).append(", Oracle"); } else if (javaClass("com.sun.cldchi.jvm.JVM") == 0) { BUFFER.append("CLDC Hotspot Implementation, Sun"); } else if (javaClass("com.sun.midp.Main") == 0) { BUFFER.append("KVM, Sun (MIDP)"); } else if (javaClass("com.sun.cldc.io.ConsoleOutputStream") == 0) { BUFFER.append("KVM, Sun (CLDC)"); } else if (javaClass("com.jblend.util.SortedVector") == 0) { BUFFER.append("JBlend, Aplix"); } else if (javaClass("com.jbed.io.CharConvUTF8") == 0) { BUFFER.append("Jbed, Esmertec/Myriad Group"); } else if (javaClass("MahoTrans.IJavaObject") == 0) { BUFFER.append("MahoTrans"); } else { BUFFER.append("Unknown"); } return BUFFER.append('\n').toString(); }
+}
+// |
+// Process
+class Process {
+    private OpenTTY midlet = null;
+    private Hashtable elfArgs;
+    public String name, owner, pid, parentPid, cmd;
+    public Hashtable scope, db = new Hashtable(), net = new Hashtable();
+    public final long startTime;
+    public int uid = 1000, priority = DEFAULT_PRIORITY, exitStatus = 0;
+    public boolean exited = false;
+
+    public static final int MIN_PRIORITY = 0, DEFAULT_PRIORITY = 10, MAX_PRIORITY = 20;
+
+    public Object stdout, stderr;
+    public Object handler = null, sighandler = null;
+    public Displayable screen = null;
+    public Lua lua = null;
+    public ELF elf = null;
+
+    public Process(OpenTTY midlet, String name, String command, String owner, int uid, String pid, Object stdout, Hashtable scope) { this.lua = new Lua(midlet, uid, pid, this, stdout, scope); this.name = name; this.owner = owner; this.uid = uid; this.pid = pid; this.stdout = stdout; this.stderr = stdout; this.scope = scope; this.startTime = System.currentTimeMillis(); }
+    public Process(OpenTTY midlet, String name, String command, String owner, int uid, String pid, Object stdout, Hashtable args, Hashtable scope) { this.midlet = midlet; this.elfArgs = args; this.name = name; this.owner = owner; this.uid = uid; this.pid = pid; this.stdout = stdout; this.stderr = stdout; this.scope = scope; this.startTime = System.currentTimeMillis(); }
+
+    // ELF owns a 1 MB guest memory buffer, so do not allocate it for Lua processes.
+    public ELF getELF() { if (elf == null) { elf = new ELF(midlet, elfArgs, stdout, scope, uid, pid, this); } return elf; }
+
+    public String toString() { return "{ name=" + name + ", owner=" + owner + ", uid=" + uid + ", pid=" + pid + ", ppid=" + parentPid + ", " + (lua != null ? "lua=" + lua + ", " : elf != null ? "elf=" + elf + ", " : "") + (handler != null ? "handler=" + handler + ", " : "") + "priority=" + priority + ", scope=" + scope + ", db=" + db + " }"; }
+}
+// |
+// | 10k commits
+// Goodbye 2025
+// EOF

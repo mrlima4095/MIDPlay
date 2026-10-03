@@ -1,0 +1,21 @@
+#!/bin/lua
+
+if arg[1] then
+    if string.startswith(arg[1], "--serve=") then
+        local program = string.sub(arg[1], string.len("--serve="))
+        if program == "" or not program then
+            print("/bin/init: missing executable")
+            os.exit(1)
+        end
+        print(os.request(1, "serve", os.join(program)))
+    else
+        print("init: " .. arg[1] .. ": not found")
+    end
+end
+
+for k,v in pairs({ ["PATCH"] = "RISC-V Revival", ["VERSION"] = getAppProperty("MIDlet-Version"), ["RELEASE"] = "beta", ["SHELL"] = "/bin/sh" }) do os.setenv(k, v) end
+for k,v in pairs({ ["TYPE"] = "platform", ["CONFIG"] = "configuration", ["PROFILE"] = "profiles", ["LOCALE"] = "locale" }) do os.setenv(k, getAppProperty("/microedition." .. v)) end
+
+io.mount(io.read("/etc/fstab"))
+
+pcall(io.popen, "/bin/xterm", "", false)

@@ -1,0 +1,213 @@
+[2025-1.12.1-01x33]	Added Command 'CHMOD'
+[2025-1.13-01x34]	Added Command 'CRON' | Permission 'javax.microedition.io.PushRegistry' fixed
+[2025-1.13-01x35]	Added Command 'MMSPT' | New function @stop 
+[2025-1.13-01x36]	Added package 'TAB'
+[2025-1.13-01x37]	Release 1.13
+[2025-1.13-01x38]	1.14 Suite case | Added package 'Android API'
+[2025-1.13-01x39]	Added Command 'CLONE'
+[2025-1.13-01x40]	Help Screen synchronized
+[2025-1.13-01x41]	X Server new render 'XFINIT' to force an level	
+[2025-1.13-01x42]	Command 'THROW' & 'PRG'
+[2025-1.14-01x43]	Build "debug.sh" in package
+[2025-1.14-01x44]	Nano buffer size increased to 31522
+[2025-1.14-01x45]	Added Command 'WRL'
+[2025-1.14-01x46]	Added Command 'SPELL' | Clear patterns of some config files | Debugging behaviors packages
+[2025-1.14-01x47]	Fixing some bugs in Yang script installation
+[2025-1.14-01x48]	Command 'PRG' search for MIDlet Class
+[2025-1.14-01x49]	Command 'QUERY' updated - Global connector - required protocol
+[2025-1.14-01x50]	New 'IF' expressions
+[2025-1.14-01x51]	Command 'IFCONFIG' accepting third connection check address
+[2025-1.14-01x52]	Run 'initd' user-script after attemp a Login 
+[2025-1.14-01x53]	Added Command 'GAUGE'
+[2025-1.14-01x54]	Performance issues fixing
+[2025-1.14-01x55]	Advanced Shell TK new support for key 'shell.unknown' run if no argument is found
+[2025-1.14-01x56]	Added Command 'LSBLK' | Enabled case sensitive
+[2025-1.14-01x57]	Removed Command 'TODO'
+[2025-1.14-01x58]	Removed Command 'LOCK' | Java Runtime don't caching 
+[2025-1.14-01x59]	X11 Multi-Window Control System (desktops)
+[2025-1.14-01x60]	New method 'getcontent'
+[2025-1.14-01x61]	Command 'LOCAL'
+[2025-1.14-01x62]	Release 1.14 | X Server 0.6.1 
+[2025-1.14.1-01x63]	1.14.1 Suite case
+[2025-1.14.1-01x64]	New case operators 'screen', 'alias', 'key' and they negative forms
+[2025-1.14.1-01x65] Added Command 'GETOPT' 
+[2025-1.14.1-01x66] Release 1.14.1
+[2025-1.14.2-01x68] 1.14.2 Suite case | Added Command 'VIEW'
+[2025-1.14.2-01x69]	Added Command 'CONF' and 'PINC'
+[2025-1.14.2-01x70]	Revert last build
+[2025-1.14.2-01x71] Added Command 'HEAD' and 'TAIL'
+[2025-1.14.2-01x72] Modified Command 'TIME'
+[2025-1.14.2-01x73] Modified history vector key
+[2025-1.14.2-01x74] Added Command 'PUSHD' and 'POPD'
+[2025-1.14.2-01x75] Added Command 'PONG'
+[2025-1.14.2-01x76] Modified FS handler and mount points
+[2025-1.14.2-01x77] Modified 'CASE' - Performance debugging
+[2025-1.14.2-01x78] Modified Font generators
+[2025-1.14.2-01x79] Modified 'LSBLK' - Adapt to "new" file system structure
+[2025-1.14.2-01x80] Modified 'CHMOD' - Generated file '/java/etc/perms.ini'
+[2025-1.14.2-01x81] Modified Java Runtime
+[2025-1.14.2-01x82] Release 1.14.2
+[2025-1.14.3-01x83] 1.14.3 Suite case | Added command 'EXPR'
+[2025-1.14.3-01x84] Removed Commands 'FORGET', 'CLS' and 'RNANO' | Added clear patterns 'stdout', 'stdin', 'logs' and 'history'
+[2025-1.14.3-01x85] File Explorer revisions
+[2025-1.14.3-01x86] Removed File Explorer
+[2025-1.14.3-01x87] New File Explorer
+[2025-1.14.3-01x88] Removed buffer limits
+[2025-1.14.3-01x89] Revert 01x88 build
+[2025-1.14.3-01x90] Added Command 'MAN'
+[2025-1.14.3-01x91] Yang now set OpenTTY Server mirror
+[2025-1.14.3-01x92] Added Command 'MKDIR'
+[2025-1.14.3-01x93] X Server 0.6.2
+[2025-1.14.3-01x94] Command 'QUERY' sorting buffers
+[2025-1.14.3-01x95] Release 1.14.3
+[2025-1.14.4-01x96] 1.14.4 Suite case
+[2025-1.14.4-01x97] Added Command 'DIFF' and 'WC'
+[2025-1.14.4-01x98] Added Command 'WHO'
+[2025-1.14.4-01x99] Improved GoBuster
+[2025-1.14.4-02x00] Improved Interfaces
+[2025-1.14.4-02x01] Improved Monitor 'HTOP' 
+[2025-1.14.4-02x02] Background and MIDlet-MOD Threads now not generating a new Class
+[2025-1.14.4-02x03] Improved Command 'UNAME'
+[2025-1.14.4-02x04] Release 1.14.4
+[2025-1.15-02x05]	1.15 Suite case | Added Command 'AUDIO'
+[2025-1.15-02x06]	New case operator 'display' (reverted)
+[2025-1.15-02x07]	Improved help message
+[2025-1.15-02x08]	Environment scopes (reverted)
+[2025-1.15-02x09]	Return codes
+[2025-1.15-02x10]	Invert commands usage
+[2025-1.15-02x11]	Bruteforce stops if a command get wrong
+[2025-1.15-02x12]	Improved MIDlet Logs
+[2025-1.15-02x13]	Java VM name 
+[2025-1.15-02x14]	Java Generator
+[2025-1.15-02x15]	New Package API Matching tools
+[2025-1.15-02x16]	Release 1.15
+[2025-1.16-02x17]	1.16 Suite case
+[2025-1.16-02x18]	Fixed a bug in 'NC' that doesn't closes the connection
+[2025-1.16-02x19]	Added Command 'WHICH'
+[2025-1.16-02x20]	Password Engine
+[2025-1.16-02x21]	New trace back translator
+[2025-1.16-02x22]	New case operator 'user'
+[2025-1.16-02x23]	Writing at files 'OpenRMS' and '.passwd' requires super user privileges | Those files cannot be deleted
+[2025-1.16-02x24]	When logged as super user the stdin item '$' changes to '#'
+[2025-1.16-02x25]	Command 'SERVER' accepting argument PORT from command
+[2025-1.16-02x26]	Command 'BG' reading super settings (scope and permissions)
+[2025-1.16-02x27]	Transferring password hash to OpenRMS page 2
+[2025-1.16-02x28]	Debugging new password hashing
+[2025-1.16-02x29]	C2ME
+[2025-1.16-02x30]	!! can read args and set it as prefix for last command
+[2025-1.16-02x31]	X11 Lists reading FIRE button to tick user button
+[2025-1.16-02x32]	Command expr supporting operator "%" (reverted)
+[2025-1.16-02x33]	Debugging C2ME
+[2025-1.16-02x34]	Command 'CAT' without arguments prints nano content
+[2025-1.16-02x35]	X Server 0.6.3
+[2025-1.16-02x36]	Chmod sockets addresses
+[2025-1.16-02x37]	Shell multiple args
+[2025-1.16-02x38]	Added X11 deleting screens support
+[2025-1.16-02x39]	Command 'who' show where IP Addresses is connected
+[2025-1.16-02x40]	Package initd.sh script is called with super-user permission
+[2025-1.16-02x41]	Added Command 'STTY'
+[2025-1.16-02x42]	Added Command 'CATCH'
+[2025-1.16-02x43]	Fixed sudo screen crashes
+[2025-1.16-02x44]	New X11 Screen 'EDIT' - (1.16-rc1)
+[2025-1.16-02x45]	Command 'QUERY' have been rewritten
+[2025-1.16-02x46]	Join 'Nano' and 'History' into Main Thread
+[2025-1.16-02x47]	File Explorer v2
+[2025-1.16-02x48]	Audio Player traced by Virtual Process
+[2025-1.16-02x49]	X11 import and export Windows into Virtual Process
+[2025-1.16-02x50]	Moved screens HashMap into Virtual Process
+[2025-1.16-02x51]	J2EMU - Improving renderings methods for emulators
+[2025-1.16-02x52]	Merge Server and RemoteConnection Threads
+[2025-1.16-02x53]	Rewrote C2ME
+[2025-1.16-02x54]	Moved history and directories stack to Virtual Process	
+[2025-1.16-02x55]	OpenTTY Lua Edition
+[2025-1.16-02x56]	Lua v2 - Improved RunTime
+[2025-1.16-02x57]	Screens, Canvas and ITEM's reading process caller permissions
+[2025-1.16-02x58]	Moved Sessions Map<> into Virtual Process
+[2025-1.16-02x59]	Improved ITEM's
+[2025-1.16-02x60]	(1.16-rc2)
+[2025-1.16-02x61]	Debugging for LTS - Merged Credentials and Monitor, generated (OpenTTY$MIDletControl) class
+[2025-1.16-02x62]	Release 1.16 LTS 
+[2025-1.16.1-02x63] 1.16.1 Suite case
+[2025-1.16.1-02x64] Added support for MIDI playing
+[2025-1.16.1-02x65] Added Lua support for REPEAT, UNTIL tokens
+[2025-1.16.1-02x66] Added Lua default library 'socket' 
+[2025-1.16.1-02x67] Added Lua default library 'graphics'
+[2025-1.16.1-02x68] Process Monitor added new tool - Process filter
+[2025-1.16.1-02x69] Connect and MIDletControl Threads merged
+[2025-1.16.1-02x70] Warn when package dont contains Lua Class
+[2025-1.16.1-02x71] Support for 'api.require'
+[2025-1.16.1-02x72] Removed native Server
+[2025-1.16.1-02x73] ItemLoader and MIDletControl Threads merged
+[2025-1.16.1-02x74] Background and MIDlet-MOD Threads merged with MIDletControl
+[2025-1.16.1-02x75] Improved Command 'mmspt'
+[2025-1.16.1-02x76] X Server 0.6.4 | Improved class `OpenTTY$MyCanvas` to generate Global `MIDletCanvas`
+[2025-1.16.1-02x77] Release 1.16.1
+
+-- [ Branch 1.16.x ]
+
+[2025-1.17-02x78] 1.17 Suite case
+[2025-1.16.2-02x79] (Branch: 1.16.x) 1.16.2 Suite case 
+[2025-1.17-02x80] Fixed Command 'PUSHD' directories stacking
+[2025-1.17-02x81] Removed Command 'RUN' | Improved File Explorer
+[2025-1.17-02x82] New internal reading streams
+[2025-1.17-02x83] Command 'CP' fixed - Using raw byte reader
+[2025-1.17-02x84] Command 'BIND' needs read port from argument line
+[2025-1.17-02x85] Improved Font Generator
+[2025-1.17-02x86] Improved Command 'case'
+[2025-1.17-02x87] Run '.initrc' considering shebang
+[2025-1.17-02x88] New 'api.require' node - devicefs
+[2025-1.17-02x89] Added command 'id' | Internal identifier for root as (id: 0)
+[2025-1.17-02x90] UID Support Structure
+[2025-1.17-02x91] Error in '/etc/init' throws a Kernel Panic
+[2025-1.17-02x92] Improved Persistent File System
+[2025-1.17-02x93] Added Command 'RMSFIX'
+[2025-1.17-02x94] Command 'QUERY' not reading until connection end
+[2025-1.17-02x95] Optimized File System
+[2025-1.17-02x96] Removed Command 'SED'
+[2025-1.17-02x97] Mount '/etc/' in a RMS Archive writeable for super-user
+[2025-1.17-02x98] Command 'START' considering services on '/etc/services'
+[2025-1.17-02x99] Basic Project of services hosting
+[2025-1.17-03x00] Added Command 'SVCHOST' - Services Host
+[2025-1.17-03x01] Reading pid from dad process
+[2025-1.17-03x02] Rewrote OpenTTY
+[2025-1.17-03x03] Added Command 'TRAP'
+[2025-1.17-03x04] Removed buffer
+[2025-1.17-03x05] ELF32
+[2025-1.17-03x06] MMU Support on ELF ARM 32 Module
+[2025-1.17-03x07] Lua - Table with open servers and connections
+[2026-1.17-03x08] Improved Archive Virtual FS to support Binaries
+[2026-1.17-03x09] Release 1.17
+[2026-1.17.1-03x10] 1.17.1 Suite case
+[2026-1.17.1-03x11] Fixed caching saving error
+[2026-1.17.1-03x12] Added /proc/ filesystem
+[2026-1.17.1-03x13] Lua Global Template Caching
+[2026-1.17.1-03x14] ELF Objects
+[2026-1.17.1-03x15] Lua Canvas (reverted)
+[2026-1.17.1-03x16] Experimental Resource (Change ROOT) | Lua can create directories
+[2026-1.17.1-03x17] Multi-User support
+[2026-1.17.1-03x18] Release 1.17.1
+[2026-1.17.1-03x19] 1.18 Suite case
+[2026-1.17.1-03x20] Process Structure
+[2026-1.18-03x21] Release 1.18
+[2026-1.18.1-03x22] 1.18.1 Suite case
+[2026-1.18.1-03x23] Kernel Network Manage
+[2026-1.18.1-03x24] Added 'nice' syscall
+[2026-1.18.1-03x25] Lua Embed Shell
+[2026-1.18.1-03x26] C2ME Born's Again
+[2026-1.18.1-03x27] Who died may not revive
+[2026-1.18.1-03x28] VFS subdir mounts
+[2026-1.18.1-03x29] Release 1.18.1
+[2026-1.18.2-03x30] 1.18.2 Suite case
+[2026-1.18.2-03x31]	"." sources sh scripts | xterm runs /home/.initrc
+[2026-1.18.2-03x32]	Boot unit /boot/ implemented on OpenRMS page 7
+[2026-1.18.2-03x33]	ELF emulator stdlib: svc #LIB_* (printf/sprintf/malloc/memcpy/aeabi-div/crt) + ldrd/strd
+[2026-1.18.2-03x34]	Exemplos C em res/apps/src -> res/apps/dist (hello/fib/primes/sort/tower/str/math/count)
+[2026-1.18.2-03x35]	ELF emulator: fix B/BL +8, bx/blx, LDM/STM addressing, pc-sync em Rd15, LDRD/STRD imm decode
+[2026-1.18.2-03x36]	ELF emulator: imports dinamicos reais - load .so via DT_NEEDED, eager JUMP_SLOT no GOT, R_ARM_COPY, dynsym/nchain; build-elf.sh -shared; samples importdemo/libgeo
+[2026-1.18.2-03x37]	ELF emulator: fix LDR/STR/byte com offset por registro (bit 25); apps C de teste: libutil/dcalc/flags/sum/base64/collatz
+[2026-1.18.2-03x38]	Build #338 - ELF emulator: open() accmode (O_RDONLY==0), heap region p/ pedidos >= 64KB, limite 200M instr; app OTP1 (otp, LZSS+CRC32)
+[2026-1.18.2-04x39]	Build #439 - ELF guest RAM padrao de 512KB, configuravel pelo kernel Lua
+[2026-1.18.2-04x40]	Build #440 - ELF emulator: syscalls pipe/alarm/access/umask/setsid/getrusage/readlink/sethostname/gethostname/getgid32
+[2026-1.18.2-04x41]	Build #441 - ELF guest libc: time() wrapper (SYS_TIME); gc() + mem_free/mem_total/mem_used (Java heap KB)
+[2026-1.18.2-04x42] Release 1.18.2 - In Marluce's memory
+[2026-1.18.2-04x43] 1.19 Suite Case

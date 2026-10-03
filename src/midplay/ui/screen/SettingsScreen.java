@@ -182,6 +182,7 @@ public final class SettingsScreen extends BaseForm {
             256,
             TextField.URL);
     append(downloadPathField);
+
   }
 
   private ChoiceGroup createChoiceGroup(

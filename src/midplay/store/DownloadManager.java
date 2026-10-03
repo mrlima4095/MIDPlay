@@ -412,8 +412,8 @@ public class DownloadManager {
         if (path.equals(trackPath)
             || ((trackPath == null || !trackPath.startsWith("file://"))
                 && key.equals(entry.getString("key", "")))) {
-          if (path.length() > 0) {
-            deleteFileIfExists(path);
+          if (path.length() > 0 && !deleteFileIfExists(path)) {
+            return false;
           }
           rebuildWithout(i);
           return true;
@@ -422,8 +422,7 @@ public class DownloadManager {
       }
     }
     if (trackPath != null && trackPath.length() > 0 && exists(trackPath)) {
-      deleteFileIfExists(trackPath);
-      return true;
+      return deleteFileIfExists(trackPath);
     }
     return false;
   }
@@ -444,21 +443,25 @@ public class DownloadManager {
     saveIndex();
   }
 
-  public void clearAllDownloads() {
+  public boolean clearAllDownloads() {
     JSONArray index = getIndex();
+    boolean deletedAll = true;
     for (int i = 0; i < index.size(); i++) {
       try {
         JSONObject entry = index.getObject(i);
         String path = entry.getString("path", "");
         if (path.length() > 0) {
-          deleteFileIfExists(path);
+          deletedAll = deleteFileIfExists(path) && deletedAll;
         }
       } catch (Exception e) {
       }
     }
-    downloads = new JSONArray();
-    saveIndex();
-    deleteFilesInDownloadDirectory();
+    if (deletedAll) {
+      downloads = new JSONArray();
+      saveIndex();
+      deletedAll = deleteFilesInDownloadDirectory();
+    }
+    return deletedAll;
   }
 
   public Track[] getDownloadedTracks() {
@@ -537,25 +540,13 @@ public class DownloadManager {
     }
   }
 
-  private void deleteFilesInDownloadDirectory() {
-    String basePath = getDownloadDirectory();
-    FileConnection directory = null;
-    try {
-      directory = (FileConnection) Connector.open(basePath, Connector.READ);
-      if (!directory.exists() || !directory.isDirectory()) {
-        return;
-      }
-      Enumeration files = directory.list();
-      while (files.hasMoreElements()) {
-        String fileName = (String) files.nextElement();
-        if (!fileName.endsWith("/")) {
-          deleteFileIfExists(basePath + fileName);
-        }
-      }
-    } catch (Exception e) {
-    } finally {
-      closeConnection(directory);
+  private boolean deleteFilesInDownloadDirectory() {
+    Vector paths = getDownloadFilePaths();
+    boolean deletedAll = true;
+    for (int i = 0; i < paths.size(); i++) {
+      deletedAll = deleteFileIfExists((String) paths.elementAt(i)) && deletedAll;
     }
+    return deletedAll;
   }
 
   private String getDownloadDirectory() {
@@ -630,14 +621,16 @@ public class DownloadManager {
     }
   }
 
-  private static void deleteFileIfExists(String path) {
+  private static boolean deleteFileIfExists(String path) {
     FileConnection conn = null;
     try {
       conn = (FileConnection) Connector.open(path, Connector.READ_WRITE);
       if (conn.exists()) {
         conn.delete();
       }
+      return true;
     } catch (Exception e) {
+      return false;
     } finally {
       closeConnection(conn);
     }

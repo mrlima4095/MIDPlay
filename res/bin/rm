@@ -1,0 +1,30 @@
+#!/bin/lua
+
+local libcore = require("libcore")
+
+local recursive = false
+local files = {}
+
+for i = 1, #arg do
+    local item = arg[i]
+
+    if item == "-r" or item == "-rf" or item == "-fr" then
+        recursive = true
+    else
+        files[#files + 1] = item
+    end
+end
+
+if #files == 0 then
+    print("rm: usage: rm [-r] [file...]")
+    os.exit(2)
+end
+
+for i = 1, #files do
+    local status = os.remove(os.join(files[i]))
+
+    if status > 0 then
+        print("rm: " .. files[i] .. ": " .. libcore.errormsg(status))
+        os.exit(status)
+    end
+end

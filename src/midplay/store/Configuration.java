@@ -38,6 +38,7 @@ public class Configuration {
   public static final String MENU_RECENT = "menu.recent";
   public static final String MENU_EQUALIZER = "menu.equalizer";
   public static final String MENU_DOWNLOADS = "menu.downloads";
+  public static final String MENU_OPENTTY = "menu.opentty";
 
   public static final String SERVICE_NCT = "NCT";
   public static final String SERVICE_SOUNDCLOUD = "SoundCloud";

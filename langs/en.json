@@ -50,7 +50,8 @@
     "settings": "Settings",
     "about": "About",
     "visibility": "Menu Visibility",
-    "equalizer": "Equalizer"
+    "equalizer": "Equalizer",
+    "opentty": "OpenTTY"
   },
   "player": {
     "next": "Next",
@@ -97,6 +98,7 @@
     "delete": "Delete",
     "delete_all": "Delete All",
     "refresh": "Refresh",
+    "deleting": "Deleting...",
     "status": {
       "deleted": "Download deleted",
       "cleared": "All downloads cleared"

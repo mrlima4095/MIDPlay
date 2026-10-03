@@ -50,7 +50,8 @@
     "settings": "Configurações",
     "about": "Sobre",
     "visibility": "Visibilidade do Menu",
-    "equalizer": "Equalizador"
+    "equalizer": "Equalizador",
+    "opentty": "OpenTTY"
   },
   "player": {
     "next": "Próxima",
@@ -96,6 +97,7 @@
     "play": "Tocar",
     "delete": "Excluir",
     "delete_all": "Excluir Tudo",
+    "deleting": "Excluindo...",
     "status": {
       "deleted": "Download excluído",
       "cleared": "Todos os downloads foram excluídos"

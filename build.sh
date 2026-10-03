@@ -27,12 +27,12 @@ cd "$SCRIPT_DIR"
 BUILD_DIR="build/standalone"
 COMPILED_DIR="$BUILD_DIR/compiled"
 DIST_DIR="dist"
-VERSION="1.7.1"
+VERSION="26.9"
 
 # ProGuard (and only ProGuard) runs on any modern JDK.
 RUN_JAVA="${RUN_JAVA:-$(command -v java)}"
 PROGUARD_JAR="lib/proguard-ant.jar"
-BOOTCP="lib/cldc_1.1.jar:lib/midp_2.0.jar:lib/jsr234_1.0.jar:lib/jsr75.jar"   # J2ME core APIs + JSR-234 (AMMS) + JSR-75 (FileConnection)
+BOOTCP="lib/cldc_1.1.jar:lib/midp_2.0.jar:lib/jsr234_1.0.jar:lib/jsr75_1.0.jar"   # J2ME core APIs + JSR-234 (AMMS) + JSR-75 (FileConnection)
 
 # ---------------------------------------------------------------------------
 # Locate JDK 8.
@@ -50,6 +50,7 @@ find_jdk8() {
       /Library/Java/JavaVirtualMachines/*/Contents/Home \
       /opt/homebrew/opt/openjdk@8/libexec/openjdk.jdk/Contents/Home \
       /opt/homebrew/Cellar/temurin@8/*/libexec/openjdk.jdk/Contents/Home \
+      /usr/lib/jvm/temurin-8-jdk-amd64 \
       "$HOME/.sdkman/candidates/java/"*; do
     if [ -x "$cand/bin/javac" ] && "$cand/bin/javac" -version 2>&1 | grep -q '1\.8'; then
       echo "$cand"; return 0
@@ -114,12 +115,19 @@ echo "• Clean"
 rm -rf "$BUILD_DIR"; mkdir -p "$COMPILED_DIR" "$DIST_DIR"
 
 echo "• Collect sources"
-find src -name '*.java' > "$BUILD_DIR/sources.txt"
-echo "    $(wc -l < "$BUILD_DIR/sources.txt" | tr -d ' ') files"
+find src -name '*.java' ! -path 'src/midplay/opentty/*' > "$BUILD_DIR/sources.txt"
+find src/midplay/opentty -name '*.java' > "$BUILD_DIR/opentty-sources.txt"
+echo "    $(wc -l < "$BUILD_DIR/sources.txt" | tr -d ' ') MIDPlay files, $(wc -l < "$BUILD_DIR/opentty-sources.txt" | tr -d ' ') OpenTTY files"
+
+echo "• Compile OpenTTY (JDK 8, -source/-target 1.4, CLDC bootclasspath)"
+"$JAVAC" -encoding UTF-8 -source 1.4 -target 1.4 -g:none \
+  -bootclasspath "$BOOTCP" \
+  -d "$COMPILED_DIR" @"$BUILD_DIR/opentty-sources.txt"
 
 echo "• Compile (JDK 8, -source/-target 1.3, CLDC bootclasspath)"
 "$JAVAC" -encoding UTF-8 -source 1.3 -target 1.3 -g:none \
   -bootclasspath "$BOOTCP" \
+  -classpath "$COMPILED_DIR" \
   -d "$COMPILED_DIR" @"$BUILD_DIR/sources.txt"
 
 echo "• Package dist/MIDPlay_midlet.jar (classes + res/)"

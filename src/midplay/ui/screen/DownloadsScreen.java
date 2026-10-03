@@ -78,13 +78,8 @@ public final class DownloadsScreen extends BaseList {
   }
 
   private void deleteSelected(int index) {
-    Track track = tracks[index];
-    if (downloadManager.removeDownload(track)) {
-      navigator.showAlert(Lang.tr("download.status.deleted"), AlertType.CONFIRMATION);
-      refresh();
-    } else {
-      navigator.showAlert(Lang.tr("download.error"), AlertType.ERROR);
-    }
+    final Track track = tracks[index];
+    deleteAsync(track, false);
   }
 
   private void confirmClearAll() {
@@ -95,12 +90,36 @@ public final class DownloadsScreen extends BaseList {
         Lang.tr("download.confirm.clear"),
         new Runnable() {
           public void run() {
-            downloadManager.clearAllDownloads();
-            navigator.showAlert(Lang.tr("download.status.cleared"), AlertType.CONFIRMATION);
-            refresh();
+            deleteAsync(null, true);
           }
         },
         AlertType.WARNING);
+  }
+
+  private void deleteAsync(final Track track, final boolean all) {
+    navigator.showLoadingAlert(Lang.tr("download.deleting"));
+    new Thread(
+            new Runnable() {
+              public void run() {
+                final boolean deleted =
+                    all ? downloadManager.clearAllDownloads() : downloadManager.removeDownload(track);
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        navigator.dismissAlert();
+                        if (deleted) {
+                          navigator.showAlert(
+                              Lang.tr(all ? "download.status.cleared" : "download.status.deleted"),
+                              AlertType.CONFIRMATION);
+                          refresh();
+                        } else {
+                          navigator.showAlert(Lang.tr("download.error"), AlertType.ERROR);
+                        }
+                      }
+                    });
+              }
+            })
+        .start();
   }
 
   private void refreshFromDisk() {

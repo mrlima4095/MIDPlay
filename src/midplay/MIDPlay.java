@@ -16,6 +16,7 @@ import midplay.model.Tracks;
 import midplay.net.CheckUpdateOperation;
 import midplay.net.JsonOperation;
 import midplay.net.NetworkOperation;
+import midplay.opentty.OpenTTY;
 import midplay.player.PlayerGUI;
 import midplay.player.PlayerScreen;
 import midplay.store.Configuration;
@@ -41,7 +42,7 @@ import midplay.util.Utils;
 
 public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
   private static NetworkOperation operation;
-  public static String APP_VERSION = "1.0";
+  public static String APP_VERSION = "26.9";
   private static PlayerScreen playerScreen;
   private static MIDPlay instance;
 
@@ -76,6 +77,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
   private final Navigator navigator;
   private final MenuManager menuManager;
   private MainMenuScreen mainMenu;
+  private OpenTTY openTTY;
 
   public MIDPlay() {
     instance = this;
@@ -140,6 +142,13 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
         new Runnable() {
           public void run() {
             goToEqualizerScreen();
+          }
+        });
+    menuManager.registerAction(
+        Configuration.MENU_OPENTTY,
+        new Runnable() {
+          public void run() {
+            goToOpenTTY();
           }
         });
   }
@@ -307,6 +316,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
     f.append(getAppProperty("MIDlet-Name") + "\n");
     f.append("Version " + APP_VERSION + "\n");
     f.append("Author: " + getAppProperty("MIDlet-Vendor") + "\n");
+    f.append("Maintained by MrLima\n");
     f.append("Contributors: " + "symbuzzer, GoldenDragon, Spajciuch, gtrxAC\n");
 
     f.addCommand(Commands.back());
@@ -373,6 +383,14 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
 
   private void goToDownloadsScreen() {
     navigator.forward(new DownloadsScreen(navigator));
+  }
+
+  private void goToOpenTTY() {
+    if (openTTY == null) {
+      openTTY = new OpenTTY(this, mainMenu);
+    }
+    openTTY.registerHostScreen(mainMenu);
+    openTTY.open();
   }
 
   private void showExitConfirmation() {
