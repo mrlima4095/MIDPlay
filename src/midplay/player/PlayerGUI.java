@@ -805,11 +805,11 @@ public class PlayerGUI implements PlayerListener {
         return;
       }
 
-      parent.albumArtLoader.setAlbumArtUrl(track.getImageUrl());
-
       if (playerMethod.isInputStream()) {
         freeHeapForInputStreamPlayback();
       }
+
+      parent.albumArtLoader.setAlbumArtUrl(track.getImageUrl());
 
       pending = mediaResolver.createPendingPlayback(track, sessionId, playerMethod);
 

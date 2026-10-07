@@ -96,6 +96,17 @@
     "play": "Tocar",
     "delete": "Excluir",
     "delete_all": "Excluir Tudo",
+    "refresh": "Atualizar",
+    "link": "Vincular local",
+    "link_url": "URL da música",
+    "link_thumb": "URL da capa",
+    "link_name": "Nome da música",
+    "link_artist": "Artista",
+    "link_no_files": "Nenhum arquivo local encontrado na pasta de downloads",
+    "link_error_url": "Informe a URL da música",
+    "link_error": "Não foi possível vincular o arquivo",
+    "link_status": "Arquivo vinculado com sucesso",
+    "link_manual": "Digitar URL manualmente",
     "status": {
       "deleted": "Download excluído",
       "cleared": "Todos os downloads foram excluídos"
@@ -110,8 +121,13 @@
     "delete_all": "Excluir tudo",
     "title": "Músicas em cache",
     "unknown": "Música desconhecida",
-    "status": {"removed": "Música removida do cache", "cleared": "Cache limpo"},
-    "confirm": {"delete_all": "Excluir todas as músicas em cache?"}
+    "status": {
+      "removed": "Música removida do cache",
+      "cleared": "Cache limpo"
+    },
+    "confirm": {
+      "delete_all": "Excluir todas as músicas em cache?"
+    }
   },
   "playlist": {
     "add_track": "Adicionar à Playlist",

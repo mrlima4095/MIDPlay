@@ -97,6 +97,16 @@
     "delete": "מחק",
     "delete_all": "מחק הכל",
     "refresh": "Refresh",
+    "link": "קשור קובץ מקומי",
+    "link_url": "כתובת URL של הרצועה",
+    "link_thumb": "כתובת URL של התמונה הממוזערת",
+    "link_name": "שם הרצועה",
+    "link_artist": "אמן",
+    "link_no_files": "לא נמצאו קבצים מקומיים בתיקיית ההורדות",
+    "link_error_url": "נא להזין את כתובת ה-URL של הרצועה",
+    "link_error": "לא ניתן היה לקשר קובץ זה",
+    "link_status": "הקובץ קושר בהצלחה",
+    "link_manual": "הזן כתובת URL ידנית",
     "status": {
       "deleted": "ההורדה נמחקה",
       "cleared": "כל ההורדות נמחקו"

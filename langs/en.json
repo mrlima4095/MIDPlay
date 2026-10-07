@@ -97,6 +97,16 @@
     "delete": "Delete",
     "delete_all": "Delete All",
     "refresh": "Refresh",
+    "link": "Link Local File",
+    "link_url": "Track URL",
+    "link_thumb": "Thumbnail URL",
+    "link_name": "Track Name",
+    "link_artist": "Artist",
+    "link_no_files": "No local files found in the download folder",
+    "link_error_url": "Enter the track URL",
+    "link_error": "Could not link this file",
+    "link_status": "File linked successfully",
+    "link_manual": "Enter URL manually",
     "status": {
       "deleted": "Download deleted",
       "cleared": "All downloads cleared"
@@ -111,8 +121,13 @@
     "delete_all": "Delete All",
     "title": "Cached Songs",
     "unknown": "Unknown Song",
-    "status": {"removed": "Cached song removed", "cleared": "Cache cleared"},
-    "confirm": {"delete_all": "Delete all cached songs?"}
+    "status": {
+      "removed": "Cached song removed",
+      "cleared": "Cache cleared"
+    },
+    "confirm": {
+      "delete_all": "Delete all cached songs?"
+    }
   },
   "playlist": {
     "add_track": "Add to Playlist",

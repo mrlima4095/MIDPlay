@@ -18,6 +18,7 @@ public class Configuration {
   public static final String STORAGE_LAST_SESSION = "storage.last_session";
   public static final String STORAGE_RECENT = "storage.recent";
   public static final String STORAGE_DOWNLOADS = "storage.downloads";
+  public static final String STORAGE_DOWNLOADS_BACKUP = "storage.downloads.bak";
   public static final String STORAGE_CACHE = "storage.cache";
   public static final String STORAGE_CACHE_AUDIO = "storage.cache_audio";
 

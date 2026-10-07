@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.TimerTask;
 import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.rms.RecordEnumeration;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
 import midplay.model.Track;
@@ -45,6 +47,10 @@ public class DownloadManager {
 
   private RecordStore indexStore;
   private JSONArray downloads;
+  private int indexRecordId = INDEX_RECORD_ID;
+  private int backupRecordId = INDEX_RECORD_ID;
+  private Vector diskPathsCache;
+  private Hashtable linkedPathsCache;
   private final Vector activeKeys = new Vector();
 
   private DownloadManager() {}
@@ -56,18 +62,45 @@ public class DownloadManager {
     return indexStore;
   }
 
-  private JSONArray getIndex() {
+  private synchronized void closeIndexStore() {
+    if (indexStore != null) {
+      try {
+        indexStore.closeRecordStore();
+      } catch (RecordStoreException e) {
+      } finally {
+        indexStore = null;
+      }
+    }
+  }
+
+  private synchronized JSONArray getIndex() {
     if (downloads != null) {
       return downloads;
     }
     downloads = new JSONArray();
     try {
       RecordStore rs = openIndexStore();
-      byte[] data = rs.getRecord(INDEX_RECORD_ID);
-      if (data != null && data.length > 0) {
-        String json = Utils.bytesToUtf8(data);
-        if (json.length() > 0) {
-          downloads = cc.nnproject.json.JSON.getArray(json);
+      JSONArray main = readArray(rs, indexRecordId);
+      if (main == null && indexRecordId != INDEX_RECORD_ID) {
+        main = readArray(rs, INDEX_RECORD_ID);
+        if (main != null) {
+          indexRecordId = INDEX_RECORD_ID;
+        }
+      }
+      if (main == null) {
+        int found = findIndexRecordId(rs);
+        if (found > 0) {
+          indexRecordId = found;
+          main = readArray(rs, found);
+        }
+      }
+      if (main != null) {
+        downloads = main;
+      } else {
+        JSONArray backup = readBackup();
+        if (backup != null) {
+          downloads = backup;
+          saveIndex();
         }
       }
     } catch (Exception e) {
@@ -76,17 +109,151 @@ public class DownloadManager {
     return downloads;
   }
 
-  private void saveIndex() {
+  private static JSONArray readArray(RecordStore rs, int id) {
+    byte[] data = readRecord(rs, id);
+    if (data == null || data.length == 0) {
+      return null;
+    }
+    String json = Utils.bytesToUtf8(data);
+    if (json.length() == 0) {
+      return null;
+    }
     try {
-      RecordStore rs = openIndexStore();
-      byte[] bytes = Utils.utf8ToBytes(downloads.toString());
+      return cc.nnproject.json.JSON.getArray(json);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private JSONArray readBackup() {
+    RecordStore rs = null;
+    try {
+      rs = RecordStore.openRecordStore(Configuration.STORAGE_DOWNLOADS_BACKUP, false);
+      JSONArray array = readArray(rs, backupRecordId);
+      if (array == null && backupRecordId != INDEX_RECORD_ID) {
+        array = readArray(rs, INDEX_RECORD_ID);
+        if (array != null) {
+          backupRecordId = INDEX_RECORD_ID;
+        }
+      }
+      return array;
+    } catch (Exception e) {
+      return null;
+    } finally {
+      if (rs != null) {
+        try {
+          rs.closeRecordStore();
+        } catch (RecordStoreException e) {
+        }
+      }
+    }
+  }
+
+  private void writeBackup(String json) {
+    byte[] bytes;
+    try {
+      bytes = Utils.utf8ToBytes(json);
+    } catch (Exception e) {
+      return;
+    }
+    RecordStore rs = null;
+    try {
+      rs = RecordStore.openRecordStore(Configuration.STORAGE_DOWNLOADS_BACKUP, true);
+      int id = backupRecordId;
       try {
-        rs.setRecord(INDEX_RECORD_ID, bytes, 0, bytes.length);
+        rs.setRecord(id, bytes, 0, bytes.length);
       } catch (RecordStoreException e) {
-        rs.addRecord(bytes, 0, bytes.length);
+        id = rs.addRecord(bytes, 0, bytes.length);
+        backupRecordId = id;
       }
     } catch (RecordStoreException e) {
+    } finally {
+      if (rs != null) {
+        try {
+          rs.closeRecordStore();
+        } catch (RecordStoreException e) {
+        }
+      }
     }
+  }
+
+  private static byte[] readRecord(RecordStore rs, int id) {
+    try {
+      return rs.getRecord(id);
+    } catch (RecordStoreException e) {
+      return null;
+    }
+  }
+
+  private static int findIndexRecordId(RecordStore rs) {
+    try {
+      RecordEnumeration records = rs.enumerateRecords(null, null, false);
+      int found = -1;
+      while (records.hasNextElement()) {
+        int id = records.nextRecordId();
+        byte[] data = readRecord(rs, id);
+        if (data == null || data.length == 0) {
+          continue;
+        }
+        String json = Utils.bytesToUtf8(data);
+        if (json.length() > 0 && json.charAt(0) == '[') {
+          found = id;
+        }
+      }
+      records.destroy();
+      return found;
+    } catch (Exception e) {
+      return -1;
+    }
+  }
+
+  private synchronized boolean saveIndex() {
+    byte[] bytes;
+    try {
+      bytes = Utils.utf8ToBytes(downloads.toString());
+    } catch (Exception e) {
+      return false;
+    }
+    try {
+      RecordStore rs = openIndexStore();
+      int id = indexRecordId;
+      try {
+        rs.setRecord(id, bytes, 0, bytes.length);
+      } catch (RecordStoreException e) {
+        id = rs.addRecord(bytes, 0, bytes.length);
+        indexRecordId = id;
+      }
+      if (!verifySaved(rs, id, bytes)) {
+        return false;
+      }
+      closeIndexStore();
+      writeBackup(downloads.toString());
+      return true;
+    } catch (RecordStoreException e) {
+      return false;
+    }
+  }
+
+  private static boolean verifySaved(RecordStore rs, int id, byte[] bytes) {
+    try {
+      byte[] stored = rs.getRecord(id);
+      if (stored == null || stored.length != bytes.length) {
+        return false;
+      }
+      for (int i = 0; i < bytes.length; i++) {
+        if (stored[i] != bytes[i]) {
+          return false;
+        }
+      }
+      return true;
+    } catch (RecordStoreException e) {
+      return false;
+    }
+  }
+
+  private synchronized void reloadIndex() {
+    downloads = null;
+    getIndex();
   }
 
   public static String makeTrackKey(Track track) {
@@ -168,9 +335,9 @@ public class DownloadManager {
         boolean sameUrl = url != null && url.length() > 0 && url.equals(indexedUrl);
         String path = entry.getString("path", "");
         boolean samePath = url != null && url.length() > 0 && url.equals(path);
-        if (sameUrl
-            || samePath
-            || (indexedUrl.length() == 0 && key.equals(entry.getString("key", "")))) {
+        String indexedKey = entry.getString("key", "");
+        boolean sameKey = key != null && indexedKey != null && key.equals(indexedKey);
+        if (sameUrl || samePath || sameKey) {
           if (path.length() > 0 && exists(path)) {
             return path;
           }
@@ -374,31 +541,216 @@ public class DownloadManager {
   }
 
   private void addToIndex(Track track, String key, String filePath) {
+    invalidateListCaches();
     JSONArray index = getIndex();
     try {
       String url = track.getUrl() != null ? track.getUrl() : "";
+      String thumb = track.getImageUrl() != null ? track.getImageUrl() : "";
+      String name = track.getName() != null ? track.getName() : "";
+      String artist = track.getArtist() != null ? track.getArtist() : "";
       for (int i = 0; i < index.size(); i++) {
         JSONObject entry = index.getObject(i);
         if (url.equals(entry.getString("url", "")) || key.equals(entry.getString("key", ""))) {
           entry.put("path", filePath);
           entry.put("url", url);
-          saveIndex();
+          if (thumb.length() > 0) {
+            entry.put("thumb", thumb);
+          }
+          if (name.length() > 0) {
+            entry.put("name", name);
+          }
+          if (artist.length() > 0) {
+            entry.put("artist", artist);
+          }
+          if (saveIndex()) {
+            return;
+          }
+          reloadIndex();
           return;
         }
       }
       JSONObject entry = new JSONObject();
       entry.put("key", key);
       entry.put("url", url);
-      entry.put("name", track.getName() != null ? track.getName() : "");
-      entry.put("artist", track.getArtist() != null ? track.getArtist() : "");
+      entry.put("name", name);
+      entry.put("artist", artist);
       entry.put("path", filePath);
+      entry.put("thumb", thumb);
       index.add(entry);
-      saveIndex();
+      if (!saveIndex()) {
+        reloadIndex();
+      }
     } catch (Exception e) {
+      reloadIndex();
     }
   }
 
+  public boolean linkLocalFile(String path, String url, String thumb, String name, String artist) {
+    invalidateListCaches();
+    if (path == null || path.length() == 0 || !exists(path)) {
+      return false;
+    }
+    if (url == null) {
+      url = "";
+    }
+    if (thumb == null) {
+      thumb = "";
+    }
+    if (name == null) {
+      name = "";
+    }
+    if (artist == null) {
+      artist = "";
+    }
+    String fileName = fileNameForPath(path);
+    if (name.length() == 0) {
+      name = baseNameOf(fileName);
+    }
+    JSONArray index = getIndex();
+    try {
+      for (int i = 0; i < index.size(); i++) {
+        JSONObject entry = index.getObject(i);
+        String entryPath = entry.getString("path", "");
+        String entryUrl = entry.getString("url", "");
+        if (path.equals(entryPath) || (url.length() > 0 && url.equals(entryUrl))) {
+          entry.put("path", path);
+          if (url.length() > 0) {
+            entry.put("url", url);
+          }
+          if (thumb.length() > 0) {
+            entry.put("thumb", thumb);
+          }
+          if (name.length() > 0) {
+            entry.put("name", name);
+          }
+          if (artist.length() > 0) {
+            entry.put("artist", artist);
+          }
+          if (entry.getString("key", "").length() == 0) {
+            entry.put("key", linkKey(url, name, artist, fileName));
+          }
+          if (saveIndex()) {
+            return true;
+          }
+          reloadIndex();
+          return false;
+        }
+      }
+      JSONObject entry = new JSONObject();
+      entry.put("key", linkKey(url, name, artist, fileName));
+      entry.put("url", url);
+      entry.put("name", name);
+      entry.put("artist", artist);
+      entry.put("path", path);
+      entry.put("thumb", thumb);
+      index.add(entry);
+      if (saveIndex()) {
+        return true;
+      }
+      reloadIndex();
+      return false;
+    } catch (Exception e) {
+      reloadIndex();
+      return false;
+    }
+  }
+
+  private static String linkKey(String url, String name, String artist, String fileName) {
+    if (url != null && url.length() > 0) {
+      return sanitize(url);
+    }
+    if (name != null && name.length() > 0) {
+      return sanitize(name + "_" + (artist != null ? artist : ""));
+    }
+    return sanitize(baseNameOf(fileName));
+  }
+
+  private static String baseNameOf(String fileName) {
+    if (fileName == null) {
+      return "";
+    }
+    int dot = fileName.lastIndexOf('.');
+    return dot > 0 ? fileName.substring(0, dot) : fileName;
+  }
+
+  public String fileNameForPath(String path) {
+    String dir = getDownloadDirectory();
+    if (path != null && path.startsWith(dir)) {
+      return path.substring(dir.length());
+    }
+    if (path == null) {
+      return "";
+    }
+    int slash = path.lastIndexOf('/');
+    return slash >= 0 ? path.substring(slash + 1) : path;
+  }
+
+  public JSONObject getLinkedEntry(String path) {
+    if (path == null) {
+      return null;
+    }
+    JSONArray index = getIndex();
+    for (int i = 0; i < index.size(); i++) {
+      try {
+        JSONObject entry = index.getObject(i);
+        if (path.equals(entry.getString("path", ""))) {
+          return entry;
+        }
+      } catch (Exception e) {
+      }
+    }
+    return null;
+  }
+
+  public Hashtable getLinkedPaths() {
+    Hashtable cached = linkedPathsCache;
+    if (cached != null) {
+      return cached;
+    }
+    healIndex(diskPaths());
+    Hashtable table = new Hashtable();
+    JSONArray index = getIndex();
+    for (int i = 0; i < index.size(); i++) {
+      try {
+        String path = index.getObject(i).getString("path", "");
+        if (path.length() > 0) {
+          table.put(path, "1");
+        }
+      } catch (Exception e) {
+      }
+    }
+    linkedPathsCache = table;
+    return table;
+  }
+
+  public String suggestedKeyword(String path) {
+    String name = baseNameOf(fileNameForPath(path));
+    StringBuffer sb = new StringBuffer(name.length());
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (c == '_' || c == '-' || c == '.' || c == ' ') {
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
+          sb.append(' ');
+        }
+      } else {
+        sb.append(c);
+      }
+    }
+    while (sb.length() > 0 && sb.charAt(sb.length() - 1) == ' ') {
+      sb.setLength(sb.length() - 1);
+    }
+    return sb.toString();
+  }
+
+  public String[] getLocalFilePaths() {
+    Vector paths = diskPaths();
+    String[] result = new String[paths.size()];
+    paths.copyInto(result);
+    return result;
+  }
+
   public boolean removeDownload(Track track) {
+    invalidateListCaches();
     if (track == null) {
       return false;
     }
@@ -429,6 +781,7 @@ public class DownloadManager {
   }
 
   private void rebuildWithout(int removedIndex) {
+    invalidateListCaches();
     JSONArray current = getIndex();
     JSONArray rebuilt = new JSONArray();
     for (int i = 0; i < current.size(); i++) {
@@ -441,10 +794,13 @@ public class DownloadManager {
       }
     }
     downloads = rebuilt;
-    saveIndex();
+    if (!saveIndex()) {
+      reloadIndex();
+    }
   }
 
   public void clearAllDownloads() {
+    invalidateListCaches();
     JSONArray index = getIndex();
     for (int i = 0; i < index.size(); i++) {
       try {
@@ -457,31 +813,22 @@ public class DownloadManager {
       }
     }
     downloads = new JSONArray();
-    saveIndex();
+    if (!saveIndex()) {
+      reloadIndex();
+    }
     deleteFilesInDownloadDirectory();
   }
 
-  public Track[] getDownloadedTracks() {
-    return getDownloadedTracks(false);
-  }
-
   public Track[] refreshDownloadedTracks() {
-    return getDownloadedTracks(true);
-  }
-
-  private Track[] getDownloadedTracks(boolean includeExternalFiles) {
     JSONArray index = getIndex();
     Vector trackList = new Vector();
-    Vector indexedPaths = new Vector();
-    Vector diskPaths = includeExternalFiles ? getDownloadFilePaths() : null;
     for (int i = 0; i < index.size(); i++) {
       try {
         JSONObject entry = index.getObject(i);
         String path = entry.getString("path", "");
-        if (diskPaths != null && !diskPaths.contains(path)) {
+        if (path.length() == 0) {
           continue;
         }
-        indexedPaths.addElement(path);
         trackList.addElement(
             new Track(
                 entry.getString("key", ""),
@@ -489,18 +836,65 @@ public class DownloadManager {
                 path,
                 0,
                 entry.getString("artist", ""),
-                ""));
+                entry.getString("thumb", "")));
       } catch (Exception e) {
       }
-    }
-    if (includeExternalFiles) {
-      addExternalFiles(trackList, indexedPaths, diskPaths);
     }
     Track[] result = new Track[trackList.size()];
     for (int i = 0; i < result.length; i++) {
       result[i] = (Track) trackList.elementAt(i);
     }
     return result;
+  }
+
+  private void healIndex(Vector diskPaths) {
+    if (diskPaths == null || diskPaths.size() == 0) {
+      return;
+    }
+    JSONArray index = getIndex();
+    boolean changed = false;
+    for (int i = 0; i < index.size(); i++) {
+      try {
+        JSONObject entry = index.getObject(i);
+        String path = entry.getString("path", "");
+        if (path.length() == 0 || diskPaths.contains(path)) {
+          continue;
+        }
+        String name = fileNameForPath(path);
+        if (name.length() == 0) {
+          continue;
+        }
+        for (int j = 0; j < diskPaths.size(); j++) {
+          String diskPath = (String) diskPaths.elementAt(j);
+          if (name.equals(fileNameForPath(diskPath))) {
+            entry.put("path", diskPath);
+            changed = true;
+            break;
+          }
+        }
+      } catch (Exception e) {
+      }
+    }
+    if (changed) {
+      invalidateListCaches();
+      if (!saveIndex()) {
+        reloadIndex();
+      }
+    }
+  }
+
+  private Vector diskPaths() {
+    Vector cached = diskPathsCache;
+    if (cached == null) {
+      cached = getDownloadFilePaths();
+      diskPathsCache = cached;
+    }
+    return cached;
+  }
+
+  public void invalidateListCaches() {
+    diskPathsCache = null;
+    linkedPathsCache = null;
   }
 
   private Vector getDownloadFilePaths() {
@@ -524,17 +918,6 @@ public class DownloadManager {
       closeConnection(directory);
     }
     return paths;
-  }
-
-  private void addExternalFiles(Vector tracks, Vector indexedPaths, Vector diskPaths) {
-    for (int i = 0; i < diskPaths.size(); i++) {
-      String path = (String) diskPaths.elementAt(i);
-      if (indexedPaths.contains(path)) {
-        continue;
-      }
-      String fileName = path.substring(getDownloadDirectory().length());
-      tracks.addElement(new Track("local_" + sanitize(fileName), fileName, path, 0, "", ""));
-    }
   }
 
   private void deleteFilesInDownloadDirectory() {
@@ -676,12 +1059,6 @@ public class DownloadManager {
   }
 
   public void cleanup() {
-    try {
-      if (indexStore != null) {
-        indexStore.closeRecordStore();
-        indexStore = null;
-      }
-    } catch (RecordStoreException e) {
-    }
+    closeIndexStore();
   }
 }

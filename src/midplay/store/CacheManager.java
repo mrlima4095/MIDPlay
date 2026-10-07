@@ -190,6 +190,7 @@ public class CacheManager {
     entry.put("name", track.getName());
     entry.put("artist", track.getArtist());
     entry.put("duration", track.getDuration());
+    entry.put("image", track.getImageUrl() != null ? track.getImageUrl() : "");
     entry.put("storage", mode);
     entry.put("location", location);
     entries().add(entry);
@@ -226,7 +227,8 @@ public class CacheManager {
           String name = entry.getString("name", "");
           String artist = entry.getString("artist", "");
           int duration = entry.getInt("duration", 0);
-          result[n++] = new Track("", name, url, duration, artist, null);
+          String image = entry.getString("image", "");
+          result[n++] = new Track("", name, url, duration, artist, image);
         }
       } catch (Exception e) {
       }

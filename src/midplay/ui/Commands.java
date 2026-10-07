@@ -173,6 +173,14 @@ public class Commands {
     return get("download.refresh", Command.SCREEN, 5);
   }
 
+  public static Command downloadLink() {
+    return get("download.link", Command.SCREEN, 6);
+  }
+
+  public static Command downloadLinkManual() {
+    return get("download.link_manual", Command.SCREEN, 7);
+  }
+
   public static Command cacheListen() {
     return get("cache.listen", Command.OK, 1);
   }

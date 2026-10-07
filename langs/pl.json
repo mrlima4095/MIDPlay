@@ -97,6 +97,16 @@
     "delete": "Usuń",
     "delete_all": "Usuń wszystkie",
     "refresh": "Odśwież",
+    "link": "Powiąż plik lokalny",
+    "link_url": "URL utworu",
+    "link_thumb": "URL miniatury",
+    "link_name": "Nazwa utworu",
+    "link_artist": "Wykonawca",
+    "link_no_files": "Nie znaleziono plików lokalnych w folderze pobierania",
+    "link_error_url": "Podaj URL utworu",
+    "link_error": "Nie udało się powiązać tego pliku",
+    "link_status": "Plik powiązano pomyślnie",
+    "link_manual": "Wpisz URL ręcznie",
     "status": {
       "deleted": "Usunięto pobrany plik",
       "cleared": "Usunięto wszystkie pobrane pliki"

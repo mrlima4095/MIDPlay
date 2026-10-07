@@ -97,6 +97,16 @@
     "delete": "Sil",
     "delete_all": "Tümünü Sil",
     "refresh": "Yenile",
+    "link": "Yerel Dosyayı Bağla",
+    "link_url": "Şarkı URL",
+    "link_thumb": "Küçük resim URL",
+    "link_name": "Şarkı Adı",
+    "link_artist": "Sanatçı",
+    "link_no_files": "İndirme klasöründe yerel dosya bulunamadı",
+    "link_error_url": "Lütfen şarkı URL girin",
+    "link_error": "Bu dosya bağlanamadı",
+    "link_status": "Dosya başarıyla bağlandı",
+    "link_manual": "URL'yi elle gir",
     "status": {
       "deleted": "İndirme silindi",
       "cleared": "Tüm indirmeler silindi"
@@ -236,7 +246,7 @@
       "set": "Uyku zamanlayıcısı etkinleştirildi"
     }
   },
-    "eq": {
+  "eq": {
     "enable": "Aktif",
     "presets": "Öntanımlı ayarlar",
     "manual": "Manuel",

@@ -97,6 +97,16 @@
     "delete": "Xóa",
     "delete_all": "Xóa tất cả",
     "refresh": "Làm mới",
+    "link": "Liên kết tệp cục bộ",
+    "link_url": "URL bài hát",
+    "link_thumb": "URL hình thu nhỏ",
+    "link_name": "Tên bài hát",
+    "link_artist": "Nghệ sĩ",
+    "link_no_files": "Không tìm thấy tệp cục bộ trong thư mục tải xuống",
+    "link_error_url": "Vui lòng nhập URL bài hát",
+    "link_error": "Không thể liên kết tệp này",
+    "link_status": "Liên kết tệp thành công",
+    "link_manual": "Nhập URL thủ công",
     "status": {
       "deleted": "Đã xóa bản tải xuống",
       "cleared": "Đã xóa toàn bộ bản tải xuống"

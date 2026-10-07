@@ -18,6 +18,7 @@ public class Navigator {
   private final Stack navStack;
   private final MIDlet midlet;
   private Displayable beforeAlert;
+  private Displayable rootView;
 
   public Navigator(MIDlet midlet) {
     this.midlet = midlet;
@@ -54,6 +55,10 @@ public class Navigator {
                   } else if (current != null) {
                     navStack.push(current);
                   }
+                  if (rootView == null) {
+                    rootView =
+                        (current != null && !(current instanceof Alert)) ? current : newView;
+                  }
                   display.setCurrent(newView);
                 }
               }
@@ -66,7 +71,12 @@ public class Navigator {
             new Runnable() {
               public void run() {
                 if (navStack.isEmpty()) {
-                  midlet.notifyDestroyed();
+                  MIDPlay app = MIDPlay.getInstance();
+                  if (app != null) {
+                    app.exitApp();
+                  } else {
+                    midlet.notifyDestroyed();
+                  }
                   return;
                 }
                 Displayable previous = (Displayable) navStack.pop();
@@ -180,6 +190,8 @@ public class Navigator {
                 } else if (!navStack.isEmpty()) {
                   Displayable previous = (Displayable) navStack.pop();
                   display.setCurrent(previous);
+                } else if (rootView != null) {
+                  display.setCurrent(rootView);
                 } else {
                   midlet.notifyDestroyed();
                 }

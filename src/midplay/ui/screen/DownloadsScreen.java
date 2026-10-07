@@ -12,12 +12,12 @@ import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.util.Lang;
+import midplay.util.Utils;
 
 public final class DownloadsScreen extends BaseList {
-  private static final String DOWNLOADED_MARKER = "[v] ";
-
   private final DownloadManager downloadManager = DownloadManager.getInstance();
-  private Track[] tracks;
+  private Track[] tracks = new Track[0];
+  private int loadKey = 0;
 
   public DownloadsScreen(Navigator navigator) {
     super(Lang.tr("menu.downloads"), navigator);
@@ -25,12 +25,52 @@ public final class DownloadsScreen extends BaseList {
     addCommand(Commands.downloadDelete());
     addCommand(Commands.downloadDeleteAll());
     addCommand(Commands.downloadRefresh());
+    addCommand(Commands.downloadLink());
     populateItems();
   }
 
   protected void populateItems() {
-    tracks = downloadManager.getDownloadedTracks();
-    populateTrackItems();
+    startLoad(getSelectedIndex());
+  }
+
+  protected void refresh() {
+    startLoad(getSelectedIndex());
+  }
+
+  private void startLoad(final int restoreIndex) {
+    final int key = ++loadKey;
+    this.deleteAll();
+    this.append(Lang.tr("status.loading"), null);
+    new Thread(
+        new Runnable() {
+          public void run() {
+            Track[] data = new Track[0];
+            boolean failed = false;
+            try {
+              data = downloadManager.refreshDownloadedTracks();
+            } catch (Throwable t) {
+              failed = true;
+            }
+            final Track[] result = data;
+            final boolean failure = failed;
+            navigator.callSerially(
+                new Runnable() {
+                  public void run() {
+                    if (key != loadKey) {
+                      return;
+                    }
+                    tracks = result;
+                    DownloadsScreen.this.deleteAll();
+                    populateTrackItems();
+                    if (failure) {
+                      DownloadsScreen.this.append(Lang.tr("status.error"), null);
+                    }
+                    Utils.clampAndSelect(DownloadsScreen.this, restoreIndex);
+                  }
+                });
+          }
+        })
+        .start();
   }
 
   private String buildTrackLabel(Track track) {
@@ -49,14 +89,14 @@ public final class DownloadsScreen extends BaseList {
     if (!isValidSelection(index, tracks.length)) {
       return;
     }
-    playSelected(index);
+    playFrom(index);
   }
 
   protected void handleCommand(Command c, Displayable d) {
     int selected = getSelectedIndex();
     if (c == Commands.downloadPlay()) {
       if (isValidSelection(selected, tracks.length)) {
-        playSelected(selected);
+        playFrom(selected);
       }
     } else if (c == Commands.downloadDelete()) {
       if (isValidSelection(selected, tracks.length)) {
@@ -65,16 +105,17 @@ public final class DownloadsScreen extends BaseList {
     } else if (c == Commands.downloadDeleteAll()) {
       confirmClearAll();
     } else if (c == Commands.downloadRefresh()) {
-      refreshFromDisk();
+      refresh();
+    } else if (c == Commands.downloadLink()) {
+      navigator.forward(new LocalFileLinkScreen(navigator));
     }
   }
 
-  private void playSelected(int index) {
-    Track track = tracks[index];
-    Tracks single = new Tracks();
-    single.setTracks(new Track[] {track});
+  private void playFrom(int index) {
+    Tracks all = new Tracks();
+    all.setTracks(tracks);
     PlayerNavHelper.playTrackFromList(
-        Lang.tr("menu.downloads"), single, 0, 0L, navigator);
+        Lang.tr("menu.downloads"), all, index, 0L, navigator);
   }
 
   private void deleteSelected(int index) {
@@ -103,20 +144,24 @@ public final class DownloadsScreen extends BaseList {
         AlertType.WARNING);
   }
 
-  private void refreshFromDisk() {
-    tracks = downloadManager.refreshDownloadedTracks();
-    this.deleteAll();
-    populateTrackItems();
-  }
-
   private void populateTrackItems() {
-    if (tracks == null || tracks.length == 0) {
+    if (tracks == null) {
+      tracks = new Track[0];
+    }
+    if (tracks.length == 0) {
+      this.append(Lang.tr("status.no_data"), null);
       return;
     }
+    String[] artUrls = new String[tracks.length];
     for (int i = 0; i < tracks.length; i++) {
-      String label = DOWNLOADED_MARKER + buildTrackLabel(tracks[i]);
-      this.append(label, Configuration.musicIcon);
+      this.append(buildTrackLabel(tracks[i]), Configuration.musicIcon);
+      artUrls[i] = Utils.withArtType(tracks[i].getImageUrl(), 1);
     }
+    loadArt(artUrls);
+  }
+
+  protected int badgeAt(int row) {
+    return BADGE_MUSIC;
   }
 
   protected void showNotify() {
