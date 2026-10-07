@@ -36,6 +36,7 @@ import midplay.ui.screen.RecentListScreen;
 import midplay.ui.screen.SearchScreen;
 import midplay.ui.screen.SettingsScreen;
 import midplay.ui.screen.DownloadsScreen;
+import midplay.ui.screen.FileBrowserScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 
@@ -119,6 +120,13 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
         new Runnable() {
           public void run() {
             goToDownloadsScreen();
+          }
+        });
+    menuManager.registerAction(
+        Configuration.MENU_FILES,
+        new Runnable() {
+          public void run() {
+            goToFileBrowserScreen();
           }
         });
     menuManager.registerAction(
@@ -375,6 +383,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
 
   private void goToDownloadsScreen() {
     navigator.forward(new DownloadsScreen(navigator));
+  }
+
+  private void goToFileBrowserScreen() {
+    navigator.forward(new FileBrowserScreen(navigator));
   }
 
   private void showExitConfirmation() {

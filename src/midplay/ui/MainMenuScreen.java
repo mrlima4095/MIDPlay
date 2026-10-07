@@ -47,6 +47,7 @@ public final class MainMenuScreen extends List implements CommandListener {
     iconMap.put(Configuration.MENU_DISCOVER_PLAYLISTS, Configuration.playlistIcon);
     iconMap.put(Configuration.MENU_RECENT, Configuration.recentIcon);
     iconMap.put(Configuration.MENU_DOWNLOADS, Configuration.musicIcon);
+    iconMap.put(Configuration.MENU_FILES, Configuration.folderIcon);
     iconMap.put(Configuration.MENU_SETTINGS, Configuration.settingsIcon);
     iconMap.put(Configuration.MENU_ABOUT, Configuration.infoIcon);
     iconMap.put(Configuration.MENU_EQUALIZER, Configuration.equalizerIcon);

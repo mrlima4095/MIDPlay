@@ -26,6 +26,11 @@
       "removed": "Removed from favorites"
     }
   },
+  "files": {
+    "empty": "No files in this folder",
+    "not_audio": "Not an audio file",
+    "root": "Go to root"
+  },
   "language": {
     "en": "English",
     "tr": "Türkçe",
@@ -45,6 +50,7 @@
     "now_playing": "Now Playing",
     "recent": "Recent",
     "downloads": "Downloads",
+    "files": "File Explorer",
     "reorder": "Reorder Menu",
     "search": "Search",
     "settings": "Settings",
@@ -67,7 +73,12 @@
       "stopped": "Stopped",
       "stopping": "Stopping...",
       "finished": "Finished",
-      "ready": "Ready"
+      "ready": "Ready",
+      "repeat_all": "Playlist repeat enabled",
+      "repeat_one": "Track repeat enabled",
+      "repeat_off": "Repeat disabled",
+      "shuffle_on": "Playlist shuffle enabled",
+      "shuffle_off": "Playlist shuffle disabled"
     },
     "stop": "Stop",
     "volume": "Volume"

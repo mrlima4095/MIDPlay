@@ -109,6 +109,10 @@ public class Commands {
     return get("queue.add_all_to_queue", Command.SCREEN, 7);
   }
 
+  public static Command filesRoot() {
+    return get("files.root", Command.SCREEN, 8);
+  }
+
   public static Command queueSort() {
     return get("queue.sort", Command.SCREEN, 5);
   }

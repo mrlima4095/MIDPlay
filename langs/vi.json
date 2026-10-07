@@ -26,6 +26,11 @@
       "removed": "Đã xóa khỏi yêu thích"
     }
   },
+  "files": {
+    "empty": "Không có tệp nào trong thư mục này",
+    "not_audio": "Không phải tệp âm thanh",
+    "root": "Đi đến thư mục gốc"
+  },
   "language": {
     "en": "English",
     "tr": "Türkçe",
@@ -45,6 +50,7 @@
     "now_playing": "Đang phát",
     "recent": "Gần đây",
     "downloads": "Đã tải xuống",
+    "files": "Trình duyệt tệp",
     "reorder": "Sắp xếp menu",
     "search": "Tìm kiếm",
     "settings": "Cài đặt",
@@ -67,7 +73,12 @@
       "stopped": "Đã dừng",
       "stopping": "Đang dừng...",
       "finished": "Đã phát xong",
-      "ready": "Sẵn sàng"
+      "ready": "Sẵn sàng",
+      "repeat_all": "Đã bật lặp lại danh sách phát",
+      "repeat_one": "Đã bật lặp lại bài hát",
+      "repeat_off": "Đã tắt lặp lại",
+      "shuffle_on": "Đã bật phát ngẫu nhiên danh sách phát",
+      "shuffle_off": "Đã tắt phát ngẫu nhiên danh sách phát"
     },
     "stop": "Dừng",
     "volume": "Âm lượng"

@@ -32,7 +32,7 @@ VERSION="26.10"
 # ProGuard (and only ProGuard) runs on any modern JDK.
 RUN_JAVA="${RUN_JAVA:-$(command -v java)}"
 PROGUARD_JAR="lib/proguard-ant.jar"
-BOOTCP="lib/cldc_1.1.jar:lib/midp_2.0.jar:lib/jsr234_1.0.jar:lib/jsr75.jar"   # J2ME core APIs + JSR-234 (AMMS) + JSR-75 (FileConnection)
+BOOTCP="lib/cldc_1.1.jar:lib/midp_2.0.jar:lib/jsr234_1.0.jar:lib/jsr75_1.0.jar"   # J2ME core APIs + JSR-234 (AMMS) + JSR-75 (FileConnection)
 
 # ---------------------------------------------------------------------------
 # Locate JDK 8.
@@ -85,8 +85,8 @@ if [ ! -f "$PROGUARD_JAR" ]; then
   echo "✗ ProGuard not found at $PROGUARD_JAR" >&2; exit 1
 fi
 
-if [ ! -f "lib/jsr75.jar" ]; then
-  echo "✗ JSR-75 API jar (FileConnection) not found at lib/jsr75.jar" >&2; exit 1
+if [ ! -f "lib/jsr75_1.0.jar" ]; then
+  echo "✗ JSR-75 API jar not found at lib/jsr75_1.0.jar" >&2; exit 1
 fi
 
 # ---------------------------------------------------------------------------

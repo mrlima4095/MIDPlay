@@ -50,10 +50,14 @@ public class Navigator {
                   if (current instanceof Alert) {
                     if (beforeAlert != null) {
                       navStack.push(beforeAlert);
+                    } else if (rootView != null) {
+                      navStack.push(rootView);
                     }
                     beforeAlert = null;
                   } else if (current != null) {
                     navStack.push(current);
+                  } else if (rootView != null) {
+                    navStack.push(rootView);
                   }
                   if (rootView == null) {
                     rootView =
@@ -71,6 +75,16 @@ public class Navigator {
             new Runnable() {
               public void run() {
                 if (navStack.isEmpty()) {
+                  Display display = Display.getDisplay(midlet);
+                  Displayable current = display.getCurrent();
+                  if (rootView != null
+                      && current != null
+                      && current != rootView
+                      && !(current instanceof Alert)) {
+                    display.setCurrent(rootView);
+                    beforeAlert = null;
+                    return;
+                  }
                   MIDPlay app = MIDPlay.getInstance();
                   if (app != null) {
                     app.exitApp();
@@ -96,6 +110,7 @@ public class Navigator {
   public void clear() {
     navStack.removeAllElements();
     beforeAlert = null;
+    rootView = null;
   }
 
   public void callSerially(Runnable r) {

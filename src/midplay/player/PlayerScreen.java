@@ -664,11 +664,25 @@ public final class PlayerScreen extends Canvas
   private void toggleRepeat() {
     getPlayerGUI().toggleRepeat();
     updateDisplay();
+    int repeatMode = getPlayerGUI().getRepeatMode();
+    String statusKey = "player.status.repeat_off";
+    if (repeatMode == Configuration.PLAYER_REPEAT_ALL) {
+      statusKey = "player.status.repeat_all";
+    } else if (repeatMode == Configuration.PLAYER_REPEAT_ONE) {
+      statusKey = "player.status.repeat_one";
+    }
+    navigator.showAlert(Lang.tr(statusKey), AlertType.CONFIRMATION);
   }
 
   private void toggleShuffle() {
     getPlayerGUI().toggleShuffle();
     updateDisplay();
+    navigator.showAlert(
+        Lang.tr(
+            getPlayerGUI().isShuffleEnabled()
+                ? "player.status.shuffle_on"
+                : "player.status.shuffle_off"),
+        AlertType.CONFIRMATION);
   }
 
   private void stop() {

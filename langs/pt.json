@@ -26,6 +26,11 @@
       "removed": "Removido dos favoritos"
     }
   },
+  "files": {
+    "empty": "Nenhum arquivo nesta pasta",
+    "not_audio": "Não é um arquivo de áudio",
+    "root": "Ir para a raiz"
+  },
   "language": {
     "en": "English",
     "tr": "Türkçe",
@@ -45,6 +50,7 @@
     "now_playing": "Tocando Agora",
     "recent": "Recentes",
     "downloads": "Downloads",
+    "files": "Explorador de Arquivos",
     "reorder": "Reordenar Menu",
     "search": "Pesquisar",
     "settings": "Configurações",
@@ -67,7 +73,12 @@
       "stopped": "Parado",
       "stopping": "Parando...",
       "finished": "Finalizado",
-      "ready": "Pronto"
+      "ready": "Pronto",
+      "repeat_all": "Repetir playlist ativado",
+      "repeat_one": "Repetir faixa ativado",
+      "repeat_off": "Repetir desativado",
+      "shuffle_on": "Embaralhar playlist ativado",
+      "shuffle_off": "Embaralhar playlist desativado"
     },
     "stop": "Parar",
     "volume": "Volume"
