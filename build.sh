@@ -26,6 +26,8 @@ cd "$SCRIPT_DIR"
 
 BUILD_DIR="build/standalone"
 COMPILED_DIR="$BUILD_DIR/compiled"
+MPGRAM_DIR="$BUILD_DIR/mpgram"
+MPGRAM_RES_DIR="$BUILD_DIR/mpgram-res"
 DIST_DIR="dist"
 VERSION="26.10"
 
@@ -113,8 +115,11 @@ EOF
 echo "• Clean"
 rm -rf "$BUILD_DIR"; mkdir -p "$COMPILED_DIR" "$DIST_DIR"
 
+echo "• Prepare embedded MPGram (generic edition)"
+python3 tools/prepare_mpgram.py third_party/mpgram "$MPGRAM_DIR"
+
 echo "• Collect sources"
-find src -name '*.java' > "$BUILD_DIR/sources.txt"
+find src "$MPGRAM_DIR" -name '*.java' > "$BUILD_DIR/sources.txt"
 echo "    $(wc -l < "$BUILD_DIR/sources.txt" | tr -d ' ') files"
 
 echo "• Compile (JDK 8, -source/-target 1.3, CLDC bootclasspath)"
@@ -125,7 +130,7 @@ echo "• Compile (JDK 8, -source/-target 1.3, CLDC bootclasspath)"
 echo "• Package dist/MIDPlay_midlet.jar (classes + res/)"
 manifest_body > "$BUILD_DIR/MANIFEST.MF"
 "$JAR_TOOL" cfm "$DIST_DIR/MIDPlay_midlet.jar" "$BUILD_DIR/MANIFEST.MF" \
-  -C "$COMPILED_DIR" . -C res .
+  -C "$COMPILED_DIR" . -C res . -C "$MPGRAM_RES_DIR" .
 
 echo "• ProGuard (shrink + obfuscate + -microedition preverify) → dist/MIDPlay.jar"
 "$RUN_JAVA" -cp "$PROGUARD_JAR" proguard.ProGuard @midlets.pro

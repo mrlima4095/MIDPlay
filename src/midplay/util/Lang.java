@@ -319,6 +319,9 @@ public class Lang {
   }
 
   public static String tr(String k) {
+    if ("menu.mpgram".equals(k)) {
+      return "MPGram";
+    }
     if (!i) {
       l(c);
       i = true;

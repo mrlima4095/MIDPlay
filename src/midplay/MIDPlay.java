@@ -39,6 +39,7 @@ import midplay.ui.screen.DownloadsScreen;
 import midplay.ui.screen.FileBrowserScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
+import mpgram.MP;
 
 public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
   private static NetworkOperation operation;
@@ -148,6 +149,23 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
         new Runnable() {
           public void run() {
             goToEqualizerScreen();
+          }
+        });
+    menuManager.registerAction(
+        Configuration.MENU_MPGRAM,
+        new Runnable() {
+          public void run() {
+            openMPGram();
+          }
+        });
+  }
+
+  private void openMPGram() {
+    MP.open(
+        this,
+        new Runnable() {
+          public void run() {
+            Display.getDisplay(MIDPlay.this).setCurrent(mainMenu);
           }
         });
   }

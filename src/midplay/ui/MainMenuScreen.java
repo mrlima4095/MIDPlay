@@ -51,6 +51,7 @@ public final class MainMenuScreen extends List implements CommandListener {
     iconMap.put(Configuration.MENU_SETTINGS, Configuration.settingsIcon);
     iconMap.put(Configuration.MENU_ABOUT, Configuration.infoIcon);
     iconMap.put(Configuration.MENU_EQUALIZER, Configuration.equalizerIcon);
+    iconMap.put(Configuration.MENU_MPGRAM, Configuration.mpgramIcon);
   }
 
   public void commandAction(Command c, Displayable d) {

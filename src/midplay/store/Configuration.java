@@ -40,6 +40,7 @@ public class Configuration {
   public static final String MENU_EQUALIZER = "menu.equalizer";
   public static final String MENU_DOWNLOADS = "menu.downloads";
   public static final String MENU_FILES = "menu.files";
+  public static final String MENU_MPGRAM = "menu.mpgram";
 
   public static final String SERVICE_NCT = "NCT";
   public static final String SERVICE_SOUNDCLOUD = "SoundCloud";
@@ -115,6 +116,7 @@ public class Configuration {
   public static Image infoIcon;
   public static Image recentIcon;
   public static Image equalizerIcon;
+  public static Image mpgramIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
 
@@ -148,6 +150,7 @@ public class Configuration {
     infoIcon = region(6, 36, 36);
     recentIcon = region(7, 36, 36);
     equalizerIcon = region(8, 36, 36);
+    mpgramIcon = Utils.resizeImageToFit(Image.createImage("/m.png"), 36, 36);
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
     musicBadgeIcon = Utils.resizeImageToFit(musicIcon, BADGE_SIZE, BADGE_SIZE);

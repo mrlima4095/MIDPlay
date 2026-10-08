@@ -11,6 +11,7 @@ An online music player for J2ME (Java ME) mobile devices — CLDC 1.1 / MIDP 2.0
 - **Playback** — seek, resume position, sleep timer
 - **Library** — favorites, playlists, recent history
 - **Localization** — English, Vietnamese, Turkish, Polish, Hebrew
+- **MPGram** — embedded Telegram client that returns to MIDPlay without stopping playback
 
 ## Requirements
 
@@ -25,10 +26,11 @@ An online music player for J2ME (Java ME) mobile devices — CLDC 1.1 / MIDP 2.0
 ## Build
 
 ```bash
+git submodule update --init --recursive
 ./build.sh
 ```
 
-Requires **JDK 8** (the last toolchain emitting CLDC-compatible bytecode). Output: `dist/MIDPlay.jar` + `dist/MIDPlay.jad`. See `build.sh` for the full pipeline (compile → package → ProGuard → JAD).
+Requires **JDK 8** (the last toolchain emitting CLDC-compatible bytecode) and Python 3 to prepare the embedded generic MPGram sources. Output: `dist/MIDPlay.jar` + `dist/MIDPlay.jad`. See `build.sh` for the full pipeline (compile → package → ProGuard → JAD).
 
 ## Tech Stack
 

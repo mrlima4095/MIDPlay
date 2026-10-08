@@ -98,8 +98,9 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_DOWNLOADS, 5, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_FILES, 6, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_EQUALIZER, 7, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 8, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 9, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_MPGRAM, 8, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 9, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 10, true));
     return defaultConfig;
   }
 
