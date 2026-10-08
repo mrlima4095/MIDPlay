@@ -37,6 +37,7 @@ import midplay.ui.screen.SearchScreen;
 import midplay.ui.screen.SettingsScreen;
 import midplay.ui.screen.DownloadsScreen;
 import midplay.ui.screen.FileBrowserScreen;
+import midplay.ui.screen.OpenUriScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 import mpgram.MP;
@@ -158,6 +159,17 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
             openMPGram();
           }
         });
+    menuManager.registerAction(
+        Configuration.MENU_OPEN_URI,
+        new Runnable() {
+          public void run() {
+            navigator.forward(new OpenUriScreen(navigator));
+          }
+        });
+  }
+
+  public void openExternalUri(String uri) throws ConnectionNotFoundException {
+    platformRequest(uri);
   }
 
   private void openMPGram() {

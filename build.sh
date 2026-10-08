@@ -28,6 +28,8 @@ BUILD_DIR="build/standalone"
 COMPILED_DIR="$BUILD_DIR/compiled"
 MPGRAM_DIR="$BUILD_DIR/mpgram"
 MPGRAM_RES_DIR="$BUILD_DIR/mpgram-res"
+JSR135_STUB_DIR="tools/jsr135-api"
+JSR135_STUB_JAR="$BUILD_DIR/jsr135-api.jar"
 DIST_DIR="dist"
 VERSION="26.10"
 
@@ -117,6 +119,14 @@ rm -rf "$BUILD_DIR"; mkdir -p "$COMPILED_DIR" "$DIST_DIR"
 
 echo "• Prepare embedded MPGram (generic edition)"
 python3 tools/prepare_mpgram.py third_party/mpgram "$MPGRAM_DIR"
+
+echo "• Prepare JSR-135 recording API"
+mkdir -p "$BUILD_DIR/jsr135-api"
+"$JAVAC" -source 1.3 -target 1.3 -g:none -bootclasspath "$BOOTCP" \
+  -d "$BUILD_DIR/jsr135-api" \
+  "$JSR135_STUB_DIR/javax/microedition/media/control/RecordControl.java"
+"$JAR_TOOL" cf "$JSR135_STUB_JAR" -C "$BUILD_DIR/jsr135-api" .
+BOOTCP="$BOOTCP:$JSR135_STUB_JAR"
 
 echo "• Collect sources"
 find src "$MPGRAM_DIR" -name '*.java' > "$BUILD_DIR/sources.txt"

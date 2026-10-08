@@ -21,3 +21,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+MPGram compression support
+Copyright (C) 1999-2004 Free Software Foundation, Inc.
+
+The embedded GNU Classpath zip sources are GPLv2-or-later with the linking
+exception included in their source headers. Their notices are preserved in the
+compiled source distribution at third_party/mpgram/src/zip.
+
+JSR-135 RecordControl API stub
+Copyright 2019 Nikita Shakarun
+Source: https://github.com/nikita36078/J2ME-Loader
+Licensed under the Apache License, Version 2.0.

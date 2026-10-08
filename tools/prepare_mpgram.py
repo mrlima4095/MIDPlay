@@ -8,16 +8,7 @@ from pathlib import Path
 
 
 SYMBOLS = {
-    "MINI",
-    "NO_AVATARS",
-    "NO_CHAT_CANVAS",
-    "NO_EMOJI",
-    "NO_FILE",
-    "NO_LANGS",
     "NO_NOKIAUI",
-    "NO_NOTIFY",
-    "NO_RECORD",
-    "NO_ZIP",
 }
 
 
@@ -61,15 +52,22 @@ def preprocess(source):
     return "".join(output)
 
 
-def language_constants(mpgram, destination, resources):
-    english = mpgram / "langs" / "en.jsonc"
+def load_jsonc(path):
     lines = []
-    for line in english.read_text(encoding="utf-8").splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if stripped.startswith("//"):
             continue
         lines.append(line.split(" // ", 1)[0])
-    messages = json.loads("\n".join(lines))
+    return json.loads("\n".join(lines))
+
+
+def escape_locale(value):
+    return str(value).replace("\\", "\\\\").replace("\n", "\\n")
+
+
+def language_constants(mpgram, destination, resources):
+    messages = load_jsonc(mpgram / "langs" / "en.jsonc")
     constants = ["package mpgram;", "", "public interface LangConstants {"]
     for index, key in enumerate(messages, 1):
         constants.append("  int L%s = %d;" % (key, index))
@@ -79,15 +77,28 @@ def language_constants(mpgram, destination, resources):
     (destination / "LangConstants.java").write_text("\n".join(constants) + "\n", encoding="utf-8")
     locale_dir = resources / "l"
     locale_dir.mkdir(parents=True)
-    locale_dir.joinpath("en").write_text(
-        "".join(str(value).replace("\\", "\\\\").replace("\n", "\\n") + "\n" for value in messages.values()),
-        encoding="utf-8",
-    )
+    for locale_file in (mpgram / "langs").glob("*.jsonc"):
+        locale = load_jsonc(locale_file)
+        output = []
+        base = locale.get("LocaleBase")
+        if base:
+            output.append("/l/" + base)
+            for index, key in enumerate(messages, 1):
+                if key in locale:
+                    output.append(str(index) + ":" + escape_locale(locale[key]))
+        else:
+            for key, value in messages.items():
+                output.append(escape_locale(locale.get(key, value)))
+        locale_dir.joinpath(locale_file.stem).write_text("\n".join(output) + "\n", encoding="utf-8")
 
 
 def adapt_midlet(source):
     source = source.replace("public class MP extends MIDlet", "public class MP")
     source = source.replace("static MP midlet;", "static MP midlet;\n\tprivate static MIDlet host;\n\tprivate static Runnable exitHandler;")
+    source = source.replace(
+        "static boolean paused;",
+        "static boolean paused;\n\tprivate static boolean authenticationCancelled;\n\tprivate static Alert authorizingAlert;",
+    )
     source = source.replace(
         "\t// region MIDlet\n",
         "\tpublic static void open(MIDlet app, Runnable onExit) {\n"
@@ -109,6 +120,40 @@ def adapt_midlet(source):
         "\t\t\t\t|| checkClass(\"javay.microedition.lcdui.Canvas\"))\n\t\t\tthrow new RuntimeException();\n\n",
         "",
     )
+    source = source.replace(
+        "\t\tcase RUN_VALIDATE_AUTH: {\n\t\t\tString s = instanceUrl;",
+        "\t\tcase RUN_VALIDATE_AUTH: {\n\t\t\tauthenticationCancelled = false;\n\t\t\tString s = instanceUrl;",
+    )
+    source = source.replace(
+        "\t\t\tAlert alert = loadingAlert(L[LAuthorizing]);\n\t\t\tif (param == null) {\n\t\t\t\talert.addCommand(exitCmd);",
+        "\t\t\tAlert alert = loadingAlert(L[LAuthorizing]);\n\t\t\tif (param == null) {\n"
+        "\t\t\t\tauthorizingAlert = alert;\n\t\t\t\talert.addCommand(exitCmd);\n"
+        "\t\t\t\talert.addCommand(logoutCmd);",
+    )
+    source = source.replace(
+        "\t\t\t\tselfId = ((JSONObject) api(\"me&status=1\")).getString(\"id\");",
+        "\t\t\t\tselfId = ((JSONObject) api(\"me&status=1\")).getString(\"id\");\n"
+        "\t\t\t\tif (authenticationCancelled) break;",
+    )
+    source = source.replace(
+        "\t\t\t} catch (APIException e) {\n\t\t\t\tif (e.code == 401) {",
+        "\t\t\t} catch (APIException e) {\n\t\t\t\tif (authenticationCancelled) break;\n\t\t\t\tif (e.code == 401) {",
+    )
+    source = source.replace(
+        "\t\t\t} catch (Exception e) {\n\t\t\t\talert = errorAlert(e);\n\t\t\t}",
+        "\t\t\t} catch (Exception e) {\n\t\t\t\tif (authenticationCancelled) break;\n\t\t\t\talert = errorAlert(e);\n\t\t\t}",
+        1,
+    )
+    source = source.replace(
+        "\tpublic void commandAction(Command c, Displayable d) {",
+        "\tpublic void commandAction(Command c, Displayable d) {\n"
+        "\t\tif (c == logoutCmd && d == authorizingAlert) {\n"
+        "\t\t\tauthenticationCancelled = true;\n"
+        "\t\t\tuserState = 0;\n\t\t\tuser = phone = selfId = null;\n"
+        "\t\t\twriteAuth();\n\t\t\tcurrent = mainDisplayable = authForm;\n"
+        "\t\t\tdestroyApp(true);\n\t\t\treturn;\n\t\t}\n",
+        1,
+    )
     return source
 
 
@@ -125,11 +170,14 @@ def main():
     shutil.rmtree(resources, ignore_errors=True)
     destination.mkdir(parents=True)
     shutil.copytree(mpgram / "res", resources)
-    for source_file in source_dir.glob("*.java"):
+    for source_file in source_dir.rglob("*.java"):
         prepared = preprocess(source_file.read_text(encoding="utf-8"))
         if source_file.name == "MP.java":
             prepared = adapt_midlet(prepared)
-        (destination / source_file.name).write_text("package mpgram;\n\n" + prepared, encoding="utf-8")
+        target = destination / source_file.relative_to(source_dir)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        package = "" if source_file.parent.name == "zip" else "package mpgram;\n\n"
+        target.write_text(package + prepared, encoding="utf-8")
     language_constants(mpgram, destination, resources)
 
 

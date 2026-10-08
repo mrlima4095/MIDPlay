@@ -319,8 +319,9 @@ public class Lang {
   }
 
   public static String tr(String k) {
-    if ("menu.mpgram".equals(k)) {
-      return "MPGram";
+    String extra = extra(k);
+    if (extra != null) {
+      return extra;
     }
     if (!i) {
       l(c);
@@ -328,6 +329,32 @@ public class Lang {
     }
     String v = (String) d.get(k);
     return v != null ? v : k;
+  }
+
+  private static String extra(String key) {
+    if ("menu.mpgram".equals(key)) return "MPGram";
+    boolean pt = "pt".equals(c);
+    boolean tr = "tr".equals(c);
+    boolean vi = "vi".equals(c);
+    boolean pl = "pl".equals(c);
+    boolean he = "he".equals(c);
+    if ("menu.open_uri".equals(key) || "open_uri.title".equals(key)) {
+      return pt ? "Abrir..." : tr ? "Aç..." : vi ? "Mở..." : pl ? "Otwórz..." : he ? "פתח..." : "Open...";
+    }
+    if ("open_uri.hint".equals(key)) {
+      return pt ? "Use tel:, sms:, http:, https:, file: ou outra URI."
+          : tr ? "tel:, sms:, http:, https:, file: veya başka bir URI kullanın."
+          : vi ? "Dùng tel:, sms:, http:, https:, file: hoặc URI khác."
+          : pl ? "Użyj tel:, sms:, http:, https:, file: lub innego URI."
+          : he ? "השתמש ב-tel:, sms:, http:, https:, file: או URI אחר."
+          : "Use tel:, sms:, http:, https:, file: or another URI.";
+    }
+    if ("open_uri.field".equals(key)) return "URI / URL";
+    if ("open_uri.history".equals(key)) return pt ? "Histórico" : tr ? "Geçmiş" : vi ? "Lịch sử" : pl ? "Historia" : he ? "היסטוריה" : "History";
+    if ("open_uri.use".equals(key)) return pt ? "Usar" : tr ? "Kullan" : vi ? "Dùng" : pl ? "Użyj" : he ? "השתמש" : "Use";
+    if ("open_uri.clear".equals(key)) return pt ? "Limpar histórico" : tr ? "Geçmişi temizle" : vi ? "Xóa lịch sử" : pl ? "Wyczyść historię" : he ? "נקה היסטוריה" : "Clear history";
+    if ("open_uri.empty".equals(key)) return pt ? "Informe uma URI." : tr ? "Bir URI girin." : vi ? "Nhập URI." : pl ? "Wprowadź URI." : he ? "הזן URI." : "Enter a URI.";
+    return null;
   }
 
   public static String tr(String k, String a) {

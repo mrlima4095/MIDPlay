@@ -41,6 +41,7 @@ public class Configuration {
   public static final String MENU_DOWNLOADS = "menu.downloads";
   public static final String MENU_FILES = "menu.files";
   public static final String MENU_MPGRAM = "menu.mpgram";
+  public static final String MENU_OPEN_URI = "menu.open_uri";
 
   public static final String SERVICE_NCT = "NCT";
   public static final String SERVICE_SOUNDCLOUD = "SoundCloud";
