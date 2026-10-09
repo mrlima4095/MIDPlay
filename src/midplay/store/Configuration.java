@@ -1,6 +1,7 @@
 package midplay.store;
 
 import java.io.IOException;
+import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import midplay.ui.Theme;
 import midplay.util.Utils;
@@ -21,6 +22,7 @@ public class Configuration {
   public static final String STORAGE_DOWNLOADS_BACKUP = "storage.downloads.bak";
   public static final String STORAGE_CACHE = "storage.cache";
   public static final String STORAGE_CACHE_AUDIO = "storage.cache_audio";
+  public static final String STORAGE_NOTES = "storage.notes";
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
   public static final String DEFAULT_CACHE_PATH = "file:///SDCard/MIDPlay/Cache/";
@@ -42,6 +44,8 @@ public class Configuration {
   public static final String MENU_FILES = "menu.files";
   public static final String MENU_MPGRAM = "menu.mpgram";
   public static final String MENU_OPEN_URI = "menu.open_uri";
+  public static final String MENU_NOTES = "menu.notes";
+  public static final String MENU_NOW_PLAYING = "menu.now_playing";
 
   public static final String SERVICE_NCT = "NCT";
   public static final String SERVICE_SOUNDCLOUD = "SoundCloud";
@@ -80,6 +84,8 @@ public class Configuration {
 
   public static final int SAVE_LAST_SESSION_OFF = 0;
   public static final int SAVE_LAST_SESSION_ON = 1;
+  public static final int MPGRAM_AUTO_LOGIN_OFF = 0;
+  public static final int MPGRAM_AUTO_LOGIN_ON = 1;
 
   public static final String PLAYER_METHOD_PASS_INPUTSTREAM = "pass_inputstream";
   public static final String PLAYER_METHOD_PASS_URL = "pass_url";
@@ -118,6 +124,8 @@ public class Configuration {
   public static Image recentIcon;
   public static Image equalizerIcon;
   public static Image mpgramIcon;
+  public static Image notesIcon;
+  public static Image fileExplorerIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
 
@@ -152,11 +160,41 @@ public class Configuration {
     recentIcon = region(7, 36, 36);
     equalizerIcon = region(8, 36, 36);
     mpgramIcon = Utils.resizeImageToFit(Image.createImage("/m.png"), 36, 36);
+    notesIcon = createNotesIcon();
+    fileExplorerIcon = createFileExplorerIcon();
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
     musicBadgeIcon = Utils.resizeImageToFit(musicIcon, BADGE_SIZE, BADGE_SIZE);
 
     loadPlayerIcons();
+  }
+
+  private static Image createNotesIcon() {
+    Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
+    graphics.setColor(0x3F51B5);
+    graphics.fillRoundRect(6, 3, 24, 30, 3, 3);
+    graphics.setColor(0xFFFFFF);
+    graphics.fillRect(9, 6, 18, 24);
+    graphics.setColor(0x3F51B5);
+    graphics.drawLine(12, 12, 24, 12);
+    graphics.drawLine(12, 17, 24, 17);
+    graphics.drawLine(12, 22, 21, 22);
+    return image;
+  }
+
+  private static Image createFileExplorerIcon() {
+    Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
+    graphics.setColor(0xF9A825);
+    graphics.fillRoundRect(4, 10, 28, 20, 3, 3);
+    graphics.fillRoundRect(6, 6, 13, 8, 2, 2);
+    graphics.setColor(0xFFF59D);
+    graphics.fillRect(7, 14, 22, 13);
+    graphics.setColor(0x546E7A);
+    graphics.drawLine(10, 18, 25, 18);
+    graphics.drawLine(10, 22, 22, 22);
+    return image;
   }
 
   public static void loadPlayerIcons() {

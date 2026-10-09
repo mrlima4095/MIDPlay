@@ -26,6 +26,7 @@ public class SettingsManager {
   private static String currentThemeMode;
   private static int currentBlackberryWifi;
   private static int currentSaveLastSession;
+  private static int currentMpgramAutoLogin;
   private static int currentThumbnails;
   private static boolean currentEqEnabled;
   private static int currentEqPreset; // -1 = manual/custom levels
@@ -124,6 +125,8 @@ public class SettingsManager {
     currentBlackberryWifi = settings.getInt("blackberryWifi", Configuration.BLACKBERRY_WIFI_ON);
     currentSaveLastSession =
         settings.getInt("saveLastSession", Configuration.SAVE_LAST_SESSION_OFF);
+    currentMpgramAutoLogin =
+        settings.getInt("mpgramAutoLogin", Configuration.MPGRAM_AUTO_LOGIN_OFF);
     currentThumbnails = settings.getInt("thumbnails", Configuration.THUMBNAILS_ON);
     currentEqEnabled = settings.getBoolean("eqEnabled", false);
     currentEqPreset = settings.getInt("eqPreset", -1);
@@ -156,6 +159,7 @@ public class SettingsManager {
     settings.put("themeMode", Configuration.THEME_LIGHT);
     settings.put("blackberryWifi", Configuration.BLACKBERRY_WIFI_ON);
     settings.put("saveLastSession", Configuration.SAVE_LAST_SESSION_OFF);
+    settings.put("mpgramAutoLogin", Configuration.MPGRAM_AUTO_LOGIN_OFF);
     settings.put("thumbnails", Configuration.THUMBNAILS_ON);
     settings.put("eqEnabled", false);
     settings.put("eqPreset", -1);
@@ -236,6 +240,11 @@ public class SettingsManager {
   public void saveSaveLastSession(int saveLastSession) throws RecordStoreException {
     saveSetting("saveLastSession", saveLastSession);
     currentSaveLastSession = saveLastSession;
+  }
+
+  public void saveMpgramAutoLogin(int mpgramAutoLogin) throws RecordStoreException {
+    saveSetting("mpgramAutoLogin", mpgramAutoLogin);
+    currentMpgramAutoLogin = mpgramAutoLogin;
   }
 
   public void savePlayerMethod(String playerMethod) throws RecordStoreException {
@@ -370,6 +379,10 @@ public class SettingsManager {
 
   public int getCurrentSaveLastSession() {
     return currentSaveLastSession;
+  }
+
+  public int getCurrentMpgramAutoLogin() {
+    return currentMpgramAutoLogin;
   }
 
   public String getCurrentPlayerMethod() {

@@ -7,8 +7,11 @@ import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.TextField;
 import midplay.model.Track;
 import midplay.model.Tracks;
 import midplay.store.Configuration;
@@ -21,6 +24,14 @@ import midplay.util.Lang;
 import midplay.util.Utils;
 
 public final class FileBrowserScreen extends BaseList {
+  public interface FileSelectionListener {
+    void onFileSelected(String path);
+  }
+
+  public interface DirectorySelectionListener {
+    void onDirectorySelected(String path);
+  }
+
   private static final String ROOT_PATH = "file:///";
   private static final int KIND_UP = 0;
   private static final int KIND_DIR = 1;
@@ -45,19 +56,51 @@ public final class FileBrowserScreen extends BaseList {
   private int[] rowKinds = new int[0];
   private Vector audioPaths = new Vector();
   private int loadKey = 0;
+  private final FileSelectionListener fileSelectionListener;
+  private final DirectorySelectionListener directorySelectionListener;
+  private final Command selectDirectoryCommand;
+  private final Command renameCommand;
+  private final Command deleteCommand;
 
   public FileBrowserScreen(Navigator navigator) {
-    this(navigator, SettingsManager.getInstance().getCurrentDownloadPath());
+    this(navigator, SettingsManager.getInstance().getCurrentDownloadPath(), null, null);
   }
 
   public FileBrowserScreen(Navigator navigator, String path) {
+    this(navigator, path, null, null);
+  }
+
+  public FileBrowserScreen(Navigator navigator, FileSelectionListener listener) {
+    this(navigator, SettingsManager.getInstance().getCurrentDownloadPath(), listener, null);
+  }
+
+  public FileBrowserScreen(Navigator navigator, DirectorySelectionListener listener) {
+    this(navigator, SettingsManager.getInstance().getCurrentDownloadPath(), null, listener);
+  }
+
+  private FileBrowserScreen(
+      Navigator navigator,
+      String path,
+      FileSelectionListener listener,
+      DirectorySelectionListener directoryListener) {
     super(Lang.tr("menu.files"), navigator);
+    fileSelectionListener = listener;
+    directorySelectionListener = directoryListener;
+    selectDirectoryCommand =
+        directoryListener == null ? null : new Command(Lang.tr("note.save_here"), Command.OK, 0);
+    renameCommand = new Command(Lang.tr("files.rename"), Command.SCREEN, 6);
+    deleteCommand = new Command(Lang.tr("files.delete"), Command.SCREEN, 7);
     this.currentPath = normalizePath(path);
     this.currentTitle = Lang.tr("menu.files");
     addCommand(Commands.filesRoot());
     addCommand(Commands.addToQueue());
     addCommand(Commands.addAllToQueue());
     addCommand(Commands.playerAddToPlaylist());
+    addCommand(renameCommand);
+    addCommand(deleteCommand);
+    if (selectDirectoryCommand != null) {
+      addCommand(selectDirectoryCommand);
+    }
     populateItems();
   }
 
@@ -196,11 +239,25 @@ public final class FileBrowserScreen extends BaseList {
       playFrom(index);
       return;
     }
+    if (fileSelectionListener != null && isNoteFile(rowPaths[index])) {
+      fileSelectionListener.onFileSelected(rowPaths[index]);
+      return;
+    }
+    if (isImageFile(rowPaths[index])) {
+      navigator.forward(new ImagePreviewCanvas(fileNameFor(rowPaths[index]), rowPaths[index], navigator));
+      return;
+    }
+    if (isTextFile(rowPaths[index])) {
+      navigator.forward(new FilePreviewScreen(fileNameFor(rowPaths[index]), rowPaths[index], navigator));
+      return;
+    }
     navigator.showAlert(Lang.tr("files.not_audio"), AlertType.INFO);
   }
 
   protected void handleCommand(Command c, Displayable d) {
-    if (c == Commands.filesRoot()) {
+    if (c == selectDirectoryCommand) {
+      directorySelectionListener.onDirectorySelected(currentPath);
+    } else if (c == Commands.filesRoot()) {
       navigateTo(ROOT_PATH);
     } else if (c == Commands.addToQueue()) {
       queueSelected();
@@ -208,12 +265,92 @@ public final class FileBrowserScreen extends BaseList {
       queueAll();
     } else if (c == Commands.playerAddToPlaylist()) {
       addSelectedToPlaylist();
+    } else if (c == renameCommand) {
+      promptRename();
+    } else if (c == deleteCommand) {
+      deleteSelected();
     }
   }
 
   private void navigateTo(String path) {
     currentPath = normalizePath(path);
     startLoad(0);
+  }
+
+  private boolean isSelectedFile() {
+    int index = getSelectedIndex();
+    return isValidSelection(index, rowPaths.length)
+        && (rowKinds[index] == KIND_FILE || rowKinds[index] == KIND_AUDIO);
+  }
+
+  private void promptRename() {
+    if (!isSelectedFile()) {
+      return;
+    }
+    final String path = rowPaths[getSelectedIndex()];
+    final Form form = new Form(Lang.tr("files.rename"));
+    final TextField name = new TextField(Lang.tr("files.name"), fileNameFor(path), 100, TextField.ANY);
+    form.append(name);
+    form.addCommand(Commands.ok());
+    form.addCommand(Commands.cancel());
+    form.setCommandListener(
+        new CommandListener() {
+          public void commandAction(Command command, Displayable displayable) {
+            if (command == Commands.ok()) {
+              try {
+                String newName = name.getString().trim();
+                if (newName.length() == 0 || newName.indexOf('/') != -1) {
+                  return;
+                }
+                renameFile(path, newName);
+                navigator.back();
+                refresh();
+              } catch (Exception e) {
+                navigator.showAlert(e.toString(), AlertType.ERROR);
+              }
+            } else if (command == Commands.cancel()) {
+              navigator.back();
+            }
+          }
+        });
+    navigator.forward(form);
+  }
+
+  private void deleteSelected() {
+    if (!isSelectedFile()) {
+      return;
+    }
+    final String path = rowPaths[getSelectedIndex()];
+    navigator.showConfirmationAlert(
+        Lang.tr("files.confirm.delete"),
+        new Runnable() {
+          public void run() {
+            try {
+              FileConnection file = null;
+              try {
+                file = (FileConnection) Connector.open(path, Connector.READ_WRITE);
+                file.delete();
+              } finally {
+                closeDirectory(file);
+              }
+              refresh();
+              navigator.dismissAlert();
+            } catch (Exception e) {
+              navigator.showAlert(e.toString(), AlertType.ERROR);
+            }
+          }
+        },
+        AlertType.WARNING);
+  }
+
+  private static void renameFile(String path, String name) throws Exception {
+    FileConnection file = null;
+    try {
+      file = (FileConnection) Connector.open(path, Connector.READ_WRITE);
+      file.rename(name);
+    } finally {
+      closeDirectory(file);
+    }
   }
 
   private void playFrom(int rowIndex) {
@@ -374,6 +511,31 @@ public final class FileBrowserScreen extends BaseList {
       }
     }
     return false;
+  }
+
+  private static boolean isNoteFile(String path) {
+    String lower = fileNameFor(path).toLowerCase();
+    return lower.endsWith(".vnt") || lower.endsWith(".txt");
+  }
+
+  private static boolean isTextFile(String path) {
+    String lower = fileNameFor(path).toLowerCase();
+    return lower.endsWith(".txt")
+        || lower.endsWith(".vnt")
+        || lower.endsWith(".log")
+        || lower.endsWith(".csv")
+        || lower.endsWith(".json")
+        || lower.endsWith(".xml")
+        || lower.endsWith(".m3u")
+        || lower.endsWith(".pls");
+  }
+
+  private static boolean isImageFile(String path) {
+    String lower = fileNameFor(path).toLowerCase();
+    return lower.endsWith(".png")
+        || lower.endsWith(".jpg")
+        || lower.endsWith(".jpeg")
+        || lower.endsWith(".gif");
   }
 
   private static void closeDirectory(FileConnection directory) {

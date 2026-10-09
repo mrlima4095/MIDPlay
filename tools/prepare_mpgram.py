@@ -94,7 +94,10 @@ def language_constants(mpgram, destination, resources):
 
 def adapt_midlet(source):
     source = source.replace("public class MP extends MIDlet", "public class MP")
-    source = source.replace("static MP midlet;", "static MP midlet;\n\tprivate static MIDlet host;\n\tprivate static Runnable exitHandler;")
+    source = source.replace(
+        "static MP midlet;",
+        "static MP midlet;\n\tprivate static MIDlet host;\n\tprivate static Runnable exitHandler;\n\tprivate static boolean backgroundStart;",
+    )
     source = source.replace(
         "static boolean paused;",
         "static boolean paused;\n\tprivate static boolean authenticationCancelled;\n\tprivate static Alert authorizingAlert;",
@@ -103,8 +106,27 @@ def adapt_midlet(source):
         "\t// region MIDlet\n",
         "\tpublic static void open(MIDlet app, Runnable onExit) {\n"
         "\t\thost = app;\n\t\texitHandler = onExit;\n"
+        "\t\tbackgroundStart = false;\n"
         "\t\tif (midlet == null) new MP().start();\n"
         "\t\telse display.setCurrent(current == null ? mainDisplayable : current);\n"
+        "\t}\n\n"
+        "\tpublic static void warmUp(MIDlet app) {\n"
+        "\t\thost = app;\n"
+        "\t\tbackgroundStart = true;\n"
+        "\t\tif (midlet == null) new MP().start();\n"
+        "\t}\n\n"
+        "\tpublic static boolean hasSavedSession() {\n"
+        "\t\ttry {\n"
+        "\t\t\tRecordStore store = RecordStore.openRecordStore(AUTH_RECORD_NAME, false);\n"
+        "\t\t\ttry {\n"
+        "\t\t\t\tJSONObject session = parseObject(new String(store.getRecord(1), \"UTF-8\"));\n"
+        "\t\t\t\treturn session.getString(\"user\", null) != null && session.getInt(\"state\", 0) >= 3;\n"
+        "\t\t\t} finally {\n"
+        "\t\t\t\tstore.closeRecordStore();\n"
+        "\t\t\t}\n"
+        "\t\t} catch (Exception e) {\n"
+        "\t\t\treturn false;\n"
+        "\t\t}\n"
         "\t}\n\n\t// region MIDlet\n",
         1,
     )
@@ -115,6 +137,21 @@ def adapt_midlet(source):
     source = source.replace("midlet.host.getAppProperty(", "host.getAppProperty(")
     source = source.replace("platformRequest(url)", "host.platformRequest(url)")
     source = source.replace("PlayerListener.STOPPED_AT_TIME", '"stoppedAtTime"')
+    source = source.replace(
+        "\t\tdisplay.setCurrent(mainDisplayable = f);",
+        "\t\tif (!backgroundStart) display.setCurrent(mainDisplayable = f);\n\t\telse mainDisplayable = f;",
+        1,
+    )
+    source = source.replace(
+        "\tstatic void display(Alert a, Displayable d) {\n",
+        "\tstatic void display(Alert a, Displayable d) {\n\t\tif (backgroundStart) return;\n",
+        1,
+    )
+    source = source.replace(
+        "\tstatic void display(Displayable d, boolean back) {\n",
+        "\tstatic void display(Displayable d, boolean back) {\n\t\tif (backgroundStart) return;\n",
+        1,
+    )
     source = source.replace(
         "\t\t// sanity check\n\t\tif (!\"nnproject\".equals(host.getAppProperty(\"MIDlet-Vendor\"))\n"
         "\t\t\t\t|| checkClass(\"javay.microedition.lcdui.Canvas\"))\n\t\t\tthrow new RuntimeException();\n\n",

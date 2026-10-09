@@ -38,6 +38,7 @@ import midplay.ui.screen.SettingsScreen;
 import midplay.ui.screen.DownloadsScreen;
 import midplay.ui.screen.FileBrowserScreen;
 import midplay.ui.screen.OpenUriScreen;
+import midplay.ui.screen.NotesScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 import mpgram.MP;
@@ -159,6 +160,13 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
             openMPGram();
           }
         });
+    menuManager.registerAction(
+        Configuration.MENU_NOTES,
+        new Runnable() {
+          public void run() {
+            goToNotesScreen();
+          }
+        });
   }
 
   public void openUri() {
@@ -194,6 +202,15 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
     mainMenu = new MainMenuScreen(navigator, menuManager, this);
     navigator.forward(mainMenu);
     maybeOfferResume();
+    if (settingsManager.getCurrentMpgramAutoLogin() == Configuration.MPGRAM_AUTO_LOGIN_ON
+        && MP.hasSavedSession()) {
+      navigator.callSerially(
+          new Runnable() {
+            public void run() {
+              MP.warmUp(MIDPlay.this);
+            }
+          });
+    }
     autoCheckForUpdate();
   }
 
@@ -414,6 +431,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
 
   private void goToFileBrowserScreen() {
     navigator.forward(new FileBrowserScreen(navigator));
+  }
+
+  private void goToNotesScreen() {
+    navigator.forward(new NotesScreen(navigator));
   }
 
   private void showExitConfirmation() {

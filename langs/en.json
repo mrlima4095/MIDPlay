@@ -29,7 +29,13 @@
   "files": {
     "empty": "No files in this folder",
     "not_audio": "Not an audio file",
-    "root": "Go to root"
+    "root": "Go to root",
+    "rename": "Rename file",
+    "delete": "Delete file",
+    "name": "File name",
+    "confirm": {
+      "delete": "Delete this file?"
+    }
   },
   "language": {
     "en": "English",
@@ -56,7 +62,34 @@
     "settings": "Settings",
     "about": "About",
     "visibility": "Menu Visibility",
-    "equalizer": "Equalizer"
+    "equalizer": "Equalizer",
+    "notes": "Notepad",
+    "mpgram": "MPGram",
+    "open_uri": "Open..."
+  },
+  "note": {
+    "title": "Notepad",
+    "clear": "Clear",
+    "saved": "Note saved",
+    "export": "Save to device",
+    "import": "Import file",
+    "exported": "Saved to {0}",
+    "imported": "Notes imported",
+    "save_here": "Save here",
+    "new": "New note",
+    "rename": "Rename",
+    "delete": "Delete",
+    "edit": "Edit",
+    "empty": "No notes",
+    "save_changes": "Save changes?",
+    "discard": "Discard"
+  },
+  "open_uri": {
+    "title": "Open...",
+    "history": "History",
+    "use": "Use",
+    "clear": "Clear history",
+    "empty": "Enter a URI."
   },
   "player": {
     "next": "Next",
@@ -203,6 +236,7 @@
     "auto_update": "Automatic Updates",
     "check_update": "Check for Updates",
     "save_last_session": "Save Last Session",
+    "mpgram_auto_login": "Prepare MPGram automatically",
     "options": "Options",
     "theme_mode": "Appearance",
     "theme_color": "Theme Color",

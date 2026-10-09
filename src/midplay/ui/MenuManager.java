@@ -55,6 +55,7 @@ public class MenuManager {
       menuItems.addElement(menuItem);
     }
     removeMenuItem(Configuration.MENU_OPEN_URI);
+    removeMenuItem(Configuration.MENU_NOW_PLAYING);
     ensureDefaultItemsPresent();
   }
 
@@ -113,8 +114,9 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_FILES, 6, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_EQUALIZER, 7, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_MPGRAM, 8, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 9, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 10, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_NOTES, 9, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 10, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 11, true));
     return defaultConfig;
   }
 
@@ -201,6 +203,7 @@ public class MenuManager {
       }
     }
   }
+
 
   public MenuItem[] getAllMenuItems() {
     return collectMenuItems(false);
