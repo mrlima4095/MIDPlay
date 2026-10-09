@@ -159,13 +159,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
             openMPGram();
           }
         });
-    menuManager.registerAction(
-        Configuration.MENU_OPEN_URI,
-        new Runnable() {
-          public void run() {
-            navigator.forward(new OpenUriScreen(navigator));
-          }
-        });
+  }
+
+  public void openUri() {
+    navigator.forward(new OpenUriScreen(navigator));
   }
 
   public void openExternalUri(String uri) throws ConnectionNotFoundException {

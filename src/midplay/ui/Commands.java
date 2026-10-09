@@ -141,6 +141,10 @@ public class Commands {
     return get("menu.now_playing", Command.SCREEN, 12);
   }
 
+  public static Command openUri() {
+    return get("menu.open_uri", Command.SCREEN, 0);
+  }
+
   public static Command menuSort() {
     return get("menu.reorder", Command.SCREEN, 1);
   }

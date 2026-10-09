@@ -5,7 +5,6 @@ import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextField;
 import midplay.MIDPlay;
 import midplay.store.UriHistoryManager;
@@ -22,8 +21,7 @@ public final class OpenUriScreen extends BaseForm {
 
   public OpenUriScreen(Navigator navigator) {
     super(Lang.tr("open_uri.title"), navigator);
-    append(new StringItem(null, Lang.tr("open_uri.hint")));
-    uriField = new TextField(Lang.tr("open_uri.field"), "", 255, TextField.ANY);
+    uriField = new TextField(null, "", 255, TextField.ANY);
     append(uriField);
     history = new ChoiceGroup(Lang.tr("open_uri.history"), Choice.POPUP, UriHistoryManager.getInstance().getItems(), null);
     append(history);

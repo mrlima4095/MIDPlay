@@ -54,7 +54,21 @@ public class MenuManager {
               item.getString("key"), item.getInt("order"), item.getBoolean("enabled", true));
       menuItems.addElement(menuItem);
     }
+    removeMenuItem(Configuration.MENU_OPEN_URI);
     ensureDefaultItemsPresent();
+  }
+
+  private void removeMenuItem(String key) {
+    boolean removed = false;
+    for (int i = menuItems.size() - 1; i >= 0; i--) {
+      if (key.equals(((MenuItem) menuItems.elementAt(i)).key)) {
+        menuItems.removeElementAt(i);
+        removed = true;
+      }
+    }
+    if (removed) {
+      saveMenuConfig();
+    }
   }
 
   private void ensureDefaultItemsPresent() {
@@ -99,9 +113,8 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_FILES, 6, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_EQUALIZER, 7, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_MPGRAM, 8, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_OPEN_URI, 9, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 10, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 11, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 9, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 10, true));
     return defaultConfig;
   }
 
