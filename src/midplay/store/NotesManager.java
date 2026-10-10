@@ -50,6 +50,15 @@ public final class NotesManager {
     return result;
   }
 
+  public Note getNote(int id) {
+    JSONObject item = find(notes(), id);
+    if (item == null) {
+      return null;
+    }
+    String text = item.getString("text", "");
+    return new Note(id, titleFromText(text), text);
+  }
+
   public Note create(String text) throws RecordStoreException {
     JSONArray data = notes();
     int id = nextId(data);

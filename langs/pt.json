@@ -177,9 +177,12 @@
     "add_track": "Adicionar à Playlist",
     "create": "Criar Playlist",
     "confirm": {
-      "delete_with_tracks": "Esta playlist não está vazia. Excluir tudo?"
+      "delete_with_tracks": "Esta playlist não está vazia. Excluir tudo?",
+      "delete_all": "Excluir todas as playlists e suas músicas?"
     },
     "view_tracks": "Ver Lista de Músicas",
+    "delete_all": "Excluir todas as playlists",
+    "reorder_tracks": "Reordenar músicas",
     "error": {
       "add_track_failed": "Falha ao adicionar música à playlist",
       "track_already_exists": "A música já existe na playlist",
@@ -187,7 +190,8 @@
       "create_failed": "Falha ao criar playlist",
       "empty_name": "O nome da playlist não pode ficar vazio",
       "remove_track_failed": "Falha ao remover música da playlist",
-      "rename_failed": "Falha ao renomear playlist"
+      "rename_failed": "Falha ao renomear playlist",
+      "reorder_failed": "Falha ao salvar a ordem das músicas"
     },
     "name": "Nome da Playlist",
     "rename": "Renomear Playlist",

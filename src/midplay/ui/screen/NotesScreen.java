@@ -39,7 +39,7 @@ public final class NotesScreen extends BaseList {
 
   protected void handleSelection() {
     Note note = selected();
-    if (note != null) navigator.forward(new NoteEditorScreen(note, navigator, refreshOnClose()));
+    if (note != null) navigator.forward(new NoteReaderScreen(note, navigator, refreshOnClose()));
   }
 
   protected void showNotify() {

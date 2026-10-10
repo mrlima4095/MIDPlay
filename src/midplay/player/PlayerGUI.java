@@ -65,6 +65,7 @@ public class PlayerGUI implements PlayerListener {
   private static final int MAX_CONSECUTIVE_PLAYBACK_ERRORS = 3;
 
   private long cachedMediaTimeMicros = 0L;
+  private long lastKnownMediaTimeMicros = 0L;
   private long cachedDurationMicros = 0L;
   private long cachedSampleTimeMs = 0L;
   private int cachedSessionId = -1;
@@ -367,6 +368,7 @@ public class PlayerGUI implements PlayerListener {
         return;
       }
       currentPlayer = player;
+      lastKnownMediaTimeMicros = time;
     }
     parent.updateDisplayAsync();
     if (currentPlayer == null) {
@@ -468,6 +470,7 @@ public class PlayerGUI implements PlayerListener {
       attached = true;
       synchronized (this) {
         cachedMediaTimeMicros = seekTimeMicros;
+        lastKnownMediaTimeMicros = seekTimeMicros;
         cachedSampleTimeMs = System.currentTimeMillis();
         cachedSessionId = playbackSessionId;
       }
@@ -558,6 +561,7 @@ public class PlayerGUI implements PlayerListener {
       if (estimated < 0L) {
         estimated = 0L;
       }
+      rememberMediaTime(estimated);
       return estimated;
     }
 
@@ -574,12 +578,25 @@ public class PlayerGUI implements PlayerListener {
     synchronized (this) {
       if (sessionId == playbackSessionId) {
         cachedMediaTimeMicros = sampledTime;
+        if (sampledTime > lastKnownMediaTimeMicros) {
+          lastKnownMediaTimeMicros = sampledTime;
+        }
         cachedDurationMicros = sampledDuration;
         cachedSampleTimeMs = now;
         cachedSessionId = playbackSessionId;
       }
     }
     return sampledTime;
+  }
+
+  private synchronized void rememberMediaTime(long time) {
+    if (time > lastKnownMediaTimeMicros) {
+      lastKnownMediaTimeMicros = time;
+    }
+  }
+
+  public synchronized long getLastKnownMediaTime() {
+    return lastKnownMediaTimeMicros;
   }
 
   private long extrapolate(
@@ -761,8 +778,56 @@ public class PlayerGUI implements PlayerListener {
       deferredResumeSeekMicros = -1;
     }
     if (target > 0) {
-      seek(target);
+      if (getDuration() > 0L) {
+        seek(target);
+      } else {
+        waitForResumeDuration(sessionId, target);
+      }
     }
+  }
+
+  private void waitForResumeDuration(final int sessionId, final long target) {
+    Thread resumeThread =
+        new Thread(
+            new Runnable() {
+              public void run() {
+                for (int attempt = 0; attempt < 40; attempt++) {
+                  if (!isSessionActive(sessionId)) {
+                    return;
+                  }
+                  if (getDuration() > 0L) {
+                    seek(target);
+                    return;
+                  }
+                  try {
+                    Thread.sleep(250L);
+                  } catch (InterruptedException e) {
+                    return;
+                  }
+                }
+                Player currentPlayer;
+                synchronized (PlayerGUI.this) {
+                  if (!isSessionActiveLocked(sessionId)) {
+                    return;
+                  }
+                  currentPlayer = player;
+                }
+                if (currentPlayer != null) {
+                  try {
+                    currentPlayer.setMediaTime(target);
+                    synchronized (PlayerGUI.this) {
+                      cachedMediaTimeMicros = target;
+                      lastKnownMediaTimeMicros = target;
+                      cachedSampleTimeMs = System.currentTimeMillis();
+                      cachedSessionId = playbackSessionId;
+                    }
+                    parent.updateDisplayAsync();
+                  } catch (Exception e) {
+                  }
+                }
+              }
+            });
+    resumeThread.start();
   }
 
   private void startLoadThread() {
@@ -1302,6 +1367,7 @@ public class PlayerGUI implements PlayerListener {
 
   private void resetMediaCacheLocked() {
     cachedMediaTimeMicros = 0L;
+    lastKnownMediaTimeMicros = 0L;
     cachedDurationMicros = 0L;
     cachedSampleTimeMs = 0L;
     cachedSessionId = playbackSessionId;

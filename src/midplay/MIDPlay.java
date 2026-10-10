@@ -268,7 +268,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost {
                         playerScreen.getTitle(),
                         current,
                         gui.getCurrentIndex(),
-                        gui.getCurrentTime());
+                         Math.max(gui.getCurrentTime(), gui.getLastKnownMediaTime()));
               } catch (Exception e) {
               }
             }

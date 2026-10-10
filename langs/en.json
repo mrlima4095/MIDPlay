@@ -177,9 +177,12 @@
     "add_track": "Add to Playlist",
     "create": "Create Playlist",
     "confirm": {
-      "delete_with_tracks": "This playlist is not empty. Delete all?"
+      "delete_with_tracks": "This playlist is not empty. Delete all?",
+      "delete_all": "Delete all playlists and their tracks?"
     },
     "view_tracks": "View Track List",
+    "delete_all": "Delete All Playlists",
+    "reorder_tracks": "Reorder Tracks",
     "error": {
       "add_track_failed": "Failed to add track to playlist",
       "track_already_exists": "Track already exists in playlist",
@@ -187,7 +190,8 @@
       "create_failed": "Failed to create playlist",
       "empty_name": "Playlist name cannot be empty",
       "remove_track_failed": "Failed to remove track from playlist",
-      "rename_failed": "Failed to rename playlist"
+      "rename_failed": "Failed to rename playlist",
+      "reorder_failed": "Failed to save playlist track order"
     },
     "name": "Playlist Name",
     "rename": "Rename Playlist",
