@@ -13,7 +13,7 @@ An online music player for J2ME (Java ME) mobile devices — CLDC 1.1 / MIDP 2.0
 - **Localization** — English, Brazilian Portuguese, Vietnamese, Turkish, Polish, Hebrew
 - **MPGram** — embedded Telegram client that returns to MIDPlay without stopping playback
 
-## This Fork / Diferenças deste fork
+## Fork Features
 
 This fork adds features on top of the original MIDPlay project:
 
@@ -23,17 +23,6 @@ This fork adds features on top of the original MIDPlay project:
 - **Open external links** using the device's supported link handlers.
 - **Embedded MPGram integration** for devices that cannot conveniently switch between apps. MPGram is integrated into MIDPlay, and returning to the player keeps music playback running. See the [MPGram client](https://github.com/shinovon/mpgram-client).
 - **Reorder tracks** in custom playlists.
-
-### Português (Brasil)
-
-Este fork acrescenta recursos ao projeto original MIDPlay:
-
-- **Baixar músicas** para o dispositivo e ouvir offline.
-- **Explorador de arquivos** para navegar pelo armazenamento, visualizar arquivos de texto e imagens, reproduzir áudio local e adicionar músicas locais às playlists.
-- **Bloco de notas** com várias notas e importação/exportação no formato VNOTE.
-- **Abrir links externos** usando os aplicativos compatíveis do dispositivo.
-- **Integração com o MPGram** para dispositivos nos quais é difícil alternar entre aplicativos. O MPGram fica integrado ao MIDPlay e, ao voltar para o player, a música continua tocando. Veja o [cliente MPGram](https://github.com/shinovon/mpgram-client).
-- **Reordenar músicas** em playlists personalizadas.
 
 ## Requirements
 
