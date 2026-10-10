@@ -10,8 +10,30 @@ An online music player for J2ME (Java ME) mobile devices — CLDC 1.1 / MIDP 2.0
 - **Discovery** — browse by category and playlist, search songs / artists / albums
 - **Playback** — seek, resume position, sleep timer
 - **Library** — favorites, playlists, recent history
-- **Localization** — English, Vietnamese, Turkish, Polish, Hebrew
+- **Localization** — English, Brazilian Portuguese, Vietnamese, Turkish, Polish, Hebrew
 - **MPGram** — embedded Telegram client that returns to MIDPlay without stopping playback
+
+## This Fork / Diferenças deste fork
+
+This fork adds features on top of the original MIDPlay project:
+
+- **Download music** to the device for offline access.
+- **File explorer** to browse local storage, view text files and images, play local audio, and add local tracks to playlists.
+- **Notepad** with multiple notes and VNOTE import/export.
+- **Open external links** using the device's supported link handlers.
+- **Embedded MPGram integration** for devices that cannot conveniently switch between apps. MPGram is integrated into MIDPlay, and returning to the player keeps music playback running. See the [MPGram client](https://github.com/shinovon/mpgram-client).
+- **Reorder tracks** in custom playlists.
+
+### Português (Brasil)
+
+Este fork acrescenta recursos ao projeto original MIDPlay:
+
+- **Baixar músicas** para o dispositivo e ouvir offline.
+- **Explorador de arquivos** para navegar pelo armazenamento, visualizar arquivos de texto e imagens, reproduzir áudio local e adicionar músicas locais às playlists.
+- **Bloco de notas** com várias notas e importação/exportação no formato VNOTE.
+- **Abrir links externos** usando os aplicativos compatíveis do dispositivo.
+- **Integração com o MPGram** para dispositivos nos quais é difícil alternar entre aplicativos. O MPGram fica integrado ao MIDPlay e, ao voltar para o player, a música continua tocando. Veja o [cliente MPGram](https://github.com/shinovon/mpgram-client).
+- **Reordenar músicas** em playlists personalizadas.
 
 ## Requirements
 
