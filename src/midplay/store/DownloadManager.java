@@ -51,6 +51,10 @@ public class DownloadManager {
   private int backupRecordId = INDEX_RECORD_ID;
   private Vector diskPathsCache;
   private Hashtable linkedPathsCache;
+  // Per-session caches so the (expensive) index scan and the filesystem
+  // existence check are not repeated for the same track on the UI thread.
+  private Hashtable downloadedFlagsCache;
+  private Hashtable downloadedPathsCache;
   private final Vector activeKeys = new Vector();
 
   private DownloadManager() {}
@@ -73,7 +77,17 @@ public class DownloadManager {
     }
   }
 
-  private synchronized JSONArray getIndex() {
+  private JSONArray getIndex() {
+    // Fast, lock-free path: the reference is only ever assigned inside
+    // loadIndex(), so a stale read simply falls through to the synchronized load.
+    JSONArray cached = downloads;
+    if (cached != null) {
+      return cached;
+    }
+    return loadIndex();
+  }
+
+  private synchronized JSONArray loadIndex() {
     if (downloads != null) {
       return downloads;
     }
@@ -207,31 +221,42 @@ public class DownloadManager {
     }
   }
 
-  private synchronized boolean saveIndex() {
+  private boolean saveIndex() {
+    String json;
+    synchronized (this) {
+      if (downloads == null) {
+        return false;
+      }
+      json = downloads.toString();
+    }
     byte[] bytes;
     try {
-      bytes = Utils.utf8ToBytes(downloads.toString());
+      bytes = Utils.utf8ToBytes(json);
     } catch (Exception e) {
       return false;
     }
-    try {
-      RecordStore rs = openIndexStore();
-      int id = indexRecordId;
+    synchronized (this) {
       try {
-        rs.setRecord(id, bytes, 0, bytes.length);
+        RecordStore rs = openIndexStore();
+        int id = indexRecordId;
+        try {
+          rs.setRecord(id, bytes, 0, bytes.length);
+        } catch (RecordStoreException e) {
+          id = rs.addRecord(bytes, 0, bytes.length);
+          indexRecordId = id;
+        }
+        if (!verifySaved(rs, id, bytes)) {
+          return false;
+        }
+        closeIndexStore();
       } catch (RecordStoreException e) {
-        id = rs.addRecord(bytes, 0, bytes.length);
-        indexRecordId = id;
-      }
-      if (!verifySaved(rs, id, bytes)) {
         return false;
       }
-      closeIndexStore();
-      writeBackup(downloads.toString());
-      return true;
-    } catch (RecordStoreException e) {
-      return false;
     }
+    // The backup write touches a second record store; keep it outside the
+    // monitor so the UI thread is never blocked behind it.
+    writeBackup(json);
+    return true;
   }
 
   private static boolean verifySaved(RecordStore rs, int id, byte[] bytes) {
@@ -294,38 +319,67 @@ public class DownloadManager {
     return makeTrackKey(track) + ".mp3";
   }
 
+  /**
+   * Fast, index-only check used for de-duplication (bulk download, queue).
+   * It never touches the filesystem, so it is safe to call from the UI thread
+   * for many tracks; the index is reconciled with disk by {@link
+   * #refreshDownloadedTracks()} / the heal pass.
+   */
   public boolean isDownloaded(Track track) {
     if (track == null) {
       return false;
     }
     String key = makeTrackKey(track);
-    String url = track.getUrl();
     if (key == null) {
       return false;
     }
-    JSONArray index = getIndex();
-    for (int i = 0; i < index.size(); i++) {
-      try {
-        JSONObject entry = index.getObject(i);
-        if (key.equals(entry.getString("key", ""))
-            || (url != null && url.length() > 0 && url.equals(entry.getString("url", "")))) {
-          String path = entry.getString("path", "");
-          if (path.length() > 0) {
-            return exists(path);
-          }
-        }
-      } catch (Exception e) {
+    Hashtable cache = downloadedFlagsCache;
+    if (cache != null) {
+      Object hit = cache.get(key);
+      if (hit != null) {
+        return ((Boolean) hit).booleanValue();
       }
     }
-    return false;
+    boolean result = indexHasPath(track, key, false) != null;
+    if (downloadedFlagsCache == null) {
+      downloadedFlagsCache = new Hashtable();
+    }
+    downloadedFlagsCache.put(key, result ? Boolean.TRUE : Boolean.FALSE);
+    return result;
   }
 
   public String getDownloadedFilePath(Track track) {
     if (track == null) {
       return null;
     }
-    String url = track.getUrl();
     String key = makeTrackKey(track);
+    if (key == null) {
+      return null;
+    }
+    Hashtable cache = downloadedPathsCache;
+    if (cache != null) {
+      Object hit = cache.get(key);
+      if (hit != null) {
+        String cached = (String) hit;
+        return cached.length() == 0 ? null : cached;
+      }
+    }
+    String result = indexHasPath(track, key, true);
+    if (downloadedPathsCache == null) {
+      downloadedPathsCache = new Hashtable();
+    }
+    downloadedPathsCache.put(key, result == null ? "" : result);
+    return result;
+  }
+
+  /**
+   * Scans the index for an entry matching the track and returns its path.
+   * When {@code requireFile} is true the file must still exist on disk; this is
+   * the variant used before playback. The result is cached per track key by the
+   * callers above.
+   */
+  private String indexHasPath(Track track, String key, boolean requireFile) {
+    String url = track.getUrl();
     JSONArray index = getIndex();
     for (int i = 0; i < index.size(); i++) {
       try {
@@ -338,7 +392,7 @@ public class DownloadManager {
         String indexedKey = entry.getString("key", "");
         boolean sameKey = key != null && indexedKey != null && key.equals(indexedKey);
         if (sameUrl || samePath || sameKey) {
-          if (path.length() > 0 && exists(path)) {
+          if (path.length() > 0 && (!requireFile || exists(path))) {
             return path;
           }
         }
@@ -895,6 +949,8 @@ public class DownloadManager {
   public void invalidateListCaches() {
     diskPathsCache = null;
     linkedPathsCache = null;
+    downloadedFlagsCache = null;
+    downloadedPathsCache = null;
   }
 
   private Vector getDownloadFilePaths() {

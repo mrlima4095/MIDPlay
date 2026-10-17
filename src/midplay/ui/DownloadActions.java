@@ -14,7 +14,9 @@ public final class DownloadActions {
     }
     final DownloadManager manager = DownloadManager.getInstance();
 
-    if (manager.isDownloaded(track)) {
+    // Verify the file really exists (the index alone can be stale) so a track
+    // whose file was removed externally can be downloaded again.
+    if (manager.getDownloadedFilePath(track) != null) {
       navigator.showAlert(Lang.tr("download.already_downloaded"), AlertType.INFO);
       return;
     }

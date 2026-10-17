@@ -51,6 +51,18 @@ public final class DownloadQueueManager implements CommandListener {
 
   public void enqueue(Navigator navigator, Track[] tracks) {
     if (navigator == null || tracks == null || tracks.length == 0) return;
+    // Filter outside the queue monitor. isDownloaded() is index-only and cached,
+    // so this stays cheap even for large selections, and the download thread's
+    // progress callbacks are never blocked behind the filtering.
+    DownloadManager manager = DownloadManager.getInstance();
+    Vector accepted = new Vector();
+    for (int i = 0; i < tracks.length; i++) {
+      Track track = tracks[i];
+      if (track == null || manager.isDownloaded(track) || manager.isDownloadActive(track)) {
+        continue;
+      }
+      accepted.addElement(track);
+    }
     boolean start;
     int added = 0;
     synchronized (this) {
@@ -59,11 +71,9 @@ public final class DownloadQueueManager implements CommandListener {
         completed = failed = 0;
         minimized = false;
       }
-      DownloadManager manager = DownloadManager.getInstance();
-      for (int i = 0; i < tracks.length; i++) {
-        Track track = tracks[i];
-        if (track == null || manager.isDownloaded(track) || manager.isDownloadActive(track)
-            || contains(track)) continue;
+      for (int i = 0; i < accepted.size(); i++) {
+        Track track = (Track) accepted.elementAt(i);
+        if (contains(track)) continue;
         pending.addElement(track);
         added++;
       }
