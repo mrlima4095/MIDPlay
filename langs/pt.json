@@ -199,6 +199,7 @@
     "queue_waiting": "Iniciando {0} downloads selecionados",
     "queue_finished": "Downloads concluídos (sucesso / falha): {0}",
     "minimize": "Minimizar",
+    "reorder": "Reordenar downloads",
     "refresh": "Atualizar",
     "link": "Vincular local",
     "link_url": "URL da música",

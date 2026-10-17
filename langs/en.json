@@ -199,6 +199,7 @@
     "queue_waiting": "Starting {0} selected downloads",
     "queue_finished": "Downloads finished (completed / failed): {0}",
     "minimize": "Minimize",
+    "reorder": "Reorder Downloads",
     "refresh": "Refresh",
     "link": "Link Local File",
     "link_url": "Track URL",

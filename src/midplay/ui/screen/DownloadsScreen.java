@@ -9,6 +9,7 @@ import midplay.store.Configuration;
 import midplay.store.DownloadManager;
 import midplay.ui.BaseList;
 import midplay.ui.Commands;
+import midplay.ui.ListReorder;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.util.Lang;
@@ -22,6 +23,11 @@ public final class DownloadsScreen extends BaseList {
       new Command(Lang.tr("action.select"), Command.SCREEN, 1);
   private final Command inProgressCommand =
       new Command(Lang.tr("download.queue"), Command.SCREEN, 7);
+  private final Command reorderCommand =
+      new Command(Lang.tr("download.reorder"), Command.SCREEN, 8);
+  private boolean reorderMode;
+  private int reorderPick = -1;
+  private Track[] reorderTracks;
 
   public DownloadsScreen(Navigator navigator) {
     super(Lang.tr("menu.downloads"), navigator);
@@ -32,6 +38,7 @@ public final class DownloadsScreen extends BaseList {
     addCommand(Commands.downloadLink());
     addCommand(selectMultipleCommand);
     addCommand(inProgressCommand);
+    addCommand(reorderCommand);
     populateItems();
   }
 
@@ -40,6 +47,9 @@ public final class DownloadsScreen extends BaseList {
   }
 
   protected void refresh() {
+    if (reorderMode) {
+      return;
+    }
     startLoad(getSelectedIndex());
   }
 
@@ -91,6 +101,10 @@ public final class DownloadsScreen extends BaseList {
   }
 
   protected void handleSelection() {
+    if (reorderMode) {
+      reorderSelection(getSelectedIndex());
+      return;
+    }
     int index = getSelectedIndex();
     if (!isValidSelection(index, tracks.length)) {
       return;
@@ -99,6 +113,14 @@ public final class DownloadsScreen extends BaseList {
   }
 
   protected void handleCommand(Command c, Displayable d) {
+    if (reorderMode) {
+      if (c == Commands.formSave()) {
+        saveReorder();
+      } else if (c == Commands.formCancel()) {
+        cancelReorder();
+      }
+      return;
+    }
     int selected = getSelectedIndex();
     if (c == Commands.downloadPlay()) {
       if (isValidSelection(selected, tracks.length)) {
@@ -121,7 +143,86 @@ public final class DownloadsScreen extends BaseList {
               MultiTrackSelectScreen.SOURCE_DOWNLOADS, null, this));
     } else if (c == inProgressCommand) {
       navigator.forward(new DownloadQueueScreen(navigator));
+    } else if (c == reorderCommand) {
+      startReorder();
     }
+  }
+
+  private void startReorder() {
+    if (tracks == null || tracks.length < 2) {
+      navigator.showAlert(Lang.tr("status.no_data"), AlertType.INFO);
+      return;
+    }
+    reorderMode = true;
+    reorderPick = -1;
+    reorderTracks = new Track[tracks.length];
+    System.arraycopy(tracks, 0, reorderTracks, 0, tracks.length);
+    removeCommand(Commands.downloadPlay());
+    removeCommand(Commands.downloadDelete());
+    removeCommand(Commands.downloadDeleteAll());
+    removeCommand(Commands.downloadRefresh());
+    removeCommand(Commands.downloadLink());
+    removeCommand(selectMultipleCommand);
+    removeCommand(inProgressCommand);
+    removeCommand(reorderCommand);
+    removeCommand(Commands.back());
+    removeCommand(Commands.playerNowPlaying());
+    addCommand(Commands.formSave());
+    addCommand(Commands.formCancel());
+    navigator.showAlert(Lang.tr("settings.reorder.instructions"), AlertType.INFO);
+  }
+
+  private void reorderSelection(int index) {
+    if (reorderTracks == null || index < 0 || index >= reorderTracks.length) {
+      return;
+    }
+    if (reorderPick < 0) {
+      reorderPick = index;
+      ListReorder.toggleMarker(this, index, Configuration.SORT_ICON, true);
+    } else {
+      if (reorderPick != index) {
+        ListReorder.swapRows(this, reorderPick, index, Configuration.SORT_ICON);
+        Track temp = reorderTracks[reorderPick];
+        reorderTracks[reorderPick] = reorderTracks[index];
+        reorderTracks[index] = temp;
+      } else {
+        ListReorder.toggleMarker(this, reorderPick, Configuration.SORT_ICON, false);
+      }
+      reorderPick = -1;
+    }
+  }
+
+  private void saveReorder() {
+    if (downloadManager.reorderDownloads(reorderTracks)) {
+      endReorder();
+      navigator.showAlert(Lang.tr("settings.reorder.saved"), AlertType.CONFIRMATION);
+      refresh();
+    } else {
+      navigator.showAlert(Lang.tr("download.error"), AlertType.ERROR);
+    }
+  }
+
+  private void cancelReorder() {
+    endReorder();
+    refresh();
+  }
+
+  private void endReorder() {
+    reorderMode = false;
+    reorderPick = -1;
+    reorderTracks = null;
+    removeCommand(Commands.formSave());
+    removeCommand(Commands.formCancel());
+    addCommand(Commands.downloadPlay());
+    addCommand(Commands.downloadDelete());
+    addCommand(Commands.downloadDeleteAll());
+    addCommand(Commands.downloadRefresh());
+    addCommand(Commands.downloadLink());
+    addCommand(selectMultipleCommand);
+    addCommand(inProgressCommand);
+    addCommand(reorderCommand);
+    addCommand(Commands.back());
+    addCommand(Commands.playerNowPlaying());
   }
 
   private void playFrom(int index) {
@@ -190,6 +291,8 @@ public final class DownloadsScreen extends BaseList {
 
   protected void showNotify() {
     super.showNotify();
-    refresh();
+    if (!reorderMode) {
+      refresh();
+    }
   }
 }

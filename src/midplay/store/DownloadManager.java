@@ -853,6 +853,71 @@ public class DownloadManager {
     }
   }
 
+  /**
+   * Persists a user-defined order for the downloads list by rebuilding the index
+   * so its entries follow {@code ordered}. Entries not present in {@code ordered}
+   * are kept at the end so nothing is lost.
+   */
+  public boolean reorderDownloads(Track[] ordered) {
+    if (ordered == null) {
+      return false;
+    }
+    invalidateListCaches();
+    JSONArray current = getIndex();
+    boolean[] used = new boolean[current.size()];
+    JSONArray rebuilt = new JSONArray();
+    for (int i = 0; i < ordered.length; i++) {
+      int match = findEntryFor(current, used, ordered[i]);
+      if (match >= 0) {
+        used[match] = true;
+        try {
+          rebuilt.add(current.getObject(match));
+        } catch (Exception e) {
+        }
+      }
+    }
+    for (int i = 0; i < current.size(); i++) {
+      if (!used[i]) {
+        try {
+          rebuilt.add(current.getObject(i));
+        } catch (Exception e) {
+        }
+      }
+    }
+    downloads = rebuilt;
+    if (!saveIndex()) {
+      reloadIndex();
+      return false;
+    }
+    return true;
+  }
+
+  private static int findEntryFor(JSONArray index, boolean[] used, Track track) {
+    if (track == null) {
+      return -1;
+    }
+    String key = makeTrackKey(track);
+    String path = track.getUrl();
+    for (int i = 0; i < index.size(); i++) {
+      if (i < used.length && used[i]) {
+        continue;
+      }
+      try {
+        JSONObject entry = index.getObject(i);
+        String entryPath = entry.getString("path", "");
+        if (path != null && path.length() > 0 && path.equals(entryPath)) {
+          return i;
+        }
+        String entryKey = entry.getString("key", "");
+        if (key != null && entryKey != null && key.equals(entryKey)) {
+          return i;
+        }
+      } catch (Exception e) {
+      }
+    }
+    return -1;
+  }
+
   public void clearAllDownloads() {
     invalidateListCaches();
     JSONArray index = getIndex();
