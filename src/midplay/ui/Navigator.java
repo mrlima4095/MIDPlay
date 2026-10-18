@@ -19,6 +19,7 @@ public class Navigator {
   private final MIDlet midlet;
   private Displayable beforeAlert;
   private Displayable rootView;
+  private Displayable dialogReturn;
 
   public Navigator(MIDlet midlet) {
     this.midlet = midlet;
@@ -131,6 +132,66 @@ public class Navigator {
     navStack.removeAllElements();
     beforeAlert = null;
     rootView = null;
+    dialogReturn = null;
+  }
+
+  /**
+   * Shows a transient dialog (password prompt, small form) over the current view without changing
+   * navigation history, so closing it returns to exactly the screen that opened it.
+   */
+  public void showDialog(final Displayable dialog) {
+    if (dialog == null) {
+      return;
+    }
+    Display.getDisplay(this.midlet)
+        .callSerially(
+            new Runnable() {
+              public void run() {
+                Display display = Display.getDisplay(midlet);
+                Displayable current = display.getCurrent();
+                if (current != null && !(current instanceof Alert)) {
+                  dialogReturn = current;
+                } else if (beforeAlert != null) {
+                  dialogReturn = beforeAlert;
+                } else if (!navStack.isEmpty()) {
+                  dialogReturn = (Displayable) navStack.peek();
+                }
+                display.setCurrent(dialog);
+              }
+            });
+  }
+
+  /** Closes a transient dialog and restores the view underneath. */
+  public void closeDialog() {
+    restoreDialogAndThen(null);
+  }
+
+  /** Closes a transient dialog, restores the view underneath, then runs an action. */
+  public void restoreDialogAndThen(final Runnable action) {
+    Display.getDisplay(this.midlet)
+        .callSerially(
+            new Runnable() {
+              public void run() {
+                Display display = Display.getDisplay(midlet);
+                Displayable target = dialogReturn;
+                if (target == null) {
+                  target = !navStack.isEmpty() ? (Displayable) navStack.peek() : rootView;
+                }
+                if (target != null) {
+                  display.setCurrent(target);
+                }
+                beforeAlert = null;
+                dialogReturn = null;
+                if (action != null) {
+                  action.run();
+                }
+              }
+            });
+  }
+
+  /** The view a transient dialog will return to, used to anchor alerts without pushing history. */
+  public Displayable getDialogReturn() {
+    return dialogReturn;
   }
 
   public void callSerially(Runnable r) {

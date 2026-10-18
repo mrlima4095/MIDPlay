@@ -21,12 +21,18 @@ public final class NoteEditorScreen extends TextBox implements CommandListener {
   private int noteId;
   private final Command clearCommand;
   private final Runnable onClose;
+  private final boolean vault;
   private String savedText;
 
   public NoteEditorScreen(Note note, Navigator navigator, Runnable onClose) {
+    this(note, navigator, onClose, false);
+  }
+
+  public NoteEditorScreen(Note note, Navigator navigator, Runnable onClose, boolean vault) {
     super(note == null ? Lang.tr("note.new") : note.title, note == null ? "" : note.text, 4096, TextField.ANY);
     this.navigator = navigator;
     this.onClose = onClose;
+    this.vault = vault;
     noteId = note == null ? -1 : note.id;
     savedText = getString();
     clearCommand = new Command(Lang.tr("note.clear"), Command.SCREEN, 2);
@@ -59,7 +65,7 @@ public final class NoteEditorScreen extends TextBox implements CommandListener {
 
   private void saveNote() throws Exception {
     if (noteId < 0) {
-      Note saved = NotesManager.getInstance().create(getString());
+      Note saved = NotesManager.getInstance().create(getString(), vault);
       noteId = saved.id;
     } else {
       NotesManager.getInstance().update(noteId, getString());

@@ -20,6 +20,7 @@ This fork adds features on top of the original MIDPlay project:
 - **Download music** to the device for offline access.
 - **File explorer** to browse local storage, view text files and images, play local audio, and add local tracks to playlists.
 - **Notepad** with multiple notes and VNOTE import/export.
+- **Password-protected notes vault** — keep selected notes behind a vault password.
 - **Open external links** using the device's supported link handlers.
 - **Embedded MPGram integration** for devices that cannot conveniently switch between apps. MPGram is integrated into MIDPlay, and returning to the player keeps music playback running. See the [MPGram client](https://github.com/shinovon/mpgram-client).
 - **Reorder tracks** in custom playlists.

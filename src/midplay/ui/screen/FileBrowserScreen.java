@@ -295,6 +295,8 @@ public final class FileBrowserScreen extends BaseList {
       promptRename();
     } else if (c == deleteCommand) {
       deleteSelected();
+    } else if (c == gotoPathCommand) {
+      promptGotoPath();
     }
   }
 
@@ -633,18 +635,28 @@ public final class FileBrowserScreen extends BaseList {
               String value = box.getString();
               value = value == null ? "" : value.trim();
               if (value.length() == 0) {
-                navigator.showAlert(Lang.tr("files.open_path_required"), AlertType.ERROR);
+                navigator.showAlert(Lang.tr("files.open_path_required"), AlertType.ERROR, box);
                 return;
               }
-              String path = normalizePath(value);
-              navigator.back();
-              navigateTo(path);
+              navigator.closeDialog();
+              navigateTo(coercePath(value));
             } else if (c == Commands.cancel()) {
-              navigator.back();
+              navigator.closeDialog();
             }
           }
         });
-    navigator.forward(box);
+    navigator.showDialog(box);
+  }
+
+  /** Accepts full file URLs as well as shorthand like "/SDCard/Music/" or "SDCard". */
+  private static String coercePath(String value) {
+    if (value.indexOf("://") != -1) {
+      return value;
+    }
+    if (value.startsWith("/")) {
+      return "file://" + value;
+    }
+    return ROOT_PATH + value;
   }
 
 }

@@ -37,6 +37,9 @@
     "select_multiple": "Select files",
     "delete": "Delete file",
     "name": "File name",
+    "goto_path": "Go to path",
+    "open_path": "Enter path",
+    "open_path_required": "Enter a path",
     "confirm": {
       "delete": "Delete this file?",
       "delete_selected": "Delete the selected files?"
@@ -83,7 +86,8 @@
     "tasks": "Tasks",
     "mpgram": "MPGram",
     "github": "GitHub",
-    "open_uri": "Open..."
+    "open_uri": "Open...",
+    "weather": "Weather"
   },
   "mpgram": {
     "send_note": "Send note",
@@ -379,8 +383,7 @@
     "manual": "Manual",
     "band": "Band",
     "not_supported": "Equalizer is not supported on this device"
-  }
-,
+  },
   "task": {
     "title": "Tasks",
     "new": "New task",
@@ -390,6 +393,7 @@
     "no_results": "No matching tasks",
     "search": "Search tasks",
     "clear_search": "Clear search",
+    "select_multiple": "Select tasks",
     "goto_path": "Go to path",
     "open_path": "Enter path",
     "open_path_required": "Enter a path",
@@ -445,6 +449,41 @@
     "tomorrow": "Tomorrow",
     "created_at": "Created: {0}",
     "completed_at": "Completed: {0}"
+  },
+  "vault": {
+    "title": "Vault",
+    "open": "Vault",
+    "protect": "Move to vault",
+    "remove": "Remove from vault",
+    "moved": "Note moved to vault",
+    "moved_many": "Notes moved to vault: {0}",
+    "removed": "Note removed from vault",
+    "empty": "Vault is empty",
+    "enter_password": "Enter vault password",
+    "wrong_password": "Wrong password",
+    "create_title": "Create vault password",
+    "change_password": "Change vault password",
+    "current_password": "Current password",
+    "new_password": "New password",
+    "confirm_password": "Confirm password",
+    "password_empty": "Password cannot be empty",
+    "password_mismatch": "Passwords do not match",
+    "password_set": "Vault password set",
+    "password_changed": "Vault password changed"
+  },
+  "weather": {
+    "title": "Weather",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "set_city": "City...",
+    "city_prompt": "Weather city",
+    "city_field": "City",
+    "condition": "Condition",
+    "temp": "Temperature",
+    "feels": "Feels like",
+    "wind": "Wind",
+    "humidity": "Humidity",
+    "precip": "Rain",
+    "error": "Could not load weather"
   }
-
 }

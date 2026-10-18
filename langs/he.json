@@ -4,7 +4,8 @@
     "cancel": "ביטול",
     "exit": "יציאה",
     "ok": "אישור",
-    "save": "שמור"
+    "save": "שמור",
+    "select": "בחר"
   },
   "app": {
     "name": "MIDPlay"
@@ -31,7 +32,18 @@
     "not_audio": "לא קובץ שמע",
     "root": "עבור לתיקיית הבסיס",
     "search": "חיפוש קבצים",
-    "clear_search": "נקה חיפוש קבצים"
+    "clear_search": "נקה חיפוש קבצים",
+    "rename": "שנה שם קובץ",
+    "select_multiple": "בחר קבצים",
+    "delete": "מחק קובץ",
+    "name": "שם קובץ",
+    "goto_path": "עבור לנתיב",
+    "open_path": "הזן נתיב",
+    "open_path_required": "הזן נתיב",
+    "confirm": {
+      "delete": "למחוק קובץ זה?",
+      "delete_selected": "למחוק את הקבצים הנבחרים?"
+    }
   },
   "language": {
     "en": "English",
@@ -58,7 +70,13 @@
     "settings": "הגדרות",
     "about": "אודות",
     "visibility": "נראות התפריט",
-    "equalizer": "אקולייזר"
+    "equalizer": "אקולייזר",
+    "notes": "פנקס רשימות",
+    "tasks": "משימות",
+    "mpgram": "MPGram",
+    "github": "GitHub",
+    "open_uri": "פתח...",
+    "weather": "מזג אוויר"
   },
   "player": {
     "next": "הבא",
@@ -128,13 +146,24 @@
       "delete": "למחוק את השיר שהורד הזה?",
       "delete_selected": "למחוק את השירים שהורדו שנבחרו?",
       "clear": "למחוק את כל השירים שהורדו?"
-    }
+    },
+    "queue": "בתהליך",
+    "queue_empty": "אין הורדות פעילות או ממתינות",
+    "queue_active": "מוריד: {0}",
+    "queue_pending": "ממתין: {0}",
+    "queue_remaining": "{0} ממתינות",
+    "queue_waiting": "מתחיל {0} הורדות נבחרות",
+    "queue_finished": "ההורדות הסתיימו (הצליחו / נכשלו): {0}",
+    "minimize": "מזער",
+    "reorder": "סדר מחדש הורדות"
   },
   "playlist": {
     "add_track": "הוסף לרשימת השמעה",
     "create": "צור רשימת השמעה",
     "confirm": {
-      "delete_with_tracks": "רשימת ההשמעה הזו מכילה שירים. למחוק את רשימת ההשמעה ואת כל השירים?"
+      "delete_with_tracks": "רשימת ההשמעה הזו מכילה שירים. למחוק את רשימת ההשמעה ואת כל השירים?",
+      "delete_all": "למחוק את כל רשימות ההשמעה והרצועות שלהן?",
+      "remove_selected": "להסיר את הרצועות הנבחרות מרשימת ההשמעה הזו?"
     },
     "view_tracks": "הצג רשימת רצועות",
     "error": {
@@ -144,7 +173,8 @@
       "create_failed": "נכשל ביצירת רשימת השמעה",
       "empty_name": "שם רשימת ההשמעה לא יכול להיות ריק",
       "remove_track_failed": "מחיקת הרצועה מרשימת ההשמעה נכשל",
-      "rename_failed": "שינוי השם של רשימת ההשמעה נכשל"
+      "rename_failed": "שינוי השם של רשימת ההשמעה נכשל",
+      "reorder_failed": "שמירת סדר הרצועות נכשלה"
     },
     "name": "שם רשימת השמעה",
     "rename": "שנה שם רשימת השמעה",
@@ -155,7 +185,10 @@
       "renamed": "שמה של רשימת ההשמעה שונה בהצלחה",
       "track_added": "הרצועה נוספה לרשימת ההשמעה בהצלחה",
       "track_removed": "הרצועה נמחקה מרשימת ההשמעה בהצלחה"
-    }
+    },
+    "remove_selected": "הסר רצועות נבחרות",
+    "delete_all": "מחק את כל רשימות ההשמעה",
+    "reorder_tracks": "סדר מחדש רצועות"
   },
   "queue": {
     "add_to_queue": "הוסף לתור",
@@ -225,7 +258,9 @@
     "visibility": {
       "instructions": "בחר פריט להציג או להסתיר. [x] = מוצג, [] = מוסתר",
       "saved": "הגדרות הנראות נשמרו"
-    }
+    },
+    "mpgram_auto_login": "הכן את MPGram אוטומטית",
+    "use_wifi": "השתמש ב-Wi-Fi (בלקברי)"
   },
   "status": {
     "error": "התרחשה שגיאה",
@@ -263,9 +298,192 @@
   "note": {
     "select_multiple": "בחר הערות",
     "delete_selected": "מחק הערות נבחרות",
-    "delete_selected_confirm": "למחוק את ההערות הנבחרות?"
+    "delete_selected_confirm": "למחוק את ההערות הנבחרות?",
+    "title": "פנקס רשימות",
+    "clear": "נקה",
+    "saved": "הפתק נשמר",
+    "save_from_mpgram": "שמור פתק",
+    "save_failed": "שמירת הפתק נכשלה",
+    "export": "שמור במכשיר",
+    "import": "ייבא קובץ",
+    "exported": "נשמר ב-{0}",
+    "imported": "הפתקים יובאו",
+    "save_here": "שמור כאן",
+    "new": "פתק חדש",
+    "rename": "שנה שם",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "empty": "אין פתקים",
+    "save_changes": "לשמור שינויים?",
+    "discard": "בטל",
+    "search": "חפש פתקים",
+    "clear_search": "נקה חיפוש",
+    "goto_path": "עבור לנתיב",
+    "open_path": "הזן נתיב",
+    "open_path_required": "הזן נתיב",
+    "no_search_results": "לא נמצאו פתקים",
+    "custom_title": "הגדר כותרת מותאמת",
+    "custom_title_field": "כותרת",
+    "toggle_pin": "הצמד/בטל הצמדת פתק",
+    "export_select": "בחר פתקים לייצוא",
+    "export_selected": "ייצא נבחרים",
+    "select_all": "בחר הכל",
+    "deselect_all": "בטל בחירת הכל",
+    "select_at_least_one": "בחר לפחות פתק אחד",
+    "export_filename": "שם קובץ הייצוא",
+    "file_name": "שם קובץ",
+    "delete_confirm": "למחוק {0}?",
+    "deleted": "הפתק נמחק"
   },
   "bulk": {
-    "notes_deleted": "נמחקו {0} הערות"
+    "notes_deleted": "נמחקו {0} הערות",
+    "select_empty": "בחר לפחות פריט אחד",
+    "playlist_added": "נוספו {0} רצועות לרשימת ההשמעה",
+    "playlist_result": "נוסף / כבר קיים / נכשל: {0}",
+    "tracks_deleted": "נמחקו {0} הורדות",
+    "files_deleted": "נמחקו {0} קבצים",
+    "tracks_removed": "הוסרו {0} רצועות מרשימת ההשמעה",
+    "download_summary": "תוצאת ההורדה: {0}",
+    "download_none": "אין רצועות חדשות להורדה"
+  },
+  "mpgram": {
+    "send_note": "שלח פתק",
+    "import_session_note": "ייבא הפעלה מפתק",
+    "session_code_note_title": "קוד הפעלה של MPGram"
+  },
+  "github": {
+    "import_token_file": "ייבא אסימון מקובץ",
+    "import_token_note": "ייבא אסימון מפתק MIDPlay",
+    "token_empty": "קובץ/פתק האסימון ריק"
+  },
+  "open_uri": {
+    "title": "פתח...",
+    "history": "היסטוריה",
+    "use": "השתמש",
+    "clear": "נקה היסטוריה",
+    "empty": "הזן URI."
+  },
+  "cache": {
+    "listen": "האזן",
+    "delete": "מחק",
+    "delete_all": "מחק הכל",
+    "title": "שירים במטמון",
+    "unknown": "שיר לא ידוע",
+    "status": {
+      "removed": "השיר הוסר מהמטמון",
+      "cleared": "המטמון נוקה"
+    },
+    "confirm": {
+      "delete_all": "למחוק את כל השירים במטמון?"
+    }
+  },
+  "eq": {
+    "enable": "הפעל",
+    "presets": "הגדרות קבועות מראש",
+    "manual": "ידני",
+    "band": "פס",
+    "not_supported": "האקולייזר אינו נתמך במכשיר זה"
+  },
+  "task": {
+    "title": "משימות",
+    "new": "משימה חדשה",
+    "create": "צור משימה",
+    "edit": "ערוך משימה",
+    "empty": "אין משימות",
+    "no_results": "לא נמצאו משימות",
+    "search": "חפש משימות",
+    "clear_search": "נקה חיפוש",
+    "select_multiple": "בחר משימות",
+    "goto_path": "עבור לנתיב",
+    "open_path": "הזן נתיב",
+    "open_path_required": "הזן נתיב",
+    "filter": "סינון",
+    "filter_all": "הכל",
+    "filter_pending": "ממתין",
+    "filter_done": "הושלם",
+    "filter_overdue": "באיחור",
+    "complete": "סמן כהושלם",
+    "reopen": "סמן כממתין",
+    "toggle_done": "השלם/פתח מחדש",
+    "pin": "הצמד/בטל הצמדת משימה",
+    "rename": "שנה שם",
+    "rename_title": "שנה שם משימה",
+    "title_field": "כותרת",
+    "priority": "עדיפות",
+    "priority_high": "גבוהה",
+    "priority_normal": "רגילה",
+    "priority_low": "נמוכה",
+    "due": "מועד",
+    "due_none": "ללא מועד",
+    "due_today": "היום",
+    "due_tomorrow": "מחר",
+    "due_in_3": "בעוד 3 ימים",
+    "due_in_7": "בעוד 7 ימים",
+    "due_custom": "מותאם אישית",
+    "due_hint": "DD/MM/YYYY HH:MM",
+    "reminder": "תזכורת",
+    "reminder_none": "ללא תזכורת",
+    "reminder_at_due": "בזמן המועד",
+    "reminder_15": "15 דק' לפני",
+    "reminder_60": "שעה לפני",
+    "reminder_6h": "6 שעות לפני",
+    "reminder_1d": "יום לפני",
+    "reminder_custom": "מותאם אישית",
+    "reminder_hint": "DD/MM/YYYY HH:MM",
+    "reminder_title": "תזכורת משימה",
+    "reminder_fired": "התזכורת הוצגה",
+    "description": "תיאור",
+    "description_empty": "ללא תיאור",
+    "delete": "מחק",
+    "delete_confirm": "למחוק {0}?",
+    "deleted": "המשימה נמחקה",
+    "saved": "המשימה נשמרה",
+    "title_required": "נדרשת כותרת",
+    "due_required": "הגדר מועד לתזכורת זו",
+    "due_invalid": "מועד לא תקין",
+    "reminder_invalid": "מועד תזכורת לא תקין",
+    "status_pending": "ממתין",
+    "status_done": "הושלם",
+    "overdue": "באיחור",
+    "today": "היום",
+    "tomorrow": "מחר",
+    "created_at": "נוצר: {0}",
+    "completed_at": "הושלם: {0}"
+  },
+  "vault": {
+    "title": "כספת",
+    "open": "כספת",
+    "protect": "העבר לכספת",
+    "remove": "הסר מהכספת",
+    "moved": "ההערה הועברה לכספת",
+    "moved_many": "הערות הועברו לכספת: {0}",
+    "removed": "ההערה הוסרה מהכספת",
+    "empty": "הכספת ריקה",
+    "enter_password": "הזן סיסמת כספת",
+    "wrong_password": "סיסמה שגויה",
+    "create_title": "צור סיסמת כספת",
+    "change_password": "שנה סיסמת כספת",
+    "current_password": "סיסמה נוכחית",
+    "new_password": "סיסמה חדשה",
+    "confirm_password": "אשר סיסמה",
+    "password_empty": "הסיסמה לא יכולה להיות ריקה",
+    "password_mismatch": "הסיסמאות אינן תואמות",
+    "password_set": "סיסמת הכספת הוגדרה",
+    "password_changed": "סיסמת הכספת שונתה"
+  },
+  "weather": {
+    "title": "מזג אוויר",
+    "refresh": "רענן",
+    "loading": "טוען...",
+    "set_city": "עיר...",
+    "city_prompt": "עיר למזג האוויר",
+    "city_field": "עיר",
+    "condition": "מצב",
+    "temp": "טמפרטורה",
+    "feels": "מרגיש כמו",
+    "wind": "רוח",
+    "humidity": "לחות",
+    "precip": "גשם",
+    "error": "לא ניתן לטעון את מזג האוויר"
   }
 }

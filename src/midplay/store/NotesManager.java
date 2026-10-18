@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.rms.RecordStoreException;
+import midplay.util.Password;
 import midplay.util.Utils;
 
 public final class NotesManager {
@@ -19,13 +20,15 @@ public final class NotesManager {
     public final String text;
     public final boolean pinned;
     public final String customTitle;
+    public final boolean vault;
 
-    Note(int id, String title, String text, boolean pinned, String customTitle) {
+    Note(int id, String title, String text, boolean pinned, String customTitle, boolean vault) {
       this.id = id;
       this.title = title;
       this.text = text;
       this.pinned = pinned;
       this.customTitle = customTitle;
+      this.vault = vault;
     }
   }
 
@@ -44,20 +47,28 @@ public final class NotesManager {
   private NotesManager() {}
 
   public Note[] getNotes() {
+    return ordered(false);
+  }
+
+  public Note[] getVaultNotes() {
+    return ordered(true);
+  }
+
+  private Note[] ordered(boolean vaultOnly) {
     JSONArray data = notes();
-    Note[] result = new Note[data.size()];
-    for (int i = 0; i < result.length; i++) {
-      JSONObject item = data.getObject(i);
-      String text = item.getString("text", "");
-      result[i] = noteFromJSON(item, i + 1);
+    Note[] all = new Note[data.size()];
+    int count = 0;
+    for (int i = 0; i < all.length; i++) {
+      Note note = noteFromJSON(data.getObject(i), i + 1);
+      if (note.vault == vaultOnly) all[count++] = note;
     }
-    Note[] ordered = new Note[result.length];
+    Note[] ordered = new Note[count];
     int index = 0;
-    for (int i = 0; i < result.length; i++) {
-      if (result[i].pinned) ordered[index++] = result[i];
+    for (int i = 0; i < count; i++) {
+      if (all[i].pinned) ordered[index++] = all[i];
     }
-    for (int i = 0; i < result.length; i++) {
-      if (!result[i].pinned) ordered[index++] = result[i];
+    for (int i = 0; i < count; i++) {
+      if (!all[i].pinned) ordered[index++] = all[i];
     }
     return ordered;
   }
@@ -71,9 +82,13 @@ public final class NotesManager {
   }
 
   public Note create(String text) throws RecordStoreException {
+    return create(text, false);
+  }
+
+  public Note create(String text, boolean vault) throws RecordStoreException {
     JSONArray data = notes();
     int id = nextId(data);
-    JSONObject item = noteObject(id, "", text == null ? "" : text, false);
+    JSONObject item = noteObject(id, "", text == null ? "" : text, false, vault);
     data.add(item);
     save(data);
     return noteFromJSON(item, id);
@@ -87,7 +102,13 @@ public final class NotesManager {
       int itemId = item.getInt("id", i + 1);
       String itemText = itemId == id ? (text == null ? "" : text) : item.getString("text", "");
       String customTitle = customTitle(item);
-      updated.add(noteObject(itemId, customTitle, itemText, item.getBoolean("pinned", false)));
+      updated.add(
+          noteObject(
+              itemId,
+              customTitle,
+              itemText,
+              item.getBoolean("pinned", false),
+              item.getBoolean("vault", false)));
     }
     save(updated);
   }
@@ -103,6 +124,27 @@ public final class NotesManager {
   public void togglePinned(int id) throws RecordStoreException {
     JSONObject item = find(notes(), id);
     if (item != null) rewriteNote(id, null, null, new Boolean(!item.getBoolean("pinned", false)));
+  }
+
+  public void setVault(int id, boolean vault) throws RecordStoreException {
+    rewriteNote(id, null, null, null, new Boolean(vault));
+  }
+
+  public boolean hasVaultPassword() {
+    String hash = SettingsManager.getInstance().getVaultPasswordHash();
+    return hash != null && hash.length() > 0;
+  }
+
+  public void setVaultPassword(String password) throws RecordStoreException {
+    SettingsManager.getInstance().saveVaultPassword(Password.hash(password));
+  }
+
+  public void clearVaultPassword() throws RecordStoreException {
+    SettingsManager.getInstance().saveVaultPassword("");
+  }
+
+  public boolean verifyVaultPassword(String password) {
+    return Password.verify(password, SettingsManager.getInstance().getVaultPasswordHash());
   }
 
   public void remove(int id) throws RecordStoreException {
@@ -288,11 +330,17 @@ public final class NotesManager {
   }
 
   private static JSONObject noteObject(int id, String title, String text, boolean pinned) {
+    return noteObject(id, title, text, pinned, false);
+  }
+
+  private static JSONObject noteObject(
+      int id, String title, String text, boolean pinned, boolean vault) {
     JSONObject item = new JSONObject();
     item.put("id", id);
     item.put("customTitle", title == null ? "" : title);
     item.put("text", text == null ? "" : text);
     item.put("pinned", pinned);
+    if (vault) item.put("vault", true);
     return item;
   }
 
@@ -300,7 +348,13 @@ public final class NotesManager {
     String text = item.getString("text", "");
     String customTitle = customTitle(item);
     String title = customTitle.length() > 0 ? customTitle : titleFromText(text);
-    return new Note(item.getInt("id", fallbackId), title, text, item.getBoolean("pinned", false), customTitle);
+    return new Note(
+        item.getInt("id", fallbackId),
+        title,
+        text,
+        item.getBoolean("pinned", false),
+        customTitle,
+        item.getBoolean("vault", false));
   }
 
   private static String customTitle(JSONObject item) {
@@ -312,6 +366,11 @@ public final class NotesManager {
   }
 
   private void rewriteNote(int id, String customTitle, String text, Boolean pinned) throws RecordStoreException {
+    rewriteNote(id, customTitle, text, pinned, null);
+  }
+
+  private void rewriteNote(int id, String customTitle, String text, Boolean pinned, Boolean vault)
+      throws RecordStoreException {
     JSONArray old = notes();
     JSONArray updated = new JSONArray();
     for (int i = 0; i < old.size(); i++) {
@@ -320,12 +379,14 @@ public final class NotesManager {
       String currentTitle = customTitle(item);
       String currentText = item.getString("text", "");
       boolean currentPinned = item.getBoolean("pinned", false);
+      boolean currentVault = item.getBoolean("vault", false);
       if (currentId == id) {
         if (customTitle != null) currentTitle = customTitle;
         if (text != null) currentText = text;
         if (pinned != null) currentPinned = pinned.booleanValue();
+        if (vault != null) currentVault = vault.booleanValue();
       }
-      updated.add(noteObject(currentId, currentTitle, currentText, currentPinned));
+      updated.add(noteObject(currentId, currentTitle, currentText, currentPinned, currentVault));
     }
     save(updated);
   }

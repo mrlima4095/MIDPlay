@@ -4,7 +4,8 @@
     "cancel": "Hủy",
     "exit": "Thoát",
     "ok": "OK",
-    "save": "Lưu"
+    "save": "Lưu",
+    "select": "Chọn"
   },
   "app": {
     "name": "MIDPlay"
@@ -31,7 +32,18 @@
     "not_audio": "Không phải tệp âm thanh",
     "root": "Đi đến thư mục gốc",
     "search": "Tìm tệp",
-    "clear_search": "Xóa tìm kiếm tệp"
+    "clear_search": "Xóa tìm kiếm tệp",
+    "rename": "Đổi tên tệp",
+    "select_multiple": "Chọn tệp",
+    "delete": "Xóa tệp",
+    "name": "Tên tệp",
+    "goto_path": "Đi tới đường dẫn",
+    "open_path": "Nhập đường dẫn",
+    "open_path_required": "Nhập đường dẫn",
+    "confirm": {
+      "delete": "Xóa tệp này?",
+      "delete_selected": "Xóa các tệp đã chọn?"
+    }
   },
   "language": {
     "en": "English",
@@ -58,7 +70,13 @@
     "settings": "Cài đặt",
     "about": "Giới thiệu",
     "visibility": "Ẩn/hiện menu",
-    "equalizer": "Bộ chỉnh âm"
+    "equalizer": "Bộ chỉnh âm",
+    "notes": "Ghi chú",
+    "tasks": "Nhiệm vụ",
+    "mpgram": "MPGram",
+    "github": "GitHub",
+    "open_uri": "Mở...",
+    "weather": "Thời tiết"
   },
   "player": {
     "next": "Bài tiếp theo",
@@ -128,13 +146,24 @@
       "delete": "Xóa bài hát đã tải xuống này?",
       "delete_selected": "Xóa các bài hát đã tải xuống đã chọn?",
       "clear": "Xóa tất cả bài hát đã tải xuống?"
-    }
+    },
+    "queue": "Đang xử lý",
+    "queue_empty": "Không có bản tải xuống đang chạy hoặc chờ",
+    "queue_active": "Đang tải: {0}",
+    "queue_pending": "Đang chờ: {0}",
+    "queue_remaining": "{0} đang chờ",
+    "queue_waiting": "Bắt đầu {0} bản tải xuống đã chọn",
+    "queue_finished": "Tải xuống xong (thành công / thất bại): {0}",
+    "minimize": "Thu nhỏ",
+    "reorder": "Sắp xếp lại bản tải xuống"
   },
   "playlist": {
     "add_track": "Thêm vào playlist",
     "create": "Tạo playlist",
     "confirm": {
-      "delete_with_tracks": "Playlist này có chứa bài hát. Bạn vẫn muốn xóa?"
+      "delete_with_tracks": "Playlist này có chứa bài hát. Bạn vẫn muốn xóa?",
+      "delete_all": "Xóa tất cả danh sách phát và bài hát?",
+      "remove_selected": "Xóa các bài hát đã chọn khỏi danh sách phát này?"
     },
     "view_tracks": "Xem các bài hát",
     "error": {
@@ -144,7 +173,8 @@
       "create_failed": "Không thể tạo playlist",
       "empty_name": "Tên playlist không được để trống",
       "remove_track_failed": "Không thể xóa bài hát khỏi playlist",
-      "rename_failed": "Không thể đổi tên playlist"
+      "rename_failed": "Không thể đổi tên playlist",
+      "reorder_failed": "Không lưu được thứ tự bài hát"
     },
     "name": "Tên playlist",
     "rename": "Đổi tên playlist",
@@ -155,7 +185,10 @@
       "renamed": "Đổi tên playlist thành công",
       "track_added": "Đã thêm bài hát vào playlist",
       "track_removed": "Đã xóa bài hát khỏi playlist"
-    }
+    },
+    "remove_selected": "Xóa các bài hát đã chọn",
+    "delete_all": "Xóa tất cả danh sách phát",
+    "reorder_tracks": "Sắp xếp lại bài hát"
   },
   "queue": {
     "add_to_queue": "Thêm vào hàng đợi",
@@ -226,7 +259,8 @@
     "visibility": {
       "instructions": "Chọn mục để ẩn hoặc hiện. [x] = Hiện, [] = Ẩn",
       "saved": "Đã lưu cài đặt hiển thị"
-    }
+    },
+    "mpgram_auto_login": "Tự động chuẩn bị MPGram"
   },
   "status": {
     "error": "Đã xảy ra lỗi",
@@ -271,9 +305,185 @@
   "note": {
     "select_multiple": "Chọn ghi chú",
     "delete_selected": "Xóa ghi chú đã chọn",
-    "delete_selected_confirm": "Xóa các ghi chú đã chọn?"
+    "delete_selected_confirm": "Xóa các ghi chú đã chọn?",
+    "title": "Ghi chú",
+    "clear": "Xóa",
+    "saved": "Đã lưu ghi chú",
+    "save_from_mpgram": "Lưu ghi chú",
+    "save_failed": "Lưu ghi chú thất bại",
+    "export": "Lưu vào thiết bị",
+    "import": "Nhập tệp",
+    "exported": "Đã lưu vào {0}",
+    "imported": "Đã nhập ghi chú",
+    "save_here": "Lưu tại đây",
+    "new": "Ghi chú mới",
+    "rename": "Đổi tên",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "empty": "Không có ghi chú",
+    "save_changes": "Lưu thay đổi?",
+    "discard": "Hủy bỏ",
+    "search": "Tìm ghi chú",
+    "clear_search": "Xóa tìm kiếm",
+    "goto_path": "Đi tới đường dẫn",
+    "open_path": "Nhập đường dẫn",
+    "open_path_required": "Nhập đường dẫn",
+    "no_search_results": "Không tìm thấy ghi chú",
+    "custom_title": "Đặt tiêu đề tùy chọn",
+    "custom_title_field": "Tiêu đề",
+    "toggle_pin": "Ghim/bỏ ghim ghi chú",
+    "export_select": "Chọn ghi chú để xuất",
+    "export_selected": "Xuất mục đã chọn",
+    "select_all": "Chọn tất cả",
+    "deselect_all": "Bỏ chọn tất cả",
+    "select_at_least_one": "Chọn ít nhất một ghi chú",
+    "export_filename": "Tên tệp xuất",
+    "file_name": "Tên tệp",
+    "delete_confirm": "Xóa {0}?",
+    "deleted": "Đã xóa ghi chú"
   },
   "bulk": {
-    "notes_deleted": "Đã xóa {0} ghi chú"
+    "notes_deleted": "Đã xóa {0} ghi chú",
+    "select_empty": "Chọn ít nhất một mục",
+    "playlist_added": "Đã thêm {0} bài hát vào danh sách phát",
+    "playlist_result": "Đã thêm / đã có / thất bại: {0}",
+    "tracks_deleted": "Đã xóa {0} bản tải xuống",
+    "files_deleted": "Đã xóa {0} tệp",
+    "tracks_removed": "Đã xóa {0} bài hát khỏi danh sách phát",
+    "download_summary": "Kết quả tải xuống: {0}",
+    "download_none": "Không có bài hát mới để tải xuống"
+  },
+  "mpgram": {
+    "send_note": "Gửi ghi chú",
+    "import_session_note": "Nhập phiên từ ghi chú",
+    "session_code_note_title": "Mã phiên MPGram"
+  },
+  "github": {
+    "import_token_file": "Nhập token từ tệp",
+    "import_token_note": "Nhập token từ ghi chú MIDPlay",
+    "token_empty": "Tệp/ghi chú token trống"
+  },
+  "open_uri": {
+    "title": "Mở...",
+    "history": "Lịch sử",
+    "use": "Dùng",
+    "clear": "Xóa lịch sử",
+    "empty": "Nhập URI."
+  },
+  "cache": {
+    "listen": "Nghe",
+    "delete": "Xóa",
+    "delete_all": "Xóa tất cả",
+    "title": "Bài hát trong bộ đệm",
+    "unknown": "Bài hát không rõ",
+    "status": {
+      "removed": "Đã xóa bài hát khỏi bộ đệm",
+      "cleared": "Đã xóa bộ đệm"
+    },
+    "confirm": {
+      "delete_all": "Xóa tất cả bài hát trong bộ đệm?"
+    }
+  },
+  "task": {
+    "title": "Nhiệm vụ",
+    "new": "Nhiệm vụ mới",
+    "create": "Tạo nhiệm vụ",
+    "edit": "Sửa nhiệm vụ",
+    "empty": "Không có nhiệm vụ",
+    "no_results": "Không tìm thấy nhiệm vụ",
+    "search": "Tìm nhiệm vụ",
+    "clear_search": "Xóa tìm kiếm",
+    "select_multiple": "Chọn nhiệm vụ",
+    "goto_path": "Đi tới đường dẫn",
+    "open_path": "Nhập đường dẫn",
+    "open_path_required": "Nhập đường dẫn",
+    "filter": "Lọc",
+    "filter_all": "Tất cả",
+    "filter_pending": "Đang chờ",
+    "filter_done": "Hoàn thành",
+    "filter_overdue": "Quá hạn",
+    "complete": "Đánh dấu hoàn thành",
+    "reopen": "Đánh dấu đang chờ",
+    "toggle_done": "Hoàn thành/Mở lại",
+    "pin": "Ghim/bỏ ghim nhiệm vụ",
+    "rename": "Đổi tên",
+    "rename_title": "Đổi tên nhiệm vụ",
+    "title_field": "Tiêu đề",
+    "priority": "Ưu tiên",
+    "priority_high": "Cao",
+    "priority_normal": "Bình thường",
+    "priority_low": "Thấp",
+    "due": "Hạn",
+    "due_none": "Không có hạn",
+    "due_today": "Hôm nay",
+    "due_tomorrow": "Ngày mai",
+    "due_in_3": "Trong 3 ngày",
+    "due_in_7": "Trong 7 ngày",
+    "due_custom": "Tùy chỉnh",
+    "due_hint": "DD/MM/YYYY HH:MM",
+    "reminder": "Nhắc nhở",
+    "reminder_none": "Không nhắc nhở",
+    "reminder_at_due": "Đúng hạn",
+    "reminder_15": "Trước 15 phút",
+    "reminder_60": "Trước 1 giờ",
+    "reminder_6h": "Trước 6 giờ",
+    "reminder_1d": "Trước 1 ngày",
+    "reminder_custom": "Tùy chỉnh",
+    "reminder_hint": "DD/MM/YYYY HH:MM",
+    "reminder_title": "Nhắc nhở nhiệm vụ",
+    "reminder_fired": "Đã hiển thị nhắc nhở",
+    "description": "Mô tả",
+    "description_empty": "Không có mô tả",
+    "delete": "Xóa",
+    "delete_confirm": "Xóa {0}?",
+    "deleted": "Đã xóa nhiệm vụ",
+    "saved": "Đã lưu nhiệm vụ",
+    "title_required": "Cần có tiêu đề",
+    "due_required": "Đặt hạn cho nhắc nhở này",
+    "due_invalid": "Hạn không hợp lệ",
+    "reminder_invalid": "Thời gian nhắc nhở không hợp lệ",
+    "status_pending": "Đang chờ",
+    "status_done": "Hoàn thành",
+    "overdue": "Quá hạn",
+    "today": "Hôm nay",
+    "tomorrow": "Ngày mai",
+    "created_at": "Đã tạo: {0}",
+    "completed_at": "Đã xong: {0}"
+  },
+  "vault": {
+    "title": "Két",
+    "open": "Két",
+    "protect": "Chuyển vào két",
+    "remove": "Xóa khỏi két",
+    "moved": "Đã chuyển ghi chú vào két",
+    "moved_many": "Đã chuyển ghi chú vào két: {0}",
+    "removed": "Đã xóa ghi chú khỏi két",
+    "empty": "Két trống",
+    "enter_password": "Nhập mật khẩu két",
+    "wrong_password": "Sai mật khẩu",
+    "create_title": "Tạo mật khẩu két",
+    "change_password": "Đổi mật khẩu két",
+    "current_password": "Mật khẩu hiện tại",
+    "new_password": "Mật khẩu mới",
+    "confirm_password": "Xác nhận mật khẩu",
+    "password_empty": "Mật khẩu không được để trống",
+    "password_mismatch": "Mật khẩu không khớp",
+    "password_set": "Đã đặt mật khẩu két",
+    "password_changed": "Đã đổi mật khẩu két"
+  },
+  "weather": {
+    "title": "Thời tiết",
+    "refresh": "Làm mới",
+    "loading": "Đang tải...",
+    "set_city": "Thành phố...",
+    "city_prompt": "Thành phố thời tiết",
+    "city_field": "Thành phố",
+    "condition": "Tình trạng",
+    "temp": "Nhiệt độ",
+    "feels": "Cảm giác",
+    "wind": "Gió",
+    "humidity": "Độ ẩm",
+    "precip": "Mưa",
+    "error": "Không tải được thời tiết"
   }
 }

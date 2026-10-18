@@ -24,6 +24,7 @@ public class Configuration {
   public static final String STORAGE_CACHE_AUDIO = "storage.cache_audio";
   public static final String STORAGE_NOTES = "storage.notes";
   public static final String STORAGE_TASKS = "storage.tasks";
+  public static final String STORAGE_WEATHER = "storage.weather";
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
   public static final String DEFAULT_CACHE_PATH = "file:///SDCard/MIDPlay/Cache/";
@@ -48,7 +49,10 @@ public class Configuration {
   public static final String MENU_OPEN_URI = "menu.open_uri";
   public static final String MENU_NOTES = "menu.notes";
   public static final String MENU_TASKS = "menu.tasks";
+  public static final String MENU_WEATHER = "menu.weather";
   public static final String MENU_NOW_PLAYING = "menu.now_playing";
+
+  public static final String DEFAULT_WEATHER_CITY = "Sao Paulo";
 
   public static final String SERVICE_NCT = "NCT";
   public static final String SERVICE_SOUNDCLOUD = "SoundCloud";
@@ -130,6 +134,7 @@ public class Configuration {
   public static Image githubIcon;
   public static Image notesIcon;
   public static Image tasksIcon;
+  public static Image weatherIcon;
   public static Image fileExplorerIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
@@ -168,6 +173,7 @@ public class Configuration {
     githubIcon = Utils.resizeImageToFit(Image.createImage("/g.png"), 36, 36);
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();
+    weatherIcon = createWeatherIcon();
     fileExplorerIcon = createFileExplorerIcon();
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
@@ -234,8 +240,27 @@ public class Configuration {
     return image;
   }
 
-  private static Image createFileExplorerIcon() {
+  private static Image createWeatherIcon() {
     Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
+    // Sun behind a cloud.
+    graphics.setColor(0xF6B93B);
+    graphics.fillArc(4, 4, 16, 16, 0, 360);
+    graphics.setColor(0xF9D27A);
+    graphics.fillArc(7, 7, 10, 10, 0, 360);
+    // Cloud with a soft shadow.
+    graphics.setColor(0x9FB3C8);
+    graphics.fillRoundRect(9, 20, 24, 11, 5, 5);
+    graphics.setColor(0xF4F7FB);
+    graphics.fillRoundRect(7, 18, 24, 12, 6, 6);
+    graphics.fillArc(9, 12, 15, 15, 0, 360);
+    graphics.fillArc(18, 14, 13, 13, 0, 360);
+    graphics.setColor(0x52708F);
+    graphics.drawRoundRect(7, 18, 24, 12, 6, 6);
+    return image;
+  }
+
+  private static Image createFileExplorerIcon() {    Image image = Image.createImage(36, 36);
     Graphics graphics = image.getGraphics();
     // Distinct folder silhouette with a visible tab and blue front panel.
     graphics.setColor(0xB97920);

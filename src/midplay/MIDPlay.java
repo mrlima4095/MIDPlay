@@ -43,6 +43,7 @@ import midplay.ui.screen.FileBrowserScreen;
 import midplay.ui.screen.OpenUriScreen;
 import midplay.ui.screen.NotesScreen;
 import midplay.ui.screen.TasksScreen;
+import midplay.ui.screen.WeatherScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 import mpgram.MP;
@@ -188,6 +189,13 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
         new Runnable() {
           public void run() {
             goToTasksScreen();
+          }
+        });
+    menuManager.registerAction(
+        Configuration.MENU_WEATHER,
+        new Runnable() {
+          public void run() {
+            goToWeatherScreen();
           }
         });
   }
@@ -578,6 +586,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
 
   private void goToTasksScreen() {
     navigator.forward(new TasksScreen(navigator));
+  }
+
+  private void goToWeatherScreen() {
+    navigator.forward(new WeatherScreen(navigator));
   }
 
   private void showExitConfirmation() {

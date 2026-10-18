@@ -25,6 +25,8 @@ public final class NotesScreen extends List implements CommandListener {
   private final Command pinCommand;
   private final Command deleteCommand;
   private final Command selectMultipleCommand;
+  private final Command vaultCommand;
+  private final Command protectCommand;
   private Note[] notes;
   private String searchQuery = "";
 
@@ -32,19 +34,23 @@ public final class NotesScreen extends List implements CommandListener {
     super(Lang.tr("note.title"), List.IMPLICIT);
     this.navigator = navigator;
     newCommand = new Command(Lang.tr("note.new"), Command.SCREEN, 1);
+    vaultCommand = new Command(Lang.tr("vault.open"), Command.SCREEN, 2);
     searchCommand = new Command(Lang.tr("note.search"), Command.SCREEN, 5);
     clearSearchCommand = new Command(Lang.tr("note.clear_search"), Command.SCREEN, 6);
     customTitleCommand = new Command(Lang.tr("note.custom_title"), Command.SCREEN, 7);
     pinCommand = new Command(Lang.tr("note.toggle_pin"), Command.SCREEN, 8);
     deleteCommand = new Command(Lang.tr("note.delete"), Command.SCREEN, 9);
     selectMultipleCommand = new Command(Lang.tr("action.select"), Command.SCREEN, 10);
+    protectCommand = new Command(Lang.tr("vault.protect"), Command.SCREEN, 11);
     addCommand(newCommand);
+    addCommand(vaultCommand);
     addCommand(searchCommand);
     addCommand(clearSearchCommand);
     addCommand(customTitleCommand);
     addCommand(pinCommand);
     addCommand(deleteCommand);
     addCommand(selectMultipleCommand);
+    addCommand(protectCommand);
     addCommand(Commands.back());
     addCommand(Commands.playerNowPlaying());
     setCommandListener(this);
@@ -89,6 +95,8 @@ public final class NotesScreen extends List implements CommandListener {
       else if (command == pinCommand) togglePin();
       else if (command == deleteCommand) deleteSelected();
       else if (command == selectMultipleCommand) selectMultiple();
+      else if (command == vaultCommand) openVault();
+      else if (command == protectCommand) protectSelected();
     } catch (Exception e) {
       navigator.showAlert(e.toString(), AlertType.ERROR);
     }
@@ -195,6 +203,36 @@ public final class NotesScreen extends List implements CommandListener {
       return;
     }
     navigator.forward(new NotesMultiSelectScreen(navigator, notes, refreshOnClose()));
+  }
+
+  private void openVault() {
+    VaultAuth.authenticate(
+        navigator,
+        new Runnable() {
+          public void run() {
+            navigator.forward(new VaultScreen(navigator));
+          }
+        });
+  }
+
+  private void protectSelected() {
+    final Note note = selected();
+    if (note == null) {
+      return;
+    }
+    VaultAuth.authenticate(
+        navigator,
+        new Runnable() {
+          public void run() {
+            try {
+              NotesManager.getInstance().setVault(note.id, true);
+              refresh();
+              navigator.showAlert(Lang.tr("vault.moved"), AlertType.CONFIRMATION, NotesScreen.this);
+            } catch (Exception e) {
+              navigator.showAlert(e.toString(), AlertType.ERROR, NotesScreen.this);
+            }
+          }
+        });
   }
 
   private void refresh() {

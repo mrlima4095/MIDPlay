@@ -22,6 +22,7 @@ public final class NotesMultiSelectScreen extends List implements CommandListene
   private final Command deselectAllCommand = new Command(Lang.tr("note.deselect_all"), Command.SCREEN, 2);
   private final Command deleteCommand = new Command(Lang.tr("note.delete_selected"), Command.SCREEN, 3);
   private final Command exportCommand = new Command(Lang.tr("note.export_selected"), Command.SCREEN, 4);
+  private final Command vaultCommand = new Command(Lang.tr("vault.protect"), Command.SCREEN, 5);
 
   public NotesMultiSelectScreen(Navigator navigator, Note[] notes, Runnable onDone) {
     super(Lang.tr("note.select_multiple"), Choice.MULTIPLE);
@@ -35,6 +36,7 @@ public final class NotesMultiSelectScreen extends List implements CommandListene
     addCommand(deselectAllCommand);
     addCommand(deleteCommand);
     addCommand(exportCommand);
+    addCommand(vaultCommand);
     addCommand(Commands.back());
     setCommandListener(this);
   }
@@ -50,6 +52,8 @@ public final class NotesMultiSelectScreen extends List implements CommandListene
       deleteSelected();
     } else if (command == exportCommand) {
       exportSelected();
+    } else if (command == vaultCommand) {
+      moveSelectedToVault();
     }
   }
 
@@ -87,6 +91,34 @@ public final class NotesMultiSelectScreen extends List implements CommandListene
         navigator.showAlert(Lang.tr("bulk.notes_deleted", String.valueOf(selected.length)), AlertType.CONFIRMATION);
       }
     }, AlertType.WARNING);
+  }
+
+  private void moveSelectedToVault() {
+    final Note[] selected = getSelectedNotes();
+    if (selected.length == 0) {
+      navigator.showAlert(Lang.tr("bulk.select_empty"), AlertType.INFO);
+      return;
+    }
+    final Displayable previous = navigator.getPrevious();
+    VaultAuth.authenticate(
+        navigator,
+        new Runnable() {
+          public void run() {
+            NotesManager manager = NotesManager.getInstance();
+            for (int i = 0; i < selected.length; i++) {
+              try {
+                manager.setVault(selected[i].id, true);
+              } catch (Exception ignored) {
+              }
+            }
+            if (onDone != null) onDone.run();
+            navigator.back();
+            navigator.showAlert(
+                Lang.tr("vault.moved_many", String.valueOf(selected.length)),
+                AlertType.CONFIRMATION,
+                previous);
+          }
+        });
   }
 
   private void exportSelected() {

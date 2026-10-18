@@ -4,7 +4,8 @@
     "cancel": "Anuluj",
     "exit": "Wyjdź",
     "ok": "OK",
-    "save": "Zapisz"
+    "save": "Zapisz",
+    "select": "Wybierz"
   },
   "app": {
     "name": "MIDPlay"
@@ -31,7 +32,18 @@
     "not_audio": "Nie jest plikiem audio",
     "root": "Przejdź do katalogu głównego",
     "search": "Szukaj plików",
-    "clear_search": "Wyczyść wyszukiwanie plików"
+    "clear_search": "Wyczyść wyszukiwanie plików",
+    "rename": "Zmień nazwę pliku",
+    "select_multiple": "Wybierz pliki",
+    "delete": "Usuń plik",
+    "name": "Nazwa pliku",
+    "goto_path": "Idź do ścieżki",
+    "open_path": "Podaj ścieżkę",
+    "open_path_required": "Podaj ścieżkę",
+    "confirm": {
+      "delete": "Usunąć ten plik?",
+      "delete_selected": "Usunąć wybrane pliki?"
+    }
   },
   "language": {
     "en": "English",
@@ -58,7 +70,13 @@
     "settings": "Ustawienia",
     "about": "Więcej informacji",
     "visibility": "Widoczność menu",
-    "equalizer": "Korektor"
+    "equalizer": "Korektor",
+    "notes": "Notatnik",
+    "tasks": "Zadania",
+    "mpgram": "MPGram",
+    "github": "GitHub",
+    "open_uri": "Otwórz...",
+    "weather": "Pogoda"
   },
   "player": {
     "next": "Następny",
@@ -128,13 +146,24 @@
       "delete": "Usunąć ten pobrany utwór?",
       "delete_selected": "Usunąć wybrane pobrane utwory?",
       "clear": "Usunąć wszystkie pobrane utwory?"
-    }
+    },
+    "queue": "W toku",
+    "queue_empty": "Brak pobierania w toku lub oczekującego",
+    "queue_active": "Pobieranie: {0}",
+    "queue_pending": "Oczekiwanie: {0}",
+    "queue_remaining": "Oczekuje: {0}",
+    "queue_waiting": "Rozpoczynanie {0} wybranych pobrań",
+    "queue_finished": "Pobrania zakończone (sukces / błąd): {0}",
+    "minimize": "Minimalizuj",
+    "reorder": "Zmień kolejność pobrań"
   },
   "playlist": {
     "add_track": "Dodaj do playlisty",
     "create": "Utwórz playlistę",
     "confirm": {
-      "delete_with_tracks": "Playlista nie jest pusta. Na pewno usunąć?"
+      "delete_with_tracks": "Playlista nie jest pusta. Na pewno usunąć?",
+      "delete_all": "Usunąć wszystkie playlisty i ich utwory?",
+      "remove_selected": "Usunąć wybrane utwory z tej playlisty?"
     },
     "view_tracks": "Wyświetl listę utworów",
     "error": {
@@ -144,7 +173,8 @@
       "create_failed": "Nie udało się stworzyć playlisty",
       "empty_name": "Nazwa playlisty nie może być pusta",
       "remove_track_failed": "Nie udało się usunąć utworu z playlisty",
-      "rename_failed": "Nie udało się zmienić nazwy"
+      "rename_failed": "Nie udało się zmienić nazwy",
+      "reorder_failed": "Nie udało się zapisać kolejności utworów"
     },
     "name": "Nazwa playlisty",
     "rename": "Zmień nazwę playlisty",
@@ -155,7 +185,10 @@
       "renamed": "Zmieniono nazwę",
       "track_added": "Dodano utwór",
       "track_removed": "Usunięto utwór"
-    }
+    },
+    "remove_selected": "Usuń wybrane utwory",
+    "delete_all": "Usuń wszystkie playlisty",
+    "reorder_tracks": "Zmień kolejność utworów"
   },
   "queue": {
     "add_to_queue": "Dodaj do kolejki",
@@ -225,7 +258,9 @@
     "visibility": {
       "instructions": "Wybierz elementy do ukrycia/pokazania. [x] = pokaż, [] = ukryj",
       "saved": "Zapisano"
-    }
+    },
+    "mpgram_auto_login": "Przygotuj MPGram automatycznie",
+    "use_wifi": "Używaj Wi-Fi (Blackberry)"
   },
   "status": {
     "error": "Wystąpił błąd",
@@ -263,9 +298,192 @@
   "note": {
     "select_multiple": "Wybierz notatki",
     "delete_selected": "Usuń wybrane notatki",
-    "delete_selected_confirm": "Usunąć wybrane notatki?"
+    "delete_selected_confirm": "Usunąć wybrane notatki?",
+    "title": "Notatnik",
+    "clear": "Wyczyść",
+    "saved": "Notatka zapisana",
+    "save_from_mpgram": "Zapisz notatkę",
+    "save_failed": "Nie udało się zapisać notatki",
+    "export": "Zapisz na urządzeniu",
+    "import": "Importuj plik",
+    "exported": "Zapisano w {0}",
+    "imported": "Zaimportowano notatki",
+    "save_here": "Zapisz tutaj",
+    "new": "Nowa notatka",
+    "rename": "Zmień nazwę",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "empty": "Brak notatek",
+    "save_changes": "Zapisać zmiany?",
+    "discard": "Odrzuć",
+    "search": "Szukaj notatek",
+    "clear_search": "Wyczyść wyszukiwanie",
+    "goto_path": "Idź do ścieżki",
+    "open_path": "Podaj ścieżkę",
+    "open_path_required": "Podaj ścieżkę",
+    "no_search_results": "Brak pasujących notatek",
+    "custom_title": "Ustaw własny tytuł",
+    "custom_title_field": "Tytuł",
+    "toggle_pin": "Przypnij/odepnij notatkę",
+    "export_select": "Wybierz notatki do eksportu",
+    "export_selected": "Eksportuj wybrane",
+    "select_all": "Zaznacz wszystko",
+    "deselect_all": "Odznacz wszystko",
+    "select_at_least_one": "Wybierz co najmniej jedną notatkę",
+    "export_filename": "Nazwa pliku eksportu",
+    "file_name": "Nazwa pliku",
+    "delete_confirm": "Usunąć {0}?",
+    "deleted": "Notatka usunięta"
   },
   "bulk": {
-    "notes_deleted": "Usunięto {0} notatek"
+    "notes_deleted": "Usunięto {0} notatek",
+    "select_empty": "Wybierz co najmniej jeden element",
+    "playlist_added": "Dodano {0} utworów do playlisty",
+    "playlist_result": "Dodano / już istnieje / błąd: {0}",
+    "tracks_deleted": "Usunięto {0} pobrań",
+    "files_deleted": "Usunięto {0} plików",
+    "tracks_removed": "Usunięto {0} utworów z playlisty",
+    "download_summary": "Wynik pobierania: {0}",
+    "download_none": "Brak nowych utworów do pobrania"
+  },
+  "mpgram": {
+    "send_note": "Wyślij notatkę",
+    "import_session_note": "Importuj sesję z notatki",
+    "session_code_note_title": "Kod sesji MPGram"
+  },
+  "github": {
+    "import_token_file": "Importuj token z pliku",
+    "import_token_note": "Importuj token z notatki MIDPlay",
+    "token_empty": "Plik/notatka z tokenem jest pusty"
+  },
+  "open_uri": {
+    "title": "Otwórz...",
+    "history": "Historia",
+    "use": "Użyj",
+    "clear": "Wyczyść historię",
+    "empty": "Podaj URI."
+  },
+  "cache": {
+    "listen": "Odtwórz",
+    "delete": "Usuń",
+    "delete_all": "Usuń wszystko",
+    "title": "Utwory w pamięci podręcznej",
+    "unknown": "Nieznany utwór",
+    "status": {
+      "removed": "Utwór usunięty z pamięci podręcznej",
+      "cleared": "Pamięć podręczna wyczyszczona"
+    },
+    "confirm": {
+      "delete_all": "Usunąć wszystkie utwory z pamięci podręcznej?"
+    }
+  },
+  "eq": {
+    "enable": "Włącz",
+    "presets": "Ustawienia wstępne",
+    "manual": "Ręczny",
+    "band": "Pasmo",
+    "not_supported": "Korektor nie jest obsługiwany na tym urządzeniu"
+  },
+  "task": {
+    "title": "Zadania",
+    "new": "Nowe zadanie",
+    "create": "Utwórz zadanie",
+    "edit": "Edytuj zadanie",
+    "empty": "Brak zadań",
+    "no_results": "Brak pasujących zadań",
+    "search": "Szukaj zadań",
+    "clear_search": "Wyczyść wyszukiwanie",
+    "select_multiple": "Wybierz zadania",
+    "goto_path": "Idź do ścieżki",
+    "open_path": "Podaj ścieżkę",
+    "open_path_required": "Podaj ścieżkę",
+    "filter": "Filtr",
+    "filter_all": "Wszystkie",
+    "filter_pending": "Oczekujące",
+    "filter_done": "Ukończone",
+    "filter_overdue": "Zaległe",
+    "complete": "Oznacz jako ukończone",
+    "reopen": "Oznacz jako oczekujące",
+    "toggle_done": "Ukończ/otwórz ponownie",
+    "pin": "Przypnij/odepnij zadanie",
+    "rename": "Zmień nazwę",
+    "rename_title": "Zmień nazwę zadania",
+    "title_field": "Tytuł",
+    "priority": "Priorytet",
+    "priority_high": "Wysoki",
+    "priority_normal": "Normalny",
+    "priority_low": "Niski",
+    "due": "Termin",
+    "due_none": "Bez terminu",
+    "due_today": "Dzisiaj",
+    "due_tomorrow": "Jutro",
+    "due_in_3": "Za 3 dni",
+    "due_in_7": "Za 7 dni",
+    "due_custom": "Własne",
+    "due_hint": "DD/MM/YYYY HH:MM",
+    "reminder": "Przypomnienie",
+    "reminder_none": "Bez przypomnienia",
+    "reminder_at_due": "W czasie terminu",
+    "reminder_15": "15 min wcześniej",
+    "reminder_60": "Godzinę wcześniej",
+    "reminder_6h": "6 godzin wcześniej",
+    "reminder_1d": "Dzień wcześniej",
+    "reminder_custom": "Własne",
+    "reminder_hint": "DD/MM/YYYY HH:MM",
+    "reminder_title": "Przypomnienie zadania",
+    "reminder_fired": "Przypomnienie wyświetlone",
+    "description": "Opis",
+    "description_empty": "Brak opisu",
+    "delete": "Usuń",
+    "delete_confirm": "Usunąć {0}?",
+    "deleted": "Zadanie usunięte",
+    "saved": "Zadanie zapisane",
+    "title_required": "Tytuł jest wymagany",
+    "due_required": "Ustaw termin dla tego przypomnienia",
+    "due_invalid": "Nieprawidłowy termin",
+    "reminder_invalid": "Nieprawidłowy termin przypomnienia",
+    "status_pending": "Oczekujące",
+    "status_done": "Ukończone",
+    "overdue": "Zaległe",
+    "today": "Dzisiaj",
+    "tomorrow": "Jutro",
+    "created_at": "Utworzono: {0}",
+    "completed_at": "Ukończono: {0}"
+  },
+  "vault": {
+    "title": "Sejf",
+    "open": "Sejf",
+    "protect": "Przenieś do sejfu",
+    "remove": "Usuń z sejfu",
+    "moved": "Notatka przeniesiona do sejfu",
+    "moved_many": "Notatki przeniesione do sejfu: {0}",
+    "removed": "Notatka usunięta z sejfu",
+    "empty": "Sejf jest pusty",
+    "enter_password": "Podaj hasło sejfu",
+    "wrong_password": "Nieprawidłowe hasło",
+    "create_title": "Utwórz hasło sejfu",
+    "change_password": "Zmień hasło sejfu",
+    "current_password": "Obecne hasło",
+    "new_password": "Nowe hasło",
+    "confirm_password": "Potwierdź hasło",
+    "password_empty": "Hasło nie może być puste",
+    "password_mismatch": "Hasła nie są zgodne",
+    "password_set": "Hasło sejfu ustawione",
+    "password_changed": "Hasło sejfu zmienione"
+  },
+  "weather": {
+    "title": "Pogoda",
+    "refresh": "Odśwież",
+    "loading": "Ładowanie...",
+    "set_city": "Miasto...",
+    "city_prompt": "Miasto dla pogody",
+    "city_field": "Miasto",
+    "condition": "Warunki",
+    "temp": "Temperatura",
+    "feels": "Odczuwalna",
+    "wind": "Wiatr",
+    "humidity": "Wilgotność",
+    "precip": "Deszcz",
+    "error": "Nie udało się wczytać pogody"
   }
 }

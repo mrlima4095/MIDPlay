@@ -167,6 +167,7 @@ public class SettingsManager {
     settings.put("cacheEnabled", Configuration.CACHE_OFF);
     settings.put("cacheStorage", Configuration.CACHE_STORAGE_RMS);
     settings.put("cacheDirectory", Configuration.DEFAULT_CACHE_PATH);
+    settings.put("vaultPasswordHash", "");
     return settings;
   }
 
@@ -255,6 +256,18 @@ public class SettingsManager {
   public void saveDownloadPath(String downloadPath) throws RecordStoreException {
     saveSetting("downloadPath", downloadPath);
     currentDownloadPath = downloadPath;
+  }
+
+  public String getVaultPasswordHash() {
+    try {
+      return settings().getString("vaultPasswordHash", "");
+    } catch (Exception e) {
+      return "";
+    }
+  }
+
+  public void saveVaultPassword(String hash) throws RecordStoreException {
+    saveSetting("vaultPasswordHash", hash == null ? "" : hash);
   }
 
   public String getCurrentDownloadPath() {

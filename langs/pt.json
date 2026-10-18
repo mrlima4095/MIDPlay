@@ -37,6 +37,9 @@
     "select_multiple": "Selecionar arquivos",
     "delete": "Excluir arquivo",
     "name": "Nome do arquivo",
+    "goto_path": "Ir para caminho",
+    "open_path": "Digite o caminho",
+    "open_path_required": "Informe o caminho",
     "confirm": {
       "delete": "Excluir este arquivo?",
       "delete_selected": "Excluir os arquivos selecionados?"
@@ -83,7 +86,8 @@
     "tasks": "Tarefas",
     "mpgram": "MPGram",
     "github": "GitHub",
-    "open_uri": "Abrir..."
+    "open_uri": "Abrir...",
+    "weather": "Tempo"
   },
   "mpgram": {
     "send_note": "Enviar nota",
@@ -379,8 +383,7 @@
     "manual": "Manual",
     "band": "Banda",
     "not_supported": "O equalizador não é suportado neste dispositivo"
-  }
-,
+  },
   "task": {
     "title": "Tarefas",
     "new": "Nova tarefa",
@@ -390,6 +393,7 @@
     "no_results": "Nenhuma tarefa encontrada",
     "search": "Buscar tarefas",
     "clear_search": "Limpar busca",
+    "select_multiple": "Selecionar tarefas",
     "goto_path": "Ir para caminho",
     "open_path": "Digite o caminho",
     "open_path_required": "Informe o caminho",
@@ -445,6 +449,41 @@
     "tomorrow": "Amanhã",
     "created_at": "Criada: {0}",
     "completed_at": "Concluída: {0}"
+  },
+  "vault": {
+    "title": "Cofre",
+    "open": "Cofre",
+    "protect": "Mover para o cofre",
+    "remove": "Remover do cofre",
+    "moved": "Nota movida para o cofre",
+    "moved_many": "Notas movidas para o cofre: {0}",
+    "removed": "Nota removida do cofre",
+    "empty": "O cofre está vazio",
+    "enter_password": "Digite a senha do cofre",
+    "wrong_password": "Senha incorreta",
+    "create_title": "Criar senha do cofre",
+    "change_password": "Alterar senha do cofre",
+    "current_password": "Senha atual",
+    "new_password": "Nova senha",
+    "confirm_password": "Confirmar senha",
+    "password_empty": "A senha não pode ficar vazia",
+    "password_mismatch": "As senhas não coincidem",
+    "password_set": "Senha do cofre definida",
+    "password_changed": "Senha do cofre alterada"
+  },
+  "weather": {
+    "title": "Tempo",
+    "refresh": "Atualizar",
+    "loading": "Carregando...",
+    "set_city": "Cidade...",
+    "city_prompt": "Cidade do tempo",
+    "city_field": "Cidade",
+    "condition": "Condição",
+    "temp": "Temperatura",
+    "feels": "Sensação",
+    "wind": "Vento",
+    "humidity": "Umidade",
+    "precip": "Chuva",
+    "error": "Não foi possível carregar o tempo"
   }
-
 }

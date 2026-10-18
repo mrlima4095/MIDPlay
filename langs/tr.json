@@ -4,7 +4,8 @@
     "cancel": "İptal",
     "exit": "Çık",
     "ok": "Tamam",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "select": "Seç"
   },
   "app": {
     "name": "MIDPlay"
@@ -31,7 +32,18 @@
     "not_audio": "Ses dosyası değil",
     "root": "Köke git",
     "search": "Dosyaları ara",
-    "clear_search": "Dosya aramasını temizle"
+    "clear_search": "Dosya aramasını temizle",
+    "rename": "Dosyayı yeniden adlandır",
+    "select_multiple": "Dosyaları seç",
+    "delete": "Dosyayı sil",
+    "name": "Dosya adı",
+    "goto_path": "Yola git",
+    "open_path": "Yol girin",
+    "open_path_required": "Bir yol girin",
+    "confirm": {
+      "delete": "Bu dosya silinsin mi?",
+      "delete_selected": "Seçili dosyalar silinsin mi?"
+    }
   },
   "language": {
     "en": "English",
@@ -58,7 +70,13 @@
     "settings": "Ayarlar",
     "about": "Hakkında",
     "visibility": "Menü Görünürlüğü",
-    "equalizer": "Ekolayzır"
+    "equalizer": "Ekolayzır",
+    "notes": "Not Defteri",
+    "tasks": "Görevler",
+    "mpgram": "MPGram",
+    "github": "GitHub",
+    "open_uri": "Aç...",
+    "weather": "Hava durumu"
   },
   "player": {
     "next": "Sonraki",
@@ -128,13 +146,24 @@
       "delete": "İndirilen bu şarkı silinsin mi?",
       "delete_selected": "Seçilen indirilen şarkılar silinsin mi?",
       "clear": "İndirilen tüm şarkılar silinsin mi?"
-    }
+    },
+    "queue": "Devam ediyor",
+    "queue_empty": "Devam eden veya bekleyen indirme yok",
+    "queue_active": "İndiriliyor: {0}",
+    "queue_pending": "Bekliyor: {0}",
+    "queue_remaining": "{0} bekliyor",
+    "queue_waiting": "{0} seçili indirme başlatılıyor",
+    "queue_finished": "İndirmeler bitti (başarılı / başarısız): {0}",
+    "minimize": "Simge durumuna küçült",
+    "reorder": "İndirmeleri yeniden sırala"
   },
   "playlist": {
     "add_track": "Çalma Listesine Ekle",
     "create": "Çalma Listesi Oluştur",
     "confirm": {
-      "delete_with_tracks": "Bu çalma listesinde şarkılar var. Çalma listesini ve tüm şarkıları sil?"
+      "delete_with_tracks": "Bu çalma listesinde şarkılar var. Çalma listesini ve tüm şarkıları sil?",
+      "delete_all": "Tüm çalma listeleri ve parçaları silinsin mi?",
+      "remove_selected": "Seçili parçalar bu çalma listesinden kaldırılsın mı?"
     },
     "view_tracks": "Şarkı Listesini Görüntüle",
     "error": {
@@ -144,7 +173,8 @@
       "create_failed": "Çalma listesi oluşturulamadı",
       "empty_name": "Çalma listesi adı boş olamaz",
       "remove_track_failed": "Şarkı çalma listesinden çıkarılamadı",
-      "rename_failed": "Çalma listesi yeniden adlandırılamadı"
+      "rename_failed": "Çalma listesi yeniden adlandırılamadı",
+      "reorder_failed": "Çalma listesi parça sırası kaydedilemedi"
     },
     "name": "Çalma Listesi Adı",
     "rename": "Çalma Listesini Yeniden Adlandır",
@@ -155,7 +185,10 @@
       "renamed": "Çalma listesi başarıyla yeniden adlandırıldı",
       "track_added": "Şarkı çalma listesine eklendi",
       "track_removed": "Şarkı çalma listesinden çıkarıldı"
-    }
+    },
+    "remove_selected": "Seçili parçaları kaldır",
+    "delete_all": "Tüm çalma listelerini sil",
+    "reorder_tracks": "Parçaları yeniden sırala"
   },
   "queue": {
     "add_to_queue": "Sıraya ekle",
@@ -226,7 +259,8 @@
     "visibility": {
       "instructions": "Gizlenecek/gösterilecek öğeleri seçin. [x] = göster, [] = gizle",
       "saved": "Görünürlük ayarları kaydedildi"
-    }
+    },
+    "mpgram_auto_login": "MPGram'ı otomatik hazırla"
   },
   "status": {
     "error": "Bir hata oluştu",
@@ -271,9 +305,185 @@
   "note": {
     "select_multiple": "Notları seç",
     "delete_selected": "Seçili notları sil",
-    "delete_selected_confirm": "Seçili notlar silinsin mi?"
+    "delete_selected_confirm": "Seçili notlar silinsin mi?",
+    "title": "Not Defteri",
+    "clear": "Temizle",
+    "saved": "Not kaydedildi",
+    "save_from_mpgram": "Notu kaydet",
+    "save_failed": "Not kaydedilemedi",
+    "export": "Cihaza kaydet",
+    "import": "Dosya içe aktar",
+    "exported": "{0} konumuna kaydedildi",
+    "imported": "Notlar içe aktarıldı",
+    "save_here": "Buraya kaydet",
+    "new": "Yeni not",
+    "rename": "Yeniden adlandır",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "empty": "Not yok",
+    "save_changes": "Değişiklikler kaydedilsin mi?",
+    "discard": "Vazgeç",
+    "search": "Not ara",
+    "clear_search": "Aramayı temizle",
+    "goto_path": "Yola git",
+    "open_path": "Yol girin",
+    "open_path_required": "Bir yol girin",
+    "no_search_results": "Eşleşen not yok",
+    "custom_title": "Özel başlık ayarla",
+    "custom_title_field": "Başlık",
+    "toggle_pin": "Notu sabitle/sabitlemeyi kaldır",
+    "export_select": "Dışa aktarılacak notları seç",
+    "export_selected": "Seçilenleri dışa aktar",
+    "select_all": "Tümünü seç",
+    "deselect_all": "Tümünün seçimini kaldır",
+    "select_at_least_one": "En az bir not seçin",
+    "export_filename": "Dışa aktarma dosya adı",
+    "file_name": "Dosya adı",
+    "delete_confirm": "{0} silinsin mi?",
+    "deleted": "Not silindi"
   },
   "bulk": {
-    "notes_deleted": "{0} not silindi"
+    "notes_deleted": "{0} not silindi",
+    "select_empty": "En az bir öğe seçin",
+    "playlist_added": "Çalma listesine {0} parça eklendi",
+    "playlist_result": "Eklendi / zaten var / başarısız: {0}",
+    "tracks_deleted": "{0} indirme silindi",
+    "files_deleted": "{0} dosya silindi",
+    "tracks_removed": "Çalma listesinden {0} parça kaldırıldı",
+    "download_summary": "İndirme sonucu: {0}",
+    "download_none": "İndirilecek yeni parça yok"
+  },
+  "mpgram": {
+    "send_note": "Not gönder",
+    "import_session_note": "Nottan oturum içe aktar",
+    "session_code_note_title": "MPGram oturum kodu"
+  },
+  "github": {
+    "import_token_file": "Dosyadan token içe aktar",
+    "import_token_note": "MIDPlay notundan token içe aktar",
+    "token_empty": "Token dosyası/notu boş"
+  },
+  "open_uri": {
+    "title": "Aç...",
+    "history": "Geçmiş",
+    "use": "Kullan",
+    "clear": "Geçmişi temizle",
+    "empty": "Bir URI girin."
+  },
+  "cache": {
+    "listen": "Dinle",
+    "delete": "Sil",
+    "delete_all": "Tümünü sil",
+    "title": "Önbellekteki şarkılar",
+    "unknown": "Bilinmeyen şarkı",
+    "status": {
+      "removed": "Önbellekteki şarkı kaldırıldı",
+      "cleared": "Önbellek temizlendi"
+    },
+    "confirm": {
+      "delete_all": "Önbellekteki tüm şarkılar silinsin mi?"
+    }
+  },
+  "task": {
+    "title": "Görevler",
+    "new": "Yeni görev",
+    "create": "Görev oluştur",
+    "edit": "Görevi düzenle",
+    "empty": "Görev yok",
+    "no_results": "Eşleşen görev yok",
+    "search": "Görev ara",
+    "clear_search": "Aramayı temizle",
+    "select_multiple": "Görev seç",
+    "goto_path": "Yola git",
+    "open_path": "Yol girin",
+    "open_path_required": "Bir yol girin",
+    "filter": "Filtre",
+    "filter_all": "Tümü",
+    "filter_pending": "Beklemede",
+    "filter_done": "Tamamlandı",
+    "filter_overdue": "Gecikmiş",
+    "complete": "Tamamlandı olarak işaretle",
+    "reopen": "Beklemede olarak işaretle",
+    "toggle_done": "Tamamla/Yeniden aç",
+    "pin": "Görevi sabitle/sabitlemeyi kaldır",
+    "rename": "Yeniden adlandır",
+    "rename_title": "Görevi yeniden adlandır",
+    "title_field": "Başlık",
+    "priority": "Öncelik",
+    "priority_high": "Yüksek",
+    "priority_normal": "Normal",
+    "priority_low": "Düşük",
+    "due": "Vade",
+    "due_none": "Vade tarihi yok",
+    "due_today": "Bugün",
+    "due_tomorrow": "Yarın",
+    "due_in_3": "3 gün içinde",
+    "due_in_7": "7 gün içinde",
+    "due_custom": "Özel",
+    "due_hint": "GG/AA/YYYY SS:DD",
+    "reminder": "Hatırlatıcı",
+    "reminder_none": "Hatırlatıcı yok",
+    "reminder_at_due": "Vade zamanında",
+    "reminder_15": "15 dk önce",
+    "reminder_60": "1 saat önce",
+    "reminder_6h": "6 saat önce",
+    "reminder_1d": "1 gün önce",
+    "reminder_custom": "Özel",
+    "reminder_hint": "GG/AA/YYYY SS:DD",
+    "reminder_title": "Görev hatırlatıcısı",
+    "reminder_fired": "Hatırlatıcı gösterildi",
+    "description": "Açıklama",
+    "description_empty": "Açıklama yok",
+    "delete": "Sil",
+    "delete_confirm": "{0} silinsin mi?",
+    "deleted": "Görev silindi",
+    "saved": "Görev kaydedildi",
+    "title_required": "Başlık gerekli",
+    "due_required": "Bu hatırlatıcı için bir vade tarihi belirleyin",
+    "due_invalid": "Geçersiz vade tarihi/saati",
+    "reminder_invalid": "Geçersiz hatırlatıcı tarihi/saati",
+    "status_pending": "Beklemede",
+    "status_done": "Tamamlandı",
+    "overdue": "Gecikmiş",
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "created_at": "Oluşturuldu: {0}",
+    "completed_at": "Tamamlandı: {0}"
+  },
+  "vault": {
+    "title": "Kasa",
+    "open": "Kasa",
+    "protect": "Kasaya taşı",
+    "remove": "Kasadan çıkar",
+    "moved": "Not kasaya taşındı",
+    "moved_many": "Notlar kasaya taşındı: {0}",
+    "removed": "Not kasadan çıkarıldı",
+    "empty": "Kasa boş",
+    "enter_password": "Kasa şifresini girin",
+    "wrong_password": "Yanlış şifre",
+    "create_title": "Kasa şifresi oluştur",
+    "change_password": "Kasa şifresini değiştir",
+    "current_password": "Mevcut şifre",
+    "new_password": "Yeni şifre",
+    "confirm_password": "Şifreyi onayla",
+    "password_empty": "Şifre boş olamaz",
+    "password_mismatch": "Şifreler eşleşmiyor",
+    "password_set": "Kasa şifresi ayarlandı",
+    "password_changed": "Kasa şifresi değiştirildi"
+  },
+  "weather": {
+    "title": "Hava durumu",
+    "refresh": "Yenile",
+    "loading": "Yükleniyor...",
+    "set_city": "Şehir...",
+    "city_prompt": "Hava durumu şehri",
+    "city_field": "Şehir",
+    "condition": "Durum",
+    "temp": "Sıcaklık",
+    "feels": "Hissedilen",
+    "wind": "Rüzgar",
+    "humidity": "Nem",
+    "precip": "Yağış",
+    "error": "Hava durumu yüklenemedi"
   }
 }
