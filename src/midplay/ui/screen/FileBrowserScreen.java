@@ -25,10 +25,6 @@ import midplay.util.Lang;
 import midplay.util.Utils;
 
 public final class FileBrowserScreen extends BaseList {
-  public interface FileSelectionListener {
-    void onFileSelected(String path);
-  }
-
   public interface DirectorySelectionListener {
     void onDirectorySelected(String path);
   }
@@ -59,7 +55,6 @@ public final class FileBrowserScreen extends BaseList {
   private int[] rowKinds = new int[0];
   private Vector audioPaths = new Vector();
   private int loadKey = 0;
-  private final FileSelectionListener fileSelectionListener;
   private final DirectorySelectionListener directorySelectionListener;
   private final Command selectDirectoryCommand;
   private final Command renameCommand;
@@ -70,28 +65,20 @@ public final class FileBrowserScreen extends BaseList {
   private final Command gotoPathCommand;
 
   public FileBrowserScreen(Navigator navigator) {
-    this(navigator, sessionStartPath(), null, null);
+    this(navigator, sessionStartPath(), null);
   }
 
   public FileBrowserScreen(Navigator navigator, String path) {
-    this(navigator, path, null, null);
-  }
-
-  public FileBrowserScreen(Navigator navigator, FileSelectionListener listener) {
-    this(navigator, sessionStartPath(), listener, null);
+    this(navigator, path, null);
   }
 
   public FileBrowserScreen(Navigator navigator, DirectorySelectionListener listener) {
-    this(navigator, sessionStartPath(), null, listener);
+    this(navigator, sessionStartPath(), listener);
   }
 
   private FileBrowserScreen(
-      Navigator navigator,
-      String path,
-      FileSelectionListener listener,
-      DirectorySelectionListener directoryListener) {
+      Navigator navigator, String path, DirectorySelectionListener directoryListener) {
     super(Lang.tr("menu.files"), navigator);
-    fileSelectionListener = listener;
     directorySelectionListener = directoryListener;
     selectDirectoryCommand =
         directoryListener == null ? null : new Command(Lang.tr("note.save_here"), Command.OK, 0);
@@ -114,7 +101,7 @@ public final class FileBrowserScreen extends BaseList {
     addCommand(deleteCommand);
     if (selectDirectoryCommand != null) {
       addCommand(selectDirectoryCommand);
-    } else if (fileSelectionListener == null && directorySelectionListener == null) {
+    } else if (directorySelectionListener == null) {
       addCommand(selectMultipleCommand);
     }
     addCommand(gotoPathCommand);
@@ -256,10 +243,6 @@ public final class FileBrowserScreen extends BaseList {
     }
     if (kind == KIND_AUDIO) {
       playFrom(index);
-      return;
-    }
-    if (fileSelectionListener != null && isNoteFile(rowPaths[index])) {
-      fileSelectionListener.onFileSelected(rowPaths[index]);
       return;
     }
     if (isImageFile(rowPaths[index])) {
@@ -588,11 +571,6 @@ public final class FileBrowserScreen extends BaseList {
       }
     }
     return false;
-  }
-
-  private static boolean isNoteFile(String path) {
-    String lower = fileNameFor(path).toLowerCase();
-    return lower.endsWith(".vnt") || lower.endsWith(".txt");
   }
 
   private static boolean isTextFile(String path) {

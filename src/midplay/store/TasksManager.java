@@ -242,6 +242,36 @@ public final class TasksManager {
     store(next);
   }
 
+  /** Removes several tasks with a single write to the record store. */
+  public void removeMany(int[] ids) throws RecordStoreException {
+    if (ids == null || ids.length == 0) {
+      return;
+    }
+    Task[] tasks = load();
+    int count = 0;
+    for (int i = 0; i < tasks.length; i++) {
+      if (!containsId(ids, tasks[i].id)) {
+        count++;
+      }
+    }
+    Task[] next = new Task[count];
+    int index = 0;
+    for (int i = 0; i < tasks.length; i++) {
+      if (!containsId(ids, tasks[i].id)) {
+        next[index++] = tasks[i];
+      }
+    }
+    store(next);
+  }
+
+  private static boolean containsId(int[] ids, int id) {
+    for (int i = 0; i < ids.length; i++) {
+      if (ids[i] == id) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   private void store(Task[] tasks) throws RecordStoreException {
     JSONArray data = new JSONArray();

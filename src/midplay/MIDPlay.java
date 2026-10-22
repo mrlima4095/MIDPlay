@@ -33,6 +33,7 @@ import midplay.ui.MenuManager;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.ui.PlaylistsListForwarder;
+import midplay.ui.WattpadLinks;
 import midplay.ui.screen.EqualizerScreen;
 import midplay.ui.screen.FavoritesScreen;
 import midplay.ui.screen.RecentListScreen;
@@ -43,7 +44,7 @@ import midplay.ui.screen.FileBrowserScreen;
 import midplay.ui.screen.OpenUriScreen;
 import midplay.ui.screen.NotesScreen;
 import midplay.ui.screen.TasksScreen;
-import midplay.ui.screen.WeatherScreen;
+import midplay.ui.screen.WattpadScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 import mpgram.MP;
@@ -68,6 +69,16 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       operation.stop();
       operation = null;
     }
+  }
+
+  /** Name of the network operation currently running, or null when the queue is idle. */
+  public static synchronized String getRunningOperationName() {
+    if (operation == null || !operation.isRunning()) {
+      return null;
+    }
+    String name = operation.getClass().getName();
+    int dot = name.lastIndexOf('.');
+    return dot >= 0 ? name.substring(dot + 1) : name;
   }
 
   public static PlayerScreen getPlayerScreen() {
@@ -192,10 +203,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
           }
         });
     menuManager.registerAction(
-        Configuration.MENU_WEATHER,
+        Configuration.MENU_WATTPAD,
         new Runnable() {
           public void run() {
-            goToWeatherScreen();
+            goToWattpadScreen();
           }
         });
   }
@@ -254,6 +265,14 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     GH.openExternalUrl(url);
   }
 
+  public void openWattpadLinkFromMPGram(String url) {
+    WattpadLinks.open(navigator, url);
+  }
+
+  public void openWattpadLinkFromGH(String url) {
+    WattpadLinks.open(navigator, url);
+  }
+
   public void openTelegramLink(String url) {
     MP.openLinkFromHost(
         this,
@@ -270,6 +289,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   }
 
   public void openExternalUri(String uri) throws ConnectionNotFoundException {
+    if (WattpadLinks.isWattpad(uri)) {
+      WattpadLinks.open(navigator, uri);
+      return;
+    }
     platformRequest(uri);
   }
 
@@ -588,8 +611,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     navigator.forward(new TasksScreen(navigator));
   }
 
-  private void goToWeatherScreen() {
-    navigator.forward(new WeatherScreen(navigator));
+  private void goToWattpadScreen() {
+    navigator.forward(new WattpadScreen(navigator));
   }
 
   private void showExitConfirmation() {

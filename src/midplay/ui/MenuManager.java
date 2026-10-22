@@ -57,7 +57,52 @@ public class MenuManager {
     removeMenuItem(Configuration.MENU_OPEN_URI);
     removeMenuItem(Configuration.MENU_NOW_PLAYING);
     removeMenuItem("menu.opentty");
+    // Leftover from an intermediate build that grouped web services in a "Web" submenu.
+    removeMenuItem("menu.web");
+    // The stopwatch menu entry was removed from the app.
+    removeMenuItem("menu.timer");
+    // The speed test menu entry was removed from the app.
+    removeMenuItem("menu.speedtest");
+    // The Wikipedia and weather sections were removed from the app.
+    removeMenuItem("menu.wikipedia");
+    removeMenuItem("menu.weather");
     ensureDefaultItemsPresent();
+  }
+
+  /** Reorders the menu so that {@code key} sits right after {@code anchorKey}. */
+  private void placeAfter(String key, String anchorKey) {
+    MenuItem moved = null;
+    Vector ordered = new Vector();
+    for (int i = 0; i < menuItems.size(); i++) {
+      MenuItem item = (MenuItem) menuItems.elementAt(i);
+      if (key.equals(item.key)) {
+        moved = item;
+      } else {
+        ordered.addElement(item);
+      }
+    }
+    if (moved == null) {
+      return;
+    }
+    int anchorIndex = -1;
+    for (int i = 0; i < ordered.size(); i++) {
+      if (anchorKey.equals(((MenuItem) ordered.elementAt(i)).key)) {
+        anchorIndex = i;
+        break;
+      }
+    }
+    if (anchorIndex < 0) {
+      ordered.addElement(moved);
+    } else {
+      ordered.insertElementAt(moved, anchorIndex + 1);
+    }
+    menuItems.removeAllElements();
+    for (int i = 0; i < ordered.size(); i++) {
+      MenuItem item = (MenuItem) ordered.elementAt(i);
+      item.order = i + 1;
+      menuItems.addElement(item);
+    }
+    saveMenuConfig();
   }
 
   private void removeMenuItem(String key) {
@@ -117,7 +162,7 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_MPGRAM, 8, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_NOTES, 9, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_TASKS, 10, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_WEATHER, 11, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_WATTPAD, 11, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 12, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 13, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 14, true));

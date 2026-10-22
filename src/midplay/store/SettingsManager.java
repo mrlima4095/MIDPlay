@@ -31,9 +31,10 @@ public class SettingsManager {
   private static boolean currentEqEnabled;
   private static int currentEqPreset; // -1 = manual/custom levels
   private static int[] currentEqLevels;
-  private static int currentCacheEnabled;
-  private static String currentCacheStorage;
-  private static String currentCacheDirectory;
+  private static String currentHttpProxy;
+  private static int currentWattpadPageChars;
+  private static int currentWattpadMature;
+  private static int currentWattpadLanguage;
 
   public static SettingsManager getInstance() {
     if (instance == null) {
@@ -131,9 +132,11 @@ public class SettingsManager {
     currentEqEnabled = settings.getBoolean("eqEnabled", false);
     currentEqPreset = settings.getInt("eqPreset", -1);
     currentEqLevels = parseLevelsCsv(settings.getString("eqLevels", ""));
-    currentCacheEnabled = settings.getInt("cacheEnabled", Configuration.CACHE_OFF);
-    currentCacheStorage = settings.getString("cacheStorage", Configuration.CACHE_STORAGE_RMS);
-    currentCacheDirectory = settings.getString("cacheDirectory", Configuration.DEFAULT_CACHE_PATH);
+    currentHttpProxy = settings.getString("httpProxy", Configuration.DEFAULT_HTTP_PROXY);
+    currentWattpadPageChars =
+        settings.getInt("wattpadPageChars", Configuration.DEFAULT_WATTPAD_PAGE_CHARS);
+    currentWattpadMature = settings.getInt("wattpadMature", Configuration.WATTPAD_MATURE_OFF);
+    currentWattpadLanguage = settings.getInt("wattpadLanguage", 0);
   }
 
   private JSONObject getSettingsJSON() {
@@ -164,9 +167,10 @@ public class SettingsManager {
     settings.put("eqEnabled", false);
     settings.put("eqPreset", -1);
     settings.put("eqLevels", "");
-    settings.put("cacheEnabled", Configuration.CACHE_OFF);
-    settings.put("cacheStorage", Configuration.CACHE_STORAGE_RMS);
-    settings.put("cacheDirectory", Configuration.DEFAULT_CACHE_PATH);
+    settings.put("httpProxy", Configuration.DEFAULT_HTTP_PROXY);
+    settings.put("wattpadPageChars", Configuration.DEFAULT_WATTPAD_PAGE_CHARS);
+    settings.put("wattpadMature", Configuration.WATTPAD_MATURE_OFF);
+    settings.put("wattpadLanguage", 0);
     settings.put("vaultPasswordHash", "");
     return settings;
   }
@@ -277,19 +281,71 @@ public class SettingsManager {
     return currentDownloadPath;
   }
 
-  public int getCurrentCacheEnabled() {
-    return currentCacheEnabled;
-  }
-
-  public String getCurrentCacheStorage() {
-    return currentCacheStorage;
-  }
-
-  public String getCurrentCacheDirectory() {
-    if (currentCacheDirectory == null || currentCacheDirectory.length() == 0) {
-      currentCacheDirectory = Configuration.DEFAULT_CACHE_PATH;
+  public String getCurrentHttpProxy() {
+    if (currentHttpProxy == null) {
+      currentHttpProxy = Configuration.DEFAULT_HTTP_PROXY;
     }
-    return currentCacheDirectory;
+    return currentHttpProxy;
+  }
+
+  public void saveHttpProxy(String proxy) throws RecordStoreException {
+    String value = proxy == null ? "" : proxy.trim();
+    saveSetting("httpProxy", value);
+    currentHttpProxy = value;
+  }
+
+  /**
+   * Routes https URLs through the configured http->https proxy. The proxy reads the raw query
+   * string as the target URL, so the URL is appended verbatim. Plain http URLs pass through.
+   */
+  public String routeHttp(String url) {
+    if (url == null) {
+      return "";
+    }
+    String proxy = getCurrentHttpProxy();
+    if (proxy != null && proxy.length() > 0 && url.startsWith("https://")) {
+      return proxy + url;
+    }
+    return url;
+  }
+
+  /** Maximum number of characters shown per Wattpad chapter page. */
+  public int getWattpadPageChars() {
+    if (currentWattpadPageChars < Configuration.WATTPAD_PAGE_CHARS_MIN
+        || currentWattpadPageChars > Configuration.WATTPAD_PAGE_CHARS_MAX) {
+      currentWattpadPageChars = Configuration.DEFAULT_WATTPAD_PAGE_CHARS;
+    }
+    return currentWattpadPageChars;
+  }
+
+  public void saveWattpadPageChars(int chars) throws RecordStoreException {
+    int value = chars;
+    if (value < Configuration.WATTPAD_PAGE_CHARS_MIN) {
+      value = Configuration.WATTPAD_PAGE_CHARS_MIN;
+    } else if (value > Configuration.WATTPAD_PAGE_CHARS_MAX) {
+      value = Configuration.WATTPAD_PAGE_CHARS_MAX;
+    }
+    saveSetting("wattpadPageChars", value);
+    currentWattpadPageChars = value;
+  }
+
+  public int getCurrentWattpadMature() {
+    return currentWattpadMature;
+  }
+
+  public void saveWattpadMature(int mature) throws RecordStoreException {
+    saveSetting("wattpadMature", mature);
+    currentWattpadMature = mature;
+  }
+
+  /** Wattpad language id used to filter searches, or 0 for every language. */
+  public int getWattpadLanguage() {
+    return currentWattpadLanguage;
+  }
+
+  public void saveWattpadLanguage(int language) throws RecordStoreException {
+    saveSetting("wattpadLanguage", language);
+    currentWattpadLanguage = language;
   }
 
   public void saveRepeatMode(int repeatMode) throws RecordStoreException {

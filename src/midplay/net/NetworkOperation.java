@@ -24,6 +24,10 @@ public abstract class NetworkOperation {
     this.thread.start();
   }
 
+  public boolean isRunning() {
+    return thread != null && thread.isAlive();
+  }
+
   public void stop() {
     this.stopped = true;
     if (this.network != null) {

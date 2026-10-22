@@ -57,7 +57,7 @@ public final class MainMenuScreen extends List implements CommandListener {
     iconMap.put(Configuration.MENU_GITHUB, Configuration.githubIcon);
     iconMap.put(Configuration.MENU_NOTES, Configuration.notesIcon);
     iconMap.put(Configuration.MENU_TASKS, Configuration.tasksIcon);
-    iconMap.put(Configuration.MENU_WEATHER, Configuration.weatherIcon);
+    iconMap.put(Configuration.MENU_WATTPAD, Configuration.wattpadIcon);
   }
 
   public void commandAction(Command c, Displayable d) {

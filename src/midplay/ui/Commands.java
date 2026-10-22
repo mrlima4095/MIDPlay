@@ -189,17 +189,5 @@ public class Commands {
     return get("download.link_manual", Command.SCREEN, 7);
   }
 
-  public static Command cacheListen() {
-    return get("cache.listen", Command.OK, 1);
-  }
-
-  public static Command cacheDelete() {
-    return get("cache.delete", Command.ITEM, 2);
-  }
-
-  public static Command cacheDeleteAll() {
-    return get("cache.delete_all", Command.SCREEN, 3);
-  }
-
   private Commands() {}
 }

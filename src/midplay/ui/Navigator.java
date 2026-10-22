@@ -101,6 +101,42 @@ public class Navigator {
             });
   }
 
+  /**
+   * Pops the current view and shows an alert over the view underneath in one serial action. Calling
+   * {@link #back()} and then {@link #showAlert(String, AlertType)} separately is unsafe on devices
+   * where {@code Display.setCurrent} is asynchronous: the alert can capture the view being closed
+   * as its return target, leaving the user on the old screen with corrupted back history.
+   */
+  public void backAndShowAlert(String message, AlertType type) {
+    if (message == null) {
+      back();
+      return;
+    }
+    final String text = message;
+    final AlertType alertType = type;
+    Display.getDisplay(this.midlet)
+        .callSerially(
+            new Runnable() {
+              public void run() {
+                Display display = Display.getDisplay(midlet);
+                Displayable previous;
+                if (!navStack.isEmpty()) {
+                  previous = (Displayable) navStack.pop();
+                } else {
+                  previous = rootView;
+                }
+                beforeAlert = null;
+                Alert alert = new Alert(null, text, null, alertType);
+                alert.setTimeout(Configuration.ALERT_TIMEOUT);
+                if (previous != null) {
+                  display.setCurrent(alert, previous);
+                } else {
+                  display.setCurrent(alert);
+                }
+              }
+            });
+  }
+
   public Displayable getPrevious() {
     if (navStack.isEmpty()) {
       return null;
@@ -251,6 +287,14 @@ public class Navigator {
   }
 
   public void showLoadingAlert(String s) {
+    showLoadingAlert(s, null);
+  }
+
+  /**
+   * Shows a loading alert. When the user cancels it, {@code onCancel} runs after the alert closes,
+   * so callers can clear their own "loading" flag instead of staying blocked.
+   */
+  public void showLoadingAlert(String s, final Runnable onCancel) {
     if (Utils.isJ2MELoader()) {
       return;
     }
@@ -264,6 +308,9 @@ public class Navigator {
             if (c == Commands.cancel()) {
               MIDPlay.cancelOperation();
               dismissAlert();
+              if (onCancel != null) {
+                onCancel.run();
+              }
             }
           }
         });

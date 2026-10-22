@@ -33,6 +33,7 @@ public final class SettingsScreen extends BaseForm {
   private ChoiceGroup togglesGroup;
   private ChoiceGroup playerMethodGroup;
   private TextField downloadPathField;
+  private TextField httpProxyField;
   private int autoUpdateIndex;
   private int saveLastSessionIndex;
   private int mpgramAutoLoginIndex;
@@ -50,6 +51,7 @@ public final class SettingsScreen extends BaseForm {
   private int currentThumbnails;
   private String currentPlayerMethod;
   private String currentDownloadPath;
+  private String currentHttpProxy;
   private int currentColorIndex;
 
   public SettingsScreen(Navigator navigator, Listener listener) {
@@ -110,6 +112,9 @@ public final class SettingsScreen extends BaseForm {
     }
     String pathValue = downloadPathField.getString().trim();
     if (!currentDownloadPath.equals(pathValue)) {
+      return true;
+    }
+    if (!currentHttpProxy.equals(httpProxyField.getString().trim())) {
       return true;
     }
     if ((currentAutoUpdate == Configuration.AUTO_UPDATE_ENABLED)
@@ -189,6 +194,14 @@ public final class SettingsScreen extends BaseForm {
             256,
             TextField.URL);
     append(downloadPathField);
+
+    httpProxyField =
+        new TextField(
+            Lang.tr("settings.http_proxy"),
+            settingsManager.getCurrentHttpProxy(),
+            256,
+            TextField.URL);
+    append(httpProxyField);
   }
 
   private ChoiceGroup createChoiceGroup(
@@ -214,6 +227,7 @@ public final class SettingsScreen extends BaseForm {
     currentThumbnails = settingsManager.getCurrentThumbnails();
     currentPlayerMethod = settingsManager.getCurrentPlayerMethod();
     currentDownloadPath = settingsManager.getCurrentDownloadPath();
+    currentHttpProxy = settingsManager.getCurrentHttpProxy();
     currentColorIndex = settingsManager.getSavedColorIndex();
     selectChoice(languageGroup, availableLanguages, currentLanguage);
     selectChoice(themeModeGroup, Configuration.ALL_THEME_MODES, currentThemeMode);
@@ -237,6 +251,7 @@ public final class SettingsScreen extends BaseForm {
           blackberryWifiIndex, currentBlackberryWifi == Configuration.BLACKBERRY_WIFI_ON);
     }
     downloadPathField.setString(currentDownloadPath);
+    httpProxyField.setString(currentHttpProxy);
   }
 
   private void selectChoice(ChoiceGroup group, String[] values, String target) {
@@ -330,6 +345,11 @@ public final class SettingsScreen extends BaseForm {
       if (!currentDownloadPath.equals(selectedDownloadPath)) {
         hasChanges = true;
         settingsManager.saveDownloadPath(selectedDownloadPath);
+      }
+      String selectedHttpProxy = httpProxyField.getString().trim();
+      if (!currentHttpProxy.equals(selectedHttpProxy)) {
+        hasChanges = true;
+        settingsManager.saveHttpProxy(selectedHttpProxy);
       }
 
       if (hasColorChange || hasModeChange) {

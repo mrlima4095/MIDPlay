@@ -20,20 +20,10 @@ public class Configuration {
   public static final String STORAGE_RECENT = "storage.recent";
   public static final String STORAGE_DOWNLOADS = "storage.downloads";
   public static final String STORAGE_DOWNLOADS_BACKUP = "storage.downloads.bak";
-  public static final String STORAGE_CACHE = "storage.cache";
-  public static final String STORAGE_CACHE_AUDIO = "storage.cache_audio";
   public static final String STORAGE_NOTES = "storage.notes";
   public static final String STORAGE_TASKS = "storage.tasks";
-  public static final String STORAGE_WEATHER = "storage.weather";
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
-  public static final String DEFAULT_CACHE_PATH = "file:///SDCard/MIDPlay/Cache/";
-
-  public static final int CACHE_OFF = 0;
-  public static final int CACHE_ON = 1;
-  public static final String CACHE_STORAGE_RMS = "rms";
-  public static final String CACHE_STORAGE_FILE = "file";
-  public static final int MAX_CACHE_ENTRY_BYTES = 8 * 1024 * 1024;
 
   public static final String MENU_SEARCH = "menu.search";
   public static final String MENU_FAVORITES = "menu.favorites";
@@ -49,10 +39,17 @@ public class Configuration {
   public static final String MENU_OPEN_URI = "menu.open_uri";
   public static final String MENU_NOTES = "menu.notes";
   public static final String MENU_TASKS = "menu.tasks";
-  public static final String MENU_WEATHER = "menu.weather";
   public static final String MENU_NOW_PLAYING = "menu.now_playing";
+  public static final String MENU_WATTPAD = "menu.wattpad";
 
-  public static final String DEFAULT_WEATHER_CITY = "Sao Paulo";
+  public static final String DEFAULT_HTTP_PROXY = "http://opentty.fun/proxy.php?";
+
+  public static final int DEFAULT_WATTPAD_PAGE_CHARS = 2000;
+  public static final int WATTPAD_PAGE_CHARS_MIN = 500;
+  public static final int WATTPAD_PAGE_CHARS_MAX = 20000;
+
+  public static final int WATTPAD_MATURE_OFF = 0;
+  public static final int WATTPAD_MATURE_ON = 1;
 
   public static final String SERVICE_NCT = "NCT";
   public static final String SERVICE_SOUNDCLOUD = "SoundCloud";
@@ -134,7 +131,7 @@ public class Configuration {
   public static Image githubIcon;
   public static Image notesIcon;
   public static Image tasksIcon;
-  public static Image weatherIcon;
+  public static Image wattpadIcon;
   public static Image fileExplorerIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
@@ -173,7 +170,7 @@ public class Configuration {
     githubIcon = Utils.resizeImageToFit(Image.createImage("/g.png"), 36, 36);
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();
-    weatherIcon = createWeatherIcon();
+    wattpadIcon = createWattpadIcon();
     fileExplorerIcon = createFileExplorerIcon();
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
@@ -240,28 +237,61 @@ public class Configuration {
     return image;
   }
 
-  private static Image createWeatherIcon() {
+  private static Image createWattpadIcon() {
     Image image = Image.createImage(36, 36);
     Graphics graphics = image.getGraphics();
-    // Sun behind a cloud.
-    graphics.setColor(0xF6B93B);
-    graphics.fillArc(4, 4, 16, 16, 0, 360);
-    graphics.setColor(0xF9D27A);
-    graphics.fillArc(7, 7, 10, 10, 0, 360);
-    // Cloud with a soft shadow.
-    graphics.setColor(0x9FB3C8);
-    graphics.fillRoundRect(9, 20, 24, 11, 5, 5);
-    graphics.setColor(0xF4F7FB);
-    graphics.fillRoundRect(7, 18, 24, 12, 6, 6);
-    graphics.fillArc(9, 12, 15, 15, 0, 360);
-    graphics.fillArc(18, 14, 13, 13, 0, 360);
-    graphics.setColor(0x52708F);
-    graphics.drawRoundRect(7, 18, 24, 12, 6, 6);
+    // Rounded orange tile with a soft top-down gradient.
+    for (int y = 3; y <= 32; y++) {
+      int left = 3;
+      int right = 32;
+      int cornerY = y < 11 ? 11 : (y > 24 ? 25 : -1);
+      if (cornerY != -1) {
+        double dy = y + 0.5 - cornerY;
+        if (dy >= 8) {
+          continue;
+        }
+        double half = Math.sqrt(64 - dy * dy);
+        left = (int) Math.ceil(10.5 - half);
+        right = (int) Math.floor(24.5 + half);
+      }
+      int t = y - 3;
+      int red = 255 - (23 * t) / 29;
+      int green = 108 - (42 * t) / 29;
+      int blue = 31 - (25 * t) / 29;
+      graphics.setColor((red << 16) | (green << 8) | blue);
+      graphics.drawLine(left, y, right, y);
+    }
+    graphics.setColor(0xD13D04);
+    graphics.drawRoundRect(3, 3, 30, 30, 8, 8);
+    // Bold white "W" with rounded strokes.
+    graphics.setColor(0xFFFFFF);
+    thickLine(graphics, 9, 10, 14, 25, 4);
+    thickLine(graphics, 14, 25, 18, 15, 4);
+    thickLine(graphics, 18, 15, 22, 25, 4);
+    thickLine(graphics, 22, 25, 27, 10, 4);
     return image;
   }
 
-  private static Image createFileExplorerIcon() {    Image image = Image.createImage(36, 36);
-    Graphics graphics = image.getGraphics();
+  /** Draws a line with the given width and rounded caps (MIDP has no stroke width). */
+  private static void thickLine(
+      Graphics graphics, int x1, int y1, int x2, int y2, int width) {
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double len = Math.sqrt(dx * dx + dy * dy);
+    int ox = roundToInt(-dy * width / (2 * len));
+    int oy = roundToInt(dx * width / (2 * len));
+    graphics.fillTriangle(x1 + ox, y1 + oy, x2 + ox, y2 + oy, x1 - ox, y1 - oy);
+    graphics.fillTriangle(x2 + ox, y2 + oy, x2 - ox, y2 - oy, x1 - ox, y1 - oy);
+    int r = width / 2;
+    graphics.fillArc(x1 - r, y1 - r, width, width, 0, 360);
+    graphics.fillArc(x2 - r, y2 - r, width, width, 0, 360);
+  }
+
+  private static int roundToInt(double value) {
+    return (int) (value >= 0 ? value + 0.5 : value - 0.5);
+  }
+
+  private static Image createFileExplorerIcon() {    Image image = Image.createImage(36, 36);    Graphics graphics = image.getGraphics();
     // Distinct folder silhouette with a visible tab and blue front panel.
     graphics.setColor(0xB97920);
     graphics.fillRoundRect(3, 11, 30, 21, 4, 4);

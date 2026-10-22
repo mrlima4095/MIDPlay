@@ -123,8 +123,7 @@ createdItem = new StringItem(_createdLbl + ":", "");
               if (onClose != null) {
                 onClose.run();
               }
-              navigator.back();
-              navigator.showAlert(Lang.tr("task.deleted"), AlertType.CONFIRMATION);
+              navigator.backAndShowAlert(Lang.tr("task.deleted"), AlertType.CONFIRMATION);
             } catch (Exception e) {
               navigator.showAlert(e.toString(), AlertType.ERROR);
             }

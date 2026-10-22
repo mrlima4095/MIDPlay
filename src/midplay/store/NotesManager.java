@@ -34,6 +34,7 @@ public final class NotesManager {
 
   private static NotesManager instance;
   private static final String EXPORT_FILE_NAME = "MIDPlay.vnt";
+  private static final String EXPORT_TEXT_FILE_NAME = "MIDPlay.txt";
   private final JsonRecordStore storage = new JsonRecordStore(Configuration.STORAGE_NOTES, 1, "[]");
   private JSONArray entries;
 
@@ -170,6 +171,40 @@ public final class NotesManager {
     String path = directory.endsWith("/") ? directory + name : directory + "/" + name;
     writeFile(path, exportData(selected));
     return path;
+  }
+
+  /**
+   * Writes a raw string to a file as plain text (.txt) or as a vNote (.vnt). The extension is forced
+   * according to {@code vnote}. Returns the full path written.
+   */
+  public String exportTextToDevice(String directory, String fileName, String text, boolean vnote)
+      throws IOException {
+    String name = fileName == null ? "" : fileName.trim();
+    while (name.indexOf('/') != -1 || name.indexOf('\\') != -1) {
+      int slash = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
+      name = name.substring(slash + 1);
+    }
+    String extension = vnote ? ".vnt" : ".txt";
+    if (name.length() == 0) {
+      name = vnote ? EXPORT_FILE_NAME : EXPORT_TEXT_FILE_NAME;
+    }
+    if (!endsWithIgnoreCase(name, extension)) {
+      name = stripExtension(name) + extension;
+    }
+    String path = directory.endsWith("/") ? directory + name : directory + "/" + name;
+    String body = text == null ? "" : text;
+    writeFile(
+        path,
+        vnote ? exportData(new Note[] {new Note(0, "", body, false, "", false)}) : body);
+    return path;
+  }
+
+  private static String stripExtension(String name) {
+    String lower = name.toLowerCase();
+    if (lower.endsWith(".vnt") || lower.endsWith(".txt")) {
+      return name.substring(0, name.length() - 4);
+    }
+    return name;
   }
 
   public int importFromDevice(String path) throws Exception {

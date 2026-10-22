@@ -1,50 +1,44 @@
 package midplay.ui.screen;
 
 import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.Choice;
-import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.List;
 import midplay.store.TasksManager;
 import midplay.store.TasksManager.Task;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
-import midplay.ui.TaskPrompts;
 import midplay.util.DateTime;
 import midplay.util.Lang;
 
+/** Multiple-selection mode for tasks: select all, deselect all and bulk delete. */
 public final class TasksMultiSelectScreen extends List implements CommandListener {
   private final Navigator navigator;
   private final Runnable onClose;
-  private final Command doneCommand;
-  private final Command reopenCommand;
-  private final Command priorityCommand;
+  private final Command selectAllCommand;
+  private final Command deselectAllCommand;
   private final Command deleteCommand;
   private Task[] tasks;
 
-  public TasksMultiSelectScreen(Navigator navigator, Runnable onClose) {
+  public TasksMultiSelectScreen(Navigator navigator, Task[] tasks, Runnable onClose) {
     super(Lang.tr("task.select_multiple"), List.MULTIPLE);
     this.navigator = navigator;
     this.onClose = onClose;
-    doneCommand = new Command(Lang.tr("task.complete"), Command.SCREEN, 1);
-    reopenCommand = new Command(Lang.tr("task.reopen"), Command.SCREEN, 2);
-    priorityCommand = new Command(Lang.tr("task.priority"), Command.SCREEN, 3);
-    deleteCommand = new Command(Lang.tr("task.delete"), Command.SCREEN, 4);
-    addCommand(doneCommand);
-    addCommand(reopenCommand);
-    addCommand(priorityCommand);
+    this.tasks = tasks == null ? new Task[0] : tasks;
+    selectAllCommand = new Command(Lang.tr("task.select_all"), Command.SCREEN, 1);
+    deselectAllCommand = new Command(Lang.tr("task.deselect_all"), Command.SCREEN, 2);
+    deleteCommand = new Command(Lang.tr("task.delete_selected"), Command.SCREEN, 3);
+    addCommand(selectAllCommand);
+    addCommand(deselectAllCommand);
     addCommand(deleteCommand);
-    addCommand(Commands.cancel());
+    addCommand(Commands.back());
     setCommandListener(this);
-    populate();
+    populateItems();
   }
 
-  private void populate() {
+  private void populateItems() {
     deleteAll();
-    tasks = TasksManager.getInstance().getTasks();
     for (int i = 0; i < tasks.length; i++) {
       append(label(tasks[i]), null);
     }
@@ -74,145 +68,80 @@ public final class TasksMultiSelectScreen extends List implements CommandListene
 
   public void commandAction(Command command, Displayable displayable) {
     try {
-      if (command == Commands.cancel()) {
+      if (command == Commands.back()) {
         navigator.back();
-        return;
+      } else if (command == selectAllCommand) {
+        setAllSelected(true);
+      } else if (command == deselectAllCommand) {
+        setAllSelected(false);
+      } else if (command == deleteCommand) {
+        deleteSelected();
       }
-      boolean[] selected = new boolean[size()];
-      getSelectedFlags(selected);
-      if (command == deleteCommand) {
-        deleteSelected(selected);
-        return;
-      }
-      if (command == doneCommand) {
-        bulkDone(selected, true);
-        return;
-      }
-      if (command == reopenCommand) {
-        bulkDone(selected, false);
-        return;
-      }
-      if (command == priorityCommand) {
-        promptBulkPriority(selected);
-        return;
-      }
-      navigator.back();
     } catch (Exception e) {
       navigator.showAlert(e.toString(), AlertType.ERROR);
     }
   }
 
-  private void bulkDone(boolean[] selected, boolean done) throws Exception {
-    boolean changed = false;
-    for (int i = 0; i < tasks.length && i < selected.length; i++) {
-      if (selected[i] && tasks[i].done != done) {
-        TasksManager.getInstance().toggleDone(tasks[i].id);
-        changed = true;
-      }
+  private void setAllSelected(boolean selected) {
+    boolean[] flags = new boolean[size()];
+    for (int i = 0; i < flags.length; i++) {
+      flags[i] = selected;
     }
-    if (onClose != null) {
-      onClose.run();
-    }
-    navigator.back();
-    if (changed) {
-      navigator.showAlert(Lang.tr("task.saved"), AlertType.CONFIRMATION);
-    }
+    setSelectedFlags(flags);
   }
 
-  private void deleteSelected(boolean[] selected) throws Exception {
+  private Task[] getSelectedTasks() {
+    boolean[] flags = new boolean[tasks.length];
+    getSelectedFlags(flags);
     int count = 0;
-    for (int i = 0; i < tasks.length && i < selected.length; i++) {
-      if (selected[i]) {
+    for (int i = 0; i < flags.length; i++) {
+      if (flags[i]) {
         count++;
       }
     }
-    if (count == 0) {
-      navigator.back();
+    Task[] selected = new Task[count];
+    int index = 0;
+    for (int i = 0; i < flags.length; i++) {
+      if (flags[i]) {
+        selected[index++] = tasks[i];
+      }
+    }
+    return selected;
+  }
+
+  private void deleteSelected() {
+    final Task[] selected = getSelectedTasks();
+    if (selected.length == 0) {
+      navigator.showAlert(Lang.tr("bulk.select_empty"), AlertType.INFO);
       return;
     }
-    String msg = count == 1 ? tasks[firstSelected(selected)].title : String.valueOf(count);
+    String message =
+        selected.length == 1
+            ? Lang.tr("task.delete_confirm", selected[0].title)
+            : Lang.tr("task.delete_selected_confirm", String.valueOf(selected.length));
     navigator.showConfirmationAlert(
-        Lang.tr("task.delete_confirm", msg),
+        message,
         new Runnable() {
           public void run() {
             try {
-              boolean[] sel = new boolean[size()];
-              getSelectedFlags(sel);
-              for (int i = 0; i < tasks.length && i < sel.length; i++) {
-                if (sel[i]) {
-                  TasksManager.getInstance().remove(tasks[i].id);
-                }
+              int[] ids = new int[selected.length];
+              for (int i = 0; i < selected.length; i++) {
+                ids[i] = selected[i].id;
               }
+              TasksManager.getInstance().removeMany(ids);
               if (onClose != null) {
                 onClose.run();
               }
-              navigator.back();
-              navigator.showAlert(Lang.tr("task.deleted"), AlertType.CONFIRMATION);
+              String message =
+                  selected.length == 1
+                      ? Lang.tr("task.deleted")
+                      : Lang.tr("task.deleted_many", String.valueOf(selected.length));
+              navigator.backAndShowAlert(message, AlertType.CONFIRMATION);
             } catch (Exception e) {
               navigator.showAlert(e.toString(), AlertType.ERROR);
             }
           }
-        });
-  }
-
-  private int firstSelected(boolean[] selected) {
-    for (int i = 0; i < selected.length; i++) {
-      if (selected[i]) {
-        return i;
-      }
-    }
-    return 0;
-  }
-
-  private void promptBulkPriority(boolean[] selected) {
-    final int[] selCopy = new int[countSelected(selected)];
-    int idx = 0;
-    for (int i = 0; i < tasks.length && i < selected.length; i++) {
-      if (selected[i]) {
-        selCopy[idx++] = tasks[i].id;
-      }
-    }
-    final Form form = new Form(Lang.tr("task.priority"));
-    final ChoiceGroup group = new ChoiceGroup(Lang.tr("task.priority"), Choice.EXCLUSIVE);
-    group.append(Lang.tr("task.priority_high"), null);
-    group.append(Lang.tr("task.priority_normal"), null);
-    group.append(Lang.tr("task.priority_low"), null);
-    group.setSelectedIndex(1, true);
-    form.append(group);
-    form.addCommand(Commands.ok());
-    form.addCommand(Commands.cancel());
-    form.setCommandListener(
-        new CommandListener() {
-          public void commandAction(Command command, Displayable displayable) {
-            if (command == Commands.ok()) {
-              try {
-                int priority = TaskPrompts.priorityValue(group.getSelectedIndex());
-                for (int i = 0; i < selCopy.length; i++) {
-                  TasksManager.getInstance().setPriority(selCopy[i], priority);
-                }
-                if (onClose != null) {
-                  onClose.run();
-                }
-                navigator.back();
-                navigator.showAlert(Lang.tr("task.saved"), AlertType.CONFIRMATION);
-              } catch (Exception e) {
-                navigator.showAlert(e.toString(), AlertType.ERROR);
-              }
-            } else {
-              navigator.back();
-            }
-          }
-        });
-    navigator.forward(form);
-  }
-
-  private int countSelected(boolean[] selected) {
-    int c = 0;
-    for (int i = 0; i < selected.length; i++) {
-      if (selected[i]) {
-        c++;
-      }
-    }
-    return c;
+        },
+        AlertType.WARNING);
   }
 }

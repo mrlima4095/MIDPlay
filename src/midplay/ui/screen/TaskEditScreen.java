@@ -120,25 +120,10 @@ public final class TaskEditScreen extends BaseForm {
       if (onClose != null) {
         onClose.run();
       }
-      if (taskId < 0) {
-        navigator.back();
-      } else {
-        try {
-          TasksManager.Task updated = TasksManager.getInstance().getTask(taskId);
-          if (updated != null) {
-            navigator.forward(new TaskReaderScreen(updated, navigator, new Runnable() {
-              public void run() {
-                if (onClose != null) onClose.run();
-              }
-            }));
-          } else {
-            navigator.back();
-          }
-        } catch (Exception e) {
-          navigator.back();
-        }
-      }
-      navigator.showAlert(Lang.tr("task.saved"), AlertType.CONFIRMATION);
+      // Go back to the task list (new task) or to the refreshed reader (edited task). Both the pop
+      // and the alert happen in one serial action so the alert returns to that screen, not to this
+      // form, and the back history stays intact.
+      navigator.backAndShowAlert(Lang.tr("task.saved"), AlertType.CONFIRMATION);
     } catch (Exception e) {
       navigator.showAlert(e.toString(), AlertType.ERROR);
     }

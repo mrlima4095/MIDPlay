@@ -36,6 +36,7 @@ public final class TasksScreen extends List implements CommandListener {
   private final Command filterCommand;
   private final Command searchCommand;
   private final Command clearSearchCommand;
+  private final Command selectCommand;
   private Task[] tasks;
   private int filter = FILTER_ALL;
   private String searchQuery = "";
@@ -51,6 +52,7 @@ public final class TasksScreen extends List implements CommandListener {
     filterCommand = new Command(Lang.tr("task.filter"), Command.SCREEN, 6);
     searchCommand = new Command(Lang.tr("task.search"), Command.SCREEN, 7);
     clearSearchCommand = new Command(Lang.tr("task.clear_search"), Command.SCREEN, 8);
+    selectCommand = new Command(Lang.tr("action.select"), Command.SCREEN, 9);
     addCommand(newCommand);
     addCommand(doneCommand);
     addCommand(pinCommand);
@@ -59,6 +61,7 @@ public final class TasksScreen extends List implements CommandListener {
     addCommand(filterCommand);
     addCommand(searchCommand);
     addCommand(clearSearchCommand);
+    addCommand(selectCommand);
     addCommand(Commands.back());
     addCommand(Commands.playerNowPlaying());
     setCommandListener(this);
@@ -98,6 +101,8 @@ public final class TasksScreen extends List implements CommandListener {
       } else if (command == clearSearchCommand) {
         searchQuery = "";
         refresh();
+      } else if (command == selectCommand) {
+        selectMultiple();
       }
     } catch (Exception e) {
       navigator.showAlert(e.toString(), AlertType.ERROR);
@@ -251,6 +256,19 @@ public final class TasksScreen extends List implements CommandListener {
   private Task selected() {
     int index = getSelectedIndex();
     return tasks != null && index >= 0 && index < tasks.length ? tasks[index] : null;
+  }
+
+  private void selectMultiple() {
+    if (tasks == null || tasks.length == 0) {
+      navigator.showAlert(
+          Lang.tr(
+              searchQuery.length() == 0 && filter == FILTER_ALL
+                  ? "task.empty"
+                  : "task.no_results"),
+          AlertType.INFO);
+      return;
+    }
+    navigator.forward(new TasksMultiSelectScreen(navigator, tasks, refreshOnClose()));
   }
 
   private Runnable refreshOnClose() {

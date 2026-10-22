@@ -50,6 +50,11 @@ public final class OpenUriScreen extends BaseForm {
       navigator.showAlert(Lang.tr("open_uri.empty"), AlertType.ERROR);
       return;
     }
+    if (uri.equalsIgnoreCase("htop")) {
+      // Hidden diagnostic command; do not add it to the URI history.
+      navigator.forward(new TaskViewerScreen(navigator));
+      return;
+    }
     try {
       MIDPlay.getInstance().openExternalUri(uri);
       UriHistoryManager.getInstance().record(uri);

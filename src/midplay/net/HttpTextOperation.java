@@ -56,7 +56,7 @@ public class HttpTextOperation extends NetworkOperation {
           hcon.setRequestProperty("Accept", "text/html,application/xhtml+xml,text/plain,*/*");
           watchdog = Network.armPlaybackWatchdog(hcon, SOCKET_TIMEOUT_MS);
           int code = hcon.getResponseCode();
-          if (code == HttpConnection.HTTP_OK || code == HttpConnection.HTTP_PARTIAL) {
+          if (code >= 200 && code < 300) {
             String text = Utils.bytesToUtf8(readAll(hcon));
             if (!isStopped()) {
               listener.onText(text);
