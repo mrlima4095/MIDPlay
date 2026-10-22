@@ -24,6 +24,7 @@ public class Configuration {
   public static final String STORAGE_TASKS = "storage.tasks";
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
+  public static final String DEFAULT_WATTPAD_PATH = "file:///SDCard/MIDPlay/Wattpad/";
 
   public static final String MENU_SEARCH = "menu.search";
   public static final String MENU_FAVORITES = "menu.favorites";

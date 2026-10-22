@@ -12,13 +12,17 @@ import midplay.net.HttpTextOperation;
 import midplay.net.WattpadApi;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
+import midplay.store.WattpadDownloadManager;
 import midplay.store.WattpadProgressManager;
 import midplay.ui.BaseList;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
 
-/** Lists the chapters of a story and lets the user open one in the reader. */
+/**
+ * Lists the chapters of a story and lets the user open one in the reader. Chapters already saved on
+ * the memory card are marked, and the whole story can be downloaded for offline reading.
+ */
 public final class WattpadStoryScreen extends BaseList {
   private static final int TITLE_MAX = 40;
 
@@ -34,52 +38,117 @@ public final class WattpadStoryScreen extends BaseList {
   private final Command authorCommand;
   private final Command gotoCommand;
   private final Command recommendationsCommand;
+  private final Command downloadCommand;
+  private final Command removeDownloadCommand;
   private boolean continueAdded;
 
   public WattpadStoryScreen(Navigator navigator, String storyId, String json) {
-    super(shorten(WattpadApi.parseTitle(json)), navigator);
+    this(
+        navigator,
+        storyId,
+        WattpadApi.parseTitle(json),
+        WattpadApi.parseParts(json),
+        WattpadApi.parseDescription(json),
+        WattpadApi.parseStoryDetails(json),
+        WattpadApi.parseAuthorUsername(json),
+        false);
+  }
+
+  /** Opens a story from its downloaded metadata, without any network request. */
+  public WattpadStoryScreen(
+      Navigator navigator, String storyId, String storyTitle, Vector parts) {
+    this(navigator, storyId, storyTitle, parts, "", "", "", true);
+  }
+
+  private WattpadStoryScreen(
+      Navigator navigator,
+      String storyId,
+      String storyTitle,
+      Vector parts,
+      String description,
+      String details,
+      String authorUsername,
+      boolean offline) {
+    super(shorten(storyTitle), navigator);
     this.storyId = storyId == null ? "" : storyId;
-    String title = WattpadApi.parseTitle(json);
+    String title = storyTitle == null ? "" : storyTitle;
     this.storyTitle = title.length() == 0 ? Lang.tr("wattpad.title") : title;
-    this.description = WattpadApi.parseDescription(json);
-    this.details = WattpadApi.parseStoryDetails(json);
-    this.authorUsername = WattpadApi.parseAuthorUsername(json);
-    this.parts = WattpadApi.parseParts(json);
+    this.parts = parts == null ? new Vector() : parts;
+    this.description = description == null ? "" : description;
+    this.details = details == null ? "" : details;
+    this.authorUsername = authorUsername == null ? "" : authorUsername;
     synopsisCommand = new Command(Lang.tr("wattpad.synopsis"), Command.SCREEN, 1);
     continueCommand = new Command(Lang.tr("wattpad.continue"), Command.SCREEN, 2);
     detailsCommand = new Command(Lang.tr("wattpad.story_details"), Command.SCREEN, 3);
     authorCommand = new Command(Lang.tr("wattpad.author_title"), Command.SCREEN, 4);
     gotoCommand = new Command(Lang.tr("wattpad.go_to_chapter"), Command.SCREEN, 5);
     recommendationsCommand = new Command(Lang.tr("wattpad.recommendations"), Command.SCREEN, 6);
-    addCommand(synopsisCommand);
-    addCommand(detailsCommand);
-    addCommand(gotoCommand);
-    addCommand(recommendationsCommand);
-    if (authorUsername.length() > 0) {
+    downloadCommand = new Command(Lang.tr("wattpad.download"), Command.SCREEN, 7);
+    removeDownloadCommand = new Command(Lang.tr("wattpad.remove_download"), Command.SCREEN, 8);
+    if (this.description.length() > 0) {
+      addCommand(synopsisCommand);
+    }
+    if (this.details.length() > 0) {
+      addCommand(detailsCommand);
+    }
+    if (this.authorUsername.length() > 0) {
       addCommand(authorCommand);
     }
-    int lastRead = WattpadProgressManager.getInstance().getIndex(this.storyId);
-    if (lastRead >= 0 && lastRead < parts.size()) {
-      addCommand(continueCommand);
-      continueAdded = true;
+    addCommand(gotoCommand);
+    if (!offline) {
+      addCommand(recommendationsCommand);
     }
     refresh();
+    updateHeader();
   }
 
   protected void showNotify() {
     super.showNotify();
     refresh();
+    updateHeader();
   }
 
   protected void populateItems() {
     int lastRead = WattpadProgressManager.getInstance().getIndex(storyId);
+    WattpadDownloadManager downloads = WattpadDownloadManager.getInstance();
     for (int i = 0; i < parts.size(); i++) {
       String[] part = (String[]) parts.elementAt(i);
       String label = WattpadApi.chapterLabel(i, part[WattpadApi.PART_TITLE]);
       if (i == lastRead) {
         label = "» " + label;
       }
+      if (downloads.isChapterDownloaded(storyId, part[WattpadApi.PART_ID])) {
+        label = label + " [+]";
+      }
       append(label, null);
+    }
+  }
+
+  private void updateHeader() {
+    WattpadDownloadManager downloads = WattpadDownloadManager.getInstance();
+    int downloaded = downloads.getDownloadedCount(storyId);
+    int total = parts.size();
+    boolean complete = total > 0 && downloaded >= total;
+    setTitle(shorten(storyTitle) + (complete ? " [" + Lang.tr("wattpad.offline") + "]" : ""));
+    if (downloaded > 0 && !downloads.isDownloading(storyId)) {
+      addCommand(removeDownloadCommand);
+    } else {
+      removeCommand(removeDownloadCommand);
+    }
+    if (downloaded < total && !downloads.isDownloading(storyId)) {
+      addCommand(downloadCommand);
+    } else {
+      removeCommand(downloadCommand);
+    }
+    int lastRead = WattpadProgressManager.getInstance().getIndex(storyId);
+    if (lastRead >= 0 && lastRead < total) {
+      if (!continueAdded) {
+        addCommand(continueCommand);
+        continueAdded = true;
+      }
+    } else if (continueAdded) {
+      removeCommand(continueCommand);
+      continueAdded = false;
     }
   }
 
@@ -109,7 +178,64 @@ public final class WattpadStoryScreen extends BaseList {
       }
     } else if (c == recommendationsCommand) {
       loadRecommendations();
+    } else if (c == downloadCommand) {
+      confirmDownload();
+    } else if (c == removeDownloadCommand) {
+      confirmRemoveDownload();
     }
+  }
+
+  private void confirmDownload() {
+    int total = parts.size();
+    int downloaded = WattpadDownloadManager.getInstance().getDownloadedCount(storyId);
+    int missing = total - downloaded;
+    if (missing <= 0) {
+      navigator.showAlert(Lang.tr("wattpad.download_none"), AlertType.INFO);
+      return;
+    }
+    navigator.showConfirmationAlert(
+        Lang.tr("wattpad.download_confirm", Integer.toString(missing)),
+        new Runnable() {
+          public void run() {
+            startDownload();
+          }
+        },
+        AlertType.INFO);
+  }
+
+  private void startDownload() {
+    WattpadDownloadManager.getInstance()
+        .download(
+            navigator,
+            storyId,
+            storyTitle,
+            parts,
+            new WattpadDownloadManager.Listener() {
+              public void onDownloadFinished(String storyId, int downloaded, int failed) {
+                refresh();
+                updateHeader();
+              }
+            });
+    updateHeader();
+  }
+
+  private void confirmRemoveDownload() {
+    if (WattpadDownloadManager.getInstance().isDownloading(storyId)) {
+      navigator.showAlert(Lang.tr("download.in_progress"), AlertType.INFO);
+      return;
+    }
+    navigator.showConfirmationAlert(
+        Lang.tr("wattpad.remove_download_confirm", storyTitle),
+        new Runnable() {
+          public void run() {
+            WattpadDownloadManager.getInstance().deleteStory(storyId);
+            refresh();
+            updateHeader();
+            navigator.showAlert(
+                Lang.tr("wattpad.download_removed"), AlertType.CONFIRMATION);
+          }
+        },
+        AlertType.WARNING);
   }
 
   private void loadRecommendations() {

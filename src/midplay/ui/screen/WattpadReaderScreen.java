@@ -13,6 +13,7 @@ import midplay.MIDPlay;
 import midplay.net.WattpadApi;
 import midplay.net.WattpadChapterOperation;
 import midplay.store.SettingsManager;
+import midplay.store.WattpadDownloadManager;
 import midplay.store.WattpadProgressManager;
 import midplay.ui.BaseForm;
 import midplay.ui.Commands;
@@ -214,6 +215,12 @@ public final class WattpadReaderScreen extends BaseForm {
 
   private void load(final int startPage) {
     final int token = ++loadToken;
+    // A downloaded chapter is served from the memory card, so the reader also works offline.
+    String offlineText = WattpadDownloadManager.getInstance().readChapter(storyId, partId);
+    if (offlineText != null) {
+      applyText(offlineText, startPage, true);
+      return;
+    }
     MIDPlay.startOperation(
         new WattpadChapterOperation(
             partId,
@@ -237,16 +244,7 @@ public final class WattpadReaderScreen extends BaseForm {
                         if (token != loadToken) {
                           return;
                         }
-                        fullText = text;
-                        pages =
-                            Pager.paginate(
-                                Pager.truncate(text, MAX_CHARS),
-                                SettingsManager.getInstance().getWattpadPageChars());
-                        int target = startPage;
-                        if (target < 0 || target >= pages.length) {
-                          target = 0;
-                        }
-                        showPage(target);
+                        applyText(text, startPage, false);
                       }
                     });
               }
@@ -262,6 +260,20 @@ public final class WattpadReaderScreen extends BaseForm {
                     });
               }
             }));
+  }
+
+  /** Paginates a chapter (from disk or from the network) and shows the requested page. */
+  private void applyText(String text, int startPage, boolean offline) {
+    fullText = text;
+    pages =
+        Pager.paginate(
+            Pager.truncate(text, MAX_CHARS), SettingsManager.getInstance().getWattpadPageChars());
+    int target = startPage;
+    if (target < 0 || target >= pages.length) {
+      target = 0;
+    }
+    setTitle(shorten(chapterTitle + (offline ? " [" + Lang.tr("wattpad.offline") + "]" : "")));
+    showPage(target);
   }
 
   private void showPage(int target) {

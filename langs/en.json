@@ -334,7 +334,8 @@
     "http_proxy": "HTTP proxy",
     "wattpad_mature": "Show mature stories (Wattpad)",
     "wattpad_page_chars": "Characters per page",
-    "wattpad_language": "Search language"
+    "wattpad_language": "Search language",
+    "wattpad_path": "Wattpad folder"
   },
   "status": {
     "error": "An error occurred",
@@ -535,6 +536,18 @@
     "sort_progress": "Progress",
     "archive_selected": "Archive selected",
     "archive_selected_confirm": "Archive {0} selected stories?",
-    "archived_many": "Archived: {0}"
+    "archived_many": "Archived: {0}",
+    "download": "Download story",
+    "downloading": "Downloading",
+    "download_confirm": "Download {0} chapters for offline reading?",
+    "download_done": "Story downloaded",
+    "download_failed": "{0} chapters failed",
+    "download_error": "Could not save the story",
+    "download_none": "All chapters are already downloaded",
+    "download_cancelled": "Download cancelled",
+    "remove_download": "Remove download",
+    "remove_download_confirm": "Remove the downloaded chapters of {0}?",
+    "download_removed": "Download removed",
+    "offline": "offline"
   }
 }

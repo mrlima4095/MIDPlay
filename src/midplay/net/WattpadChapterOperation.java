@@ -34,35 +34,64 @@ public class WattpadChapterOperation extends NetworkOperation {
     this.listener = listener;
   }
 
+  /** Stop flag used by the reader; the offline downloader passes null and cancels between parts. */
+  private interface Stopper {
+    boolean isStopped();
+  }
+
+  /**
+   * Fetches a whole chapter as plain text without delivering it to a listener. Used by the story
+   * downloader to store chapters on the card.
+   */
+  public static String downloadChapter(String partId) throws IOException {
+    return fetchText(partId, null, null);
+  }
+
+  private static String fetchText(String partId, Listener progress, Stopper stopper)
+      throws IOException {
+    StringBuffer html = new StringBuffer();
+    for (int page = 1; page <= MAX_PAGES; page++) {
+      if (stopper != null && stopper.isStopped()) {
+        throw new IOException("Stopped");
+      }
+      if (progress != null) {
+        progress.onProgress(page);
+      }
+      String chunk = fetchPage(partId, page, stopper);
+      if (chunk == null) {
+        break;
+      }
+      String trimmed = chunk.trim();
+      if (trimmed.length() == 0) {
+        break;
+      }
+      if (page == 1 && trimmed.charAt(0) == '{') {
+        // The endpoint answers with a small JSON error object when a part cannot be served.
+        throw new IOException("Chapter unavailable");
+      }
+      html.append(chunk);
+    }
+    if (html.length() == 0) {
+      throw new IOException("Empty chapter");
+    }
+    String text = HtmlText.toText(html.toString());
+    if (text.length() == 0) {
+      throw new IOException("Empty chapter");
+    }
+    return text;
+  }
+
   protected void execute() {
     try {
-      StringBuffer html = new StringBuffer();
-      for (int page = 1; page <= MAX_PAGES; page++) {
-        if (isStopped()) {
-          return;
-        }
-        listener.onProgress(page);
-        String chunk = fetchPage(page);
-        if (chunk == null) {
-          break;
-        }
-        String trimmed = chunk.trim();
-        if (trimmed.length() == 0) {
-          break;
-        }
-        if (page == 1 && trimmed.charAt(0) == '{') {
-          // The endpoint answers with a small JSON error object when a part cannot be served.
-          throw new IOException("Chapter unavailable");
-        }
-        html.append(chunk);
-      }
-      if (html.length() == 0) {
-        throw new IOException("Empty chapter");
-      }
-      String text = HtmlText.toText(html.toString());
-      if (text.length() == 0) {
-        throw new IOException("Empty chapter");
-      }
+      String text =
+          fetchText(
+              partId,
+              listener,
+              new Stopper() {
+                public boolean isStopped() {
+                  return WattpadChapterOperation.this.isStopped();
+                }
+              });
       if (!isStopped()) {
         listener.onSuccess(text);
       }
@@ -98,7 +127,7 @@ public class WattpadChapterOperation extends NetworkOperation {
     return Utils.bytesToUtf8(out.toByteArray());
   }
 
-  private String fetchPage(int page) throws IOException {
+  private static String fetchPage(String partId, int page, Stopper stopper) throws IOException {
     HttpConnection hcon = null;
     DataInputStream in = null;
     TimerTask watchdog = null;
@@ -119,7 +148,7 @@ public class WattpadChapterOperation extends NetworkOperation {
       byte[] buffer = new byte[4096];
       int read;
       while ((read = in.read(buffer)) != -1) {
-        if (isStopped()) {
+        if (stopper != null && stopper.isStopped()) {
           break;
         }
         out.write(buffer, 0, read);

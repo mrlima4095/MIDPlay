@@ -279,7 +279,8 @@
     "http_proxy": "Proxy HTTP",
     "wattpad_mature": "Hiện truyện người lớn (Wattpad)",
     "wattpad_page_chars": "Ký tự mỗi trang",
-    "wattpad_language": "Ngôn ngữ tìm kiếm"
+    "wattpad_language": "Ngôn ngữ tìm kiếm",
+    "wattpad_path": "Thư mục Wattpad"
   },
   "status": {
     "error": "Đã xảy ra lỗi",
@@ -535,6 +536,18 @@
     "sort_progress": "Tiến độ",
     "archive_selected": "Lưu trữ mục đã chọn",
     "archive_selected_confirm": "Lưu trữ {0} truyện đã chọn?",
-    "archived_many": "Đã lưu trữ: {0}"
+    "archived_many": "Đã lưu trữ: {0}",
+    "download": "Tải truyện",
+    "downloading": "Đang tải",
+    "download_confirm": "Tải {0} chương để đọc ngoại tuyến?",
+    "download_done": "Đã tải truyện",
+    "download_failed": "{0} chương tải thất bại",
+    "download_error": "Không thể lưu truyện",
+    "download_none": "Tất cả các chương đã được tải",
+    "download_cancelled": "Đã hủy tải",
+    "remove_download": "Xóa bản tải",
+    "remove_download_confirm": "Xóa các chương đã tải của {0}?",
+    "download_removed": "Đã xóa bản tải",
+    "offline": "ngoại tuyến"
   }
 }

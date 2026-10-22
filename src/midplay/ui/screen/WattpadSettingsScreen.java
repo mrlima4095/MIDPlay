@@ -19,6 +19,8 @@ import midplay.util.Lang;
 public final class WattpadSettingsScreen extends BaseForm {
   private final SettingsManager settings = SettingsManager.getInstance();
   private final TextField pageField;
+  private final TextField pathField;
+  private final String savedPath;
   private final ChoiceGroup languageGroup;
   private final int[] languageIds;
   private final ChoiceGroup toggles;
@@ -31,6 +33,7 @@ public final class WattpadSettingsScreen extends BaseForm {
   public WattpadSettingsScreen(Navigator navigator) {
     super(Lang.tr("wattpad.settings_title"), navigator);
     savedPage = settings.getWattpadPageChars();
+    savedPath = settings.getWattpadPath();
     savedLanguage = settings.getWattpadLanguage();
     savedMature = settings.getCurrentWattpadMature();
 
@@ -41,6 +44,10 @@ public final class WattpadSettingsScreen extends BaseForm {
             6,
             TextField.NUMERIC);
     append(pageField);
+
+    pathField =
+        new TextField(Lang.tr("settings.wattpad_path"), savedPath, 256, TextField.URL);
+    append(pathField);
 
     languageIds = WattpadApi.getLanguageIds();
     String[] languages = new String[languageIds.length + 1];
@@ -90,6 +97,7 @@ public final class WattpadSettingsScreen extends BaseForm {
 
   private boolean isDirty() {
     return savedPage != parsePage(pageField.getString())
+        || !savedPath.equals(pathField.getString().trim())
         || savedLanguage != selectedLanguage()
         || savedMature != selectedMature();
   }
@@ -101,6 +109,10 @@ public final class WattpadSettingsScreen extends BaseForm {
     try {
       if (page != savedPage) {
         settings.saveWattpadPageChars(page);
+      }
+      String path = pathField.getString().trim();
+      if (!path.equals(savedPath)) {
+        settings.saveWattpadPath(path);
       }
       if (language != savedLanguage) {
         settings.saveWattpadLanguage(language);

@@ -279,7 +279,8 @@
     "http_proxy": "Proxy HTTP",
     "wattpad_mature": "Pokaż opowiadania dla dorosłych (Wattpad)",
     "wattpad_page_chars": "Znaki na stronę",
-    "wattpad_language": "Język wyszukiwania"
+    "wattpad_language": "Język wyszukiwania",
+    "wattpad_path": "Folder Wattpad"
   },
   "status": {
     "error": "Wystąpił błąd",
@@ -535,6 +536,18 @@
     "sort_progress": "Postęp",
     "archive_selected": "Archiwizuj wybrane",
     "archive_selected_confirm": "Zarchiwizować {0} wybranych opowiadań?",
-    "archived_many": "Zarchiwizowano: {0}"
+    "archived_many": "Zarchiwizowano: {0}",
+    "download": "Pobierz opowiadanie",
+    "downloading": "Pobieranie",
+    "download_confirm": "Pobrać {0} rozdziałów do czytania offline?",
+    "download_done": "Opowiadanie pobrane",
+    "download_failed": "{0} rozdziałów nie zostało pobranych",
+    "download_error": "Nie można zapisać opowiadania",
+    "download_none": "Wszystkie rozdziały są już pobrane",
+    "download_cancelled": "Pobieranie anulowane",
+    "remove_download": "Usuń pobrane",
+    "remove_download_confirm": "Usunąć pobrane rozdziały {0}?",
+    "download_removed": "Pobrane usunięto",
+    "offline": "offline"
   }
 }

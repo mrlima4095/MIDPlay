@@ -279,7 +279,8 @@
     "http_proxy": "פרוקסי HTTP",
     "wattpad_mature": "הצג סיפורים למבוגרים (Wattpad)",
     "wattpad_page_chars": "תווים בעמוד",
-    "wattpad_language": "שפת החיפוש"
+    "wattpad_language": "שפת החיפוש",
+    "wattpad_path": "תיקיית Wattpad"
   },
   "status": {
     "error": "התרחשה שגיאה",
@@ -535,6 +536,18 @@
     "sort_progress": "התקדמות",
     "archive_selected": "העבר נבחרים לארכיון",
     "archive_selected_confirm": "להעביר {0} סיפורים נבחרים לארכיון?",
-    "archived_many": "נארכו: {0}"
+    "archived_many": "נארכו: {0}",
+    "download": "הורדת סיפור",
+    "downloading": "מוריד",
+    "download_confirm": "להוריד {0} פרקים לקריאה במצב לא מקוון?",
+    "download_done": "הסיפור הורד",
+    "download_failed": "{0} פרקים נכשלו",
+    "download_error": "לא ניתן לשמור את הסיפור",
+    "download_none": "כל הפרקים כבר הורדו",
+    "download_cancelled": "ההורדה בוטלה",
+    "remove_download": "הסרת הורדה",
+    "remove_download_confirm": "להסיר את הפרקים שהורדו של {0}?",
+    "download_removed": "ההורדה הוסרה",
+    "offline": "לא מקוון"
   }
 }

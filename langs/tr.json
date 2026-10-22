@@ -279,7 +279,8 @@
     "http_proxy": "HTTP proxy",
     "wattpad_mature": "Yetişkin hikâyelerini göster (Wattpad)",
     "wattpad_page_chars": "Sayfa başına karakter",
-    "wattpad_language": "Arama dili"
+    "wattpad_language": "Arama dili",
+    "wattpad_path": "Wattpad klasörü"
   },
   "status": {
     "error": "Bir hata oluştu",
@@ -535,6 +536,18 @@
     "sort_progress": "İlerleme",
     "archive_selected": "Seçilenleri arşivle",
     "archive_selected_confirm": "{0} seçili hikâye arşivlensin mi?",
-    "archived_many": "Arşivlendi: {0}"
+    "archived_many": "Arşivlendi: {0}",
+    "download": "Hikayeyi indir",
+    "downloading": "İndiriliyor",
+    "download_confirm": "{0} bölüm çevrimdışı okumak için indirilsin mi?",
+    "download_done": "Hikaye indirildi",
+    "download_failed": "{0} bölüm indirilemedi",
+    "download_error": "Hikaye kaydedilemedi",
+    "download_none": "Tüm bölümler zaten indirilmiş",
+    "download_cancelled": "İndirme iptal edildi",
+    "remove_download": "İndirmeyi kaldır",
+    "remove_download_confirm": "{0} hikayesinin indirilen bölümleri kaldırılsın mı?",
+    "download_removed": "İndirme kaldırıldı",
+    "offline": "çevrimdışı"
   }
 }

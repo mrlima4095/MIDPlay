@@ -12,6 +12,7 @@ import midplay.net.HttpTextOperation;
 import midplay.net.WattpadApi;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
+import midplay.store.WattpadDownloadManager;
 import midplay.store.WattpadProgressManager;
 import midplay.store.WattpadSearchHistoryManager;
 import midplay.ui.BaseForm;
@@ -90,6 +91,16 @@ public final class WattpadScreen extends BaseForm {
       navigator.showAlert(Lang.tr("wattpad.library_empty"), AlertType.INFO);
       return;
     }
+    String storyId = entry[WattpadProgressManager.ENTRY_ID];
+    Vector local = WattpadDownloadManager.getInstance().getLocalParts(storyId);
+    if (local != null && local.size() > 0) {
+      String title = WattpadDownloadManager.getInstance().getLocalTitle(storyId);
+      if (title.length() == 0) {
+        title = entry[WattpadProgressManager.ENTRY_TITLE];
+      }
+      openLatest(entry, local, title);
+      return;
+    }
     navigator.showLoadingAlert(Lang.tr("wattpad.loading"));
     MIDPlay.startOperation(
         new HttpTextOperation(
@@ -125,15 +136,19 @@ public final class WattpadScreen extends BaseForm {
       navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
       return;
     }
+    String storyTitle = WattpadApi.parseTitle(json);
+    if (storyTitle.length() == 0) {
+      storyTitle = entry[WattpadProgressManager.ENTRY_TITLE];
+    }
+    openLatest(entry, parts, storyTitle);
+  }
+
+  private void openLatest(String[] entry, Vector parts, String storyTitle) {
     int index = parseInt(entry[WattpadProgressManager.ENTRY_INDEX]);
     if (index < 0 || index >= parts.size()) {
       index = 0;
     }
     String storyId = entry[WattpadProgressManager.ENTRY_ID];
-    String storyTitle = WattpadApi.parseTitle(json);
-    if (storyTitle.length() == 0) {
-      storyTitle = entry[WattpadProgressManager.ENTRY_TITLE];
-    }
     String chapterTitle = ((String[]) parts.elementAt(index))[WattpadApi.PART_TITLE];
     int page = WattpadProgressManager.getInstance().getPage(storyId);
     if (page < 0) {

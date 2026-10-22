@@ -11,6 +11,7 @@ import javax.microedition.lcdui.List;
 import midplay.MIDPlay;
 import midplay.net.HttpTextOperation;
 import midplay.net.WattpadApi;
+import midplay.store.WattpadDownloadManager;
 import midplay.store.WattpadProgressManager;
 import midplay.ui.BaseList;
 import midplay.ui.Commands;
@@ -312,6 +313,13 @@ public final class WattpadLibraryScreen extends BaseList {
   }
 
   private void open(final String[] entry) {
+    // Downloaded stories open straight from the card, so the library also works offline.
+    String storyId = entry[WattpadProgressManager.ENTRY_ID];
+    Vector local = WattpadDownloadManager.getInstance().getLocalParts(storyId);
+    if (local != null && local.size() > 0) {
+      openLocal(entry, local);
+      return;
+    }
     loading = true;
     navigator.showLoadingAlert(Lang.tr("wattpad.loading"), cancelLoading());
     MIDPlay.startOperation(
@@ -348,6 +356,23 @@ public final class WattpadLibraryScreen extends BaseList {
             MAX_STORY_BYTES));
   }
 
+  /** Opens a downloaded story without touching the network. */
+  private void openLocal(String[] entry, Vector parts) {
+    String title =
+        WattpadDownloadManager.getInstance()
+            .getLocalTitle(entry[WattpadProgressManager.ENTRY_ID]);
+    if (title.length() == 0) {
+      title = entry[WattpadProgressManager.ENTRY_TITLE];
+    }
+    if (archived) {
+      navigator.forward(
+          new WattpadStoryScreen(
+              navigator, entry[WattpadProgressManager.ENTRY_ID], title, parts));
+    } else {
+      resume(entry, parts, title);
+    }
+  }
+
   /** Archived stories open on their chapter list, not directly on the saved reading position. */
   private void openChapters(String[] entry, String json) {
     if (WattpadApi.parseParts(json).size() == 0) {
@@ -364,13 +389,17 @@ public final class WattpadLibraryScreen extends BaseList {
       navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
       return;
     }
-    int index = parseInt(entry[WattpadProgressManager.ENTRY_INDEX]);
-    if (index < 0 || index >= parts.size()) {
-      index = 0;
-    }
     String storyTitle = WattpadApi.parseTitle(json);
     if (storyTitle.length() == 0) {
       storyTitle = entry[WattpadProgressManager.ENTRY_TITLE];
+    }
+    resume(entry, parts, storyTitle);
+  }
+
+  private void resume(String[] entry, Vector parts, String storyTitle) {
+    int index = parseInt(entry[WattpadProgressManager.ENTRY_INDEX]);
+    if (index < 0 || index >= parts.size()) {
+      index = 0;
     }
     String chapterTitle = ((String[]) parts.elementAt(index))[WattpadApi.PART_TITLE];
     String storyId = entry[WattpadProgressManager.ENTRY_ID];

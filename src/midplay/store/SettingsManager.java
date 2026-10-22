@@ -32,6 +32,7 @@ public class SettingsManager {
   private static int currentEqPreset; // -1 = manual/custom levels
   private static int[] currentEqLevels;
   private static String currentHttpProxy;
+  private static String currentWattpadPath;
   private static int currentWattpadPageChars;
   private static int currentWattpadMature;
   private static int currentWattpadLanguage;
@@ -133,6 +134,8 @@ public class SettingsManager {
     currentEqPreset = settings.getInt("eqPreset", -1);
     currentEqLevels = parseLevelsCsv(settings.getString("eqLevels", ""));
     currentHttpProxy = settings.getString("httpProxy", Configuration.DEFAULT_HTTP_PROXY);
+    currentWattpadPath =
+        settings.getString("wattpadPath", Configuration.DEFAULT_WATTPAD_PATH);
     currentWattpadPageChars =
         settings.getInt("wattpadPageChars", Configuration.DEFAULT_WATTPAD_PAGE_CHARS);
     currentWattpadMature = settings.getInt("wattpadMature", Configuration.WATTPAD_MATURE_OFF);
@@ -168,6 +171,7 @@ public class SettingsManager {
     settings.put("eqPreset", -1);
     settings.put("eqLevels", "");
     settings.put("httpProxy", Configuration.DEFAULT_HTTP_PROXY);
+    settings.put("wattpadPath", Configuration.DEFAULT_WATTPAD_PATH);
     settings.put("wattpadPageChars", Configuration.DEFAULT_WATTPAD_PAGE_CHARS);
     settings.put("wattpadMature", Configuration.WATTPAD_MATURE_OFF);
     settings.put("wattpadLanguage", 0);
@@ -307,6 +311,23 @@ public class SettingsManager {
       return proxy + url;
     }
     return url;
+  }
+
+  /** Folder where downloaded Wattpad stories are stored on the memory card. */
+  public String getWattpadPath() {
+    if (currentWattpadPath == null || currentWattpadPath.length() == 0) {
+      currentWattpadPath = Configuration.DEFAULT_WATTPAD_PATH;
+    }
+    return currentWattpadPath;
+  }
+
+  public void saveWattpadPath(String path) throws RecordStoreException {
+    String value = path == null ? "" : path.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_WATTPAD_PATH;
+    }
+    saveSetting("wattpadPath", value);
+    currentWattpadPath = value;
   }
 
   /** Maximum number of characters shown per Wattpad chapter page. */

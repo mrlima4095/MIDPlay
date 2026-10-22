@@ -7,6 +7,7 @@ import midplay.net.HttpTextOperation;
 import midplay.net.WattpadApi;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
+import midplay.store.WattpadDownloadManager;
 import midplay.ui.screen.WattpadAuthorScreen;
 import midplay.ui.screen.WattpadReaderScreen;
 import midplay.ui.screen.WattpadResultsScreen;
@@ -138,6 +139,16 @@ public final class WattpadLinks {
   }
 
   private static void openStory(final Navigator navigator, final String storyId) {
+    Vector local = WattpadDownloadManager.getInstance().getLocalParts(storyId);
+    if (local != null && local.size() > 0) {
+      navigator.forward(
+          new WattpadStoryScreen(
+              navigator,
+              storyId,
+              WattpadDownloadManager.getInstance().getLocalTitle(storyId),
+              local));
+      return;
+    }
     navigator.showLoadingAlert(Lang.tr("wattpad.loading"));
     MIDPlay.startOperation(
         new HttpTextOperation(
@@ -166,6 +177,20 @@ public final class WattpadLinks {
   }
 
   private static void openPart(final Navigator navigator, final String partId) {
+    // A chapter that is already on the card can be opened offline; no story lookup is needed.
+    String localStory = WattpadDownloadManager.getInstance().findStoryForPart(partId);
+    if (localStory != null && localStory.length() > 0) {
+      Vector localParts = WattpadDownloadManager.getInstance().getLocalParts(localStory);
+      if (localParts != null && localParts.size() > 0) {
+        showChapter(
+            navigator,
+            partId,
+            localStory,
+            WattpadDownloadManager.getInstance().getLocalTitle(localStory),
+            localParts);
+        return;
+      }
+    }
     navigator.showLoadingAlert(Lang.tr("wattpad.loading_chapter"));
     MIDPlay.startOperation(
         new HttpTextOperation(
@@ -185,7 +210,12 @@ public final class WattpadLinks {
                             navigator.callSerially(
                                 new Runnable() {
                                   public void run() {
-                                    showChapter(navigator, partId, storyId, story);
+                                    showChapter(
+                                        navigator,
+                                        partId,
+                                        storyId,
+                                        WattpadApi.parseTitle(story),
+                                        WattpadApi.parseParts(story));
                                   }
                                 });
                           }
@@ -204,8 +234,7 @@ public final class WattpadLinks {
   }
 
   private static void showChapter(
-      Navigator navigator, String partId, String storyId, String json) {
-    Vector parts = WattpadApi.parseParts(json);
+      Navigator navigator, String partId, String storyId, String title, Vector parts) {
     if (parts.size() == 0) {
       navigator.dismissAlert();
       error(navigator);
@@ -218,9 +247,7 @@ public final class WattpadLinks {
         break;
       }
     }
-    navigator.forward(
-        new WattpadReaderScreen(
-            navigator, storyId, WattpadApi.parseTitle(json), parts, index));
+    navigator.forward(new WattpadReaderScreen(navigator, storyId, title, parts, index));
   }
 
   private static void openUser(final Navigator navigator, final String username) {
