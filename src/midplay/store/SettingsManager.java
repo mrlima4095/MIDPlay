@@ -305,6 +305,7 @@ public class SettingsManager {
     return currentDownloadPath;
   }
 
+  /** HTTP proxy that routes Wattpad's https requests; edited in the Wattpad settings screen. */
   public String getCurrentHttpProxy() {
     if (currentHttpProxy == null) {
       currentHttpProxy = Configuration.DEFAULT_HTTP_PROXY;

@@ -15,12 +15,14 @@ import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.util.Lang;
 
-/** Wattpad-only settings: reading layout, content filter and search language. */
+/** Wattpad-only settings: reading layout, content filter, search language and the HTTPS proxy. */
 public final class WattpadSettingsScreen extends BaseForm {
   private final SettingsManager settings = SettingsManager.getInstance();
   private final TextField pageField;
   private final TextField pathField;
   private final String savedPath;
+  private final TextField proxyField;
+  private final String savedProxy;
   private final ChoiceGroup languageGroup;
   private final int[] languageIds;
   private final ChoiceGroup toggles;
@@ -34,6 +36,7 @@ public final class WattpadSettingsScreen extends BaseForm {
     super(Lang.tr("wattpad.settings_title"), navigator);
     savedPage = settings.getWattpadPageChars();
     savedPath = settings.getWattpadPath();
+    savedProxy = settings.getCurrentHttpProxy();
     savedLanguage = settings.getWattpadLanguage();
     savedMature = settings.getCurrentWattpadMature();
 
@@ -48,6 +51,11 @@ public final class WattpadSettingsScreen extends BaseForm {
     pathField =
         new TextField(Lang.tr("settings.wattpad_path"), savedPath, 256, TextField.URL);
     append(pathField);
+
+    // Wattpad endpoints are https; MIDP devices without TLS reach them through this http proxy.
+    proxyField =
+        new TextField(Lang.tr("settings.http_proxy"), savedProxy, 256, TextField.URL);
+    append(proxyField);
 
     languageIds = WattpadApi.getLanguageIds();
     String[] languages = new String[languageIds.length + 1];
@@ -98,6 +106,7 @@ public final class WattpadSettingsScreen extends BaseForm {
   private boolean isDirty() {
     return savedPage != parsePage(pageField.getString())
         || !savedPath.equals(pathField.getString().trim())
+        || !savedProxy.equals(proxyField.getString().trim())
         || savedLanguage != selectedLanguage()
         || savedMature != selectedMature();
   }
@@ -113,6 +122,10 @@ public final class WattpadSettingsScreen extends BaseForm {
       String path = pathField.getString().trim();
       if (!path.equals(savedPath)) {
         settings.saveWattpadPath(path);
+      }
+      String proxy = proxyField.getString().trim();
+      if (!proxy.equals(savedProxy)) {
+        settings.saveHttpProxy(proxy);
       }
       if (language != savedLanguage) {
         settings.saveWattpadLanguage(language);
