@@ -69,7 +69,8 @@ public final class OpenUriScreen extends BaseForm {
       return;
     }
     if (MIDPlay.getInstance().openInternalUri(uri)) {
-      // Internal shortcut (wattpad, pinterest, mpgram, ...); not a URL, so keep it out of history.
+      UriHistoryManager.getInstance().record(uri);
+      refreshHistory();
       return;
     }
     try {
