@@ -398,6 +398,12 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     } catch (Throwable t) {
     }
     try {
+      if (settingsManager.getEconomyMode() == Configuration.ECONOMY_MODE_ON) {
+        MP.setEconomyMode(true);
+      }
+    } catch (Throwable t) {
+    }
+    try {
       autoCheckForUpdate();
     } catch (Throwable t) {
     }

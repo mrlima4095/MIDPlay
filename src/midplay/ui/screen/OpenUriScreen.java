@@ -6,18 +6,24 @@ import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.TextField;
+import javax.microedition.rms.RecordStoreException;
 import midplay.MIDPlay;
+import midplay.store.Configuration;
+import midplay.store.SettingsManager;
 import midplay.store.UriHistoryManager;
 import midplay.ui.BaseForm;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
+import mpgram.MP;
 
 public final class OpenUriScreen extends BaseForm {
   private final TextField uriField;
   private final ChoiceGroup history;
   private final Command useHistory;
   private final Command clearHistory;
+  private final Command enableEconomyCommand;
+  private final Command disableEconomyCommand;
 
   public OpenUriScreen(Navigator navigator) {
     super(Lang.tr("open_uri.title"), navigator);
@@ -27,9 +33,12 @@ public final class OpenUriScreen extends BaseForm {
     append(history);
     useHistory = new Command(Lang.tr("open_uri.use"), Command.SCREEN, 1);
     clearHistory = new Command(Lang.tr("open_uri.clear"), Command.SCREEN, 2);
+    enableEconomyCommand = new Command(Lang.tr("open_uri.economy_enable"), Command.SCREEN, 3);
+    disableEconomyCommand = new Command(Lang.tr("open_uri.economy_disable"), Command.SCREEN, 3);
     addCommand(Commands.ok());
     addCommand(useHistory);
     addCommand(clearHistory);
+    updateEconomyCommand();
   }
 
   protected void handleCommand(Command c, Displayable d) {
@@ -40,6 +49,10 @@ public final class OpenUriScreen extends BaseForm {
     if (c == clearHistory) {
       UriHistoryManager.getInstance().clear();
       refreshHistory();
+      return;
+    }
+    if (c == enableEconomyCommand || c == disableEconomyCommand) {
+      toggleEconomyMode();
       return;
     }
     if (c != Commands.ok()) {
@@ -77,5 +90,36 @@ public final class OpenUriScreen extends BaseForm {
     for (int i = 0; i < items.length; i++) {
       history.append(items[i], null);
     }
+  }
+
+  /**
+   * Toggles battery-saving mode. When enabled, MPGram's background keep-alive and notification
+   * loops stop; turning it off starts them again exactly as they were configured.
+   */
+  private void toggleEconomyMode() {
+    int current = SettingsManager.getInstance().getEconomyMode();
+    final boolean enable = current != Configuration.ECONOMY_MODE_ON;
+    try {
+      SettingsManager.getInstance()
+          .saveEconomyMode(enable ? Configuration.ECONOMY_MODE_ON : Configuration.ECONOMY_MODE_OFF);
+    } catch (RecordStoreException e) {
+      navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
+      return;
+    }
+    try {
+      MP.setEconomyMode(enable);
+    } catch (Throwable t) {
+    }
+    updateEconomyCommand();
+    navigator.showAlert(
+        Lang.tr(enable ? "open_uri.economy_enabled" : "open_uri.economy_disabled"),
+        AlertType.CONFIRMATION);
+  }
+
+  private void updateEconomyCommand() {
+    boolean on = SettingsManager.getInstance().getEconomyMode() == Configuration.ECONOMY_MODE_ON;
+    removeCommand(enableEconomyCommand);
+    removeCommand(disableEconomyCommand);
+    addCommand(on ? disableEconomyCommand : enableEconomyCommand);
   }
 }
