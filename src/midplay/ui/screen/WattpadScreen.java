@@ -21,15 +21,16 @@ import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.util.Lang;
 
-/** Searches Wattpad (stories, authors and tags) and lists the matching stories. */
+/** Searches Wattpad stories or authors and lists the matches. */
 public final class WattpadScreen extends BaseForm {
   private static final int MAX_STORY_BYTES = 400 * 1024;
+  private static final int TYPE_STORIES = 0;
+  private static final int TYPE_USERS = 1;
 
   private final TextField queryField;
+  private final ChoiceGroup searchTypeGroup;
   private final ChoiceGroup history;
   private final Command continueCommand;
-  private final Command searchCommand;
-  private final Command usersCommand;
   private final Command libraryCommand;
   private final Command settingsCommand;
   private final Command useHistory;
@@ -39,6 +40,13 @@ public final class WattpadScreen extends BaseForm {
     super(Lang.tr("wattpad.title"), navigator);
     queryField = new TextField(Lang.tr("wattpad.search_field"), "", 120, TextField.ANY);
     append(queryField);
+
+    searchTypeGroup = new ChoiceGroup(Lang.tr("search.type"), ChoiceGroup.EXCLUSIVE);
+    searchTypeGroup.append(Lang.tr("wattpad.stories"), null);
+    searchTypeGroup.append(Lang.tr("wattpad.users"), null);
+    searchTypeGroup.setSelectedIndex(TYPE_STORIES, true);
+    append(searchTypeGroup);
+
     history =
         new ChoiceGroup(
             Lang.tr("open_uri.history"),
@@ -46,16 +54,14 @@ public final class WattpadScreen extends BaseForm {
             WattpadSearchHistoryManager.getInstance().getItems(),
             null);
     append(history);
+
     continueCommand = new Command(Lang.tr("wattpad.continue"), Command.SCREEN, 0);
-    searchCommand = new Command(Lang.tr("wattpad.search"), Command.SCREEN, 1);
-    usersCommand = new Command(Lang.tr("wattpad.search_users"), Command.SCREEN, 2);
     libraryCommand = new Command(Lang.tr("wattpad.library"), Command.SCREEN, 3);
     settingsCommand = new Command(Lang.tr("wattpad.settings_title"), Command.SCREEN, 4);
     useHistory = new Command(Lang.tr("open_uri.use"), Command.SCREEN, 5);
     clearHistory = new Command(Lang.tr("open_uri.clear"), Command.SCREEN, 6);
+    addCommand(Commands.ok());
     addCommand(continueCommand);
-    addCommand(searchCommand);
-    addCommand(usersCommand);
     addCommand(libraryCommand);
     addCommand(settingsCommand);
     addCommand(useHistory);
@@ -66,12 +72,10 @@ public final class WattpadScreen extends BaseForm {
   protected void handleCommand(Command c, Displayable d) {
     if (c == Commands.playerNowPlaying()) {
       PlayerNavHelper.showNowPlaying(navigator);
+    } else if (c == Commands.ok()) {
+      search();
     } else if (c == continueCommand) {
       continueReading();
-    } else if (c == searchCommand) {
-      search();
-    } else if (c == usersCommand) {
-      searchUsers();
     } else if (c == libraryCommand) {
       navigator.forward(new WattpadLibraryScreen(navigator));
     } else if (c == settingsCommand) {
@@ -186,7 +190,16 @@ public final class WattpadScreen extends BaseForm {
     return SettingsManager.getInstance().getCurrentWattpadMature() == Configuration.WATTPAD_MATURE_ON;
   }
 
+  /** Runs the search type selected in the ChoiceGroup. */
   private void search() {
+    if (searchTypeGroup.getSelectedIndex() == TYPE_USERS) {
+      searchUsers();
+    } else {
+      searchStories();
+    }
+  }
+
+  private void searchStories() {
     final String query = queryField.getString().trim();
     if (query.length() == 0) {
       navigator.showAlert(Lang.tr("wattpad.search_field"), AlertType.ERROR);

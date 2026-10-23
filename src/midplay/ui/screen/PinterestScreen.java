@@ -4,9 +4,7 @@ import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.TextField;
 import midplay.MIDPlay;
 import midplay.net.HttpTextOperation;
@@ -18,13 +16,15 @@ import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.util.Lang;
 
-/** Pinterest start screen: search for pins or boards, or open a profile by username. */
+/** Pinterest start screen: search pins, boards or users, and reach favorites/settings. */
 public final class PinterestScreen extends BaseForm {
+  private static final int TYPE_PINS = 0;
+  private static final int TYPE_BOARDS = 1;
+  private static final int TYPE_USER = 2;
+
   private final TextField queryField;
+  private final ChoiceGroup searchTypeGroup;
   private final ChoiceGroup history;
-  private final Command pinsCommand;
-  private final Command boardsCommand;
-  private final Command userCommand;
   private final Command favoritesCommand;
   private final Command settingsCommand;
   private final Command useHistory;
@@ -35,6 +35,14 @@ public final class PinterestScreen extends BaseForm {
     super(Lang.tr("pinterest.title"), navigator);
     queryField = new TextField(Lang.tr("pinterest.search_field"), "", 120, TextField.ANY);
     append(queryField);
+
+    searchTypeGroup = new ChoiceGroup(Lang.tr("search.type"), ChoiceGroup.EXCLUSIVE);
+    searchTypeGroup.append(Lang.tr("pinterest.pins"), null);
+    searchTypeGroup.append(Lang.tr("pinterest.boards"), null);
+    searchTypeGroup.append(Lang.tr("pinterest.search_user"), null);
+    searchTypeGroup.setSelectedIndex(TYPE_PINS, true);
+    append(searchTypeGroup);
+
     history =
         new ChoiceGroup(
             Lang.tr("open_uri.history"),
@@ -42,16 +50,12 @@ public final class PinterestScreen extends BaseForm {
             PinterestSearchHistoryManager.getInstance().getItems(),
             null);
     append(history);
-    pinsCommand = new Command(Lang.tr("pinterest.search_pins"), Command.SCREEN, 1);
-    boardsCommand = new Command(Lang.tr("pinterest.search_boards"), Command.SCREEN, 2);
-    userCommand = new Command(Lang.tr("pinterest.open_user"), Command.SCREEN, 3);
+
     favoritesCommand = new Command(Lang.tr("pinterest.favorites"), Command.SCREEN, 4);
     settingsCommand = new Command(Lang.tr("pinterest.settings_title"), Command.SCREEN, 5);
     useHistory = new Command(Lang.tr("open_uri.use"), Command.SCREEN, 6);
     clearHistory = new Command(Lang.tr("open_uri.clear"), Command.SCREEN, 7);
-    addCommand(pinsCommand);
-    addCommand(boardsCommand);
-    addCommand(userCommand);
+    addCommand(Commands.ok());
     addCommand(favoritesCommand);
     addCommand(settingsCommand);
     addCommand(useHistory);
@@ -62,12 +66,8 @@ public final class PinterestScreen extends BaseForm {
   protected void handleCommand(Command c, Displayable d) {
     if (c == Commands.playerNowPlaying()) {
       PlayerNavHelper.showNowPlaying(navigator);
-    } else if (c == pinsCommand) {
-      search(false);
-    } else if (c == boardsCommand) {
-      search(true);
-    } else if (c == userCommand) {
-      promptUser();
+    } else if (c == Commands.ok()) {
+      search();
     } else if (c == favoritesCommand) {
       navigator.forward(new PinterestFavoritesScreen(navigator));
     } else if (c == settingsCommand) {
@@ -95,16 +95,22 @@ public final class PinterestScreen extends BaseForm {
     }
   }
 
-  private void search(final boolean boards) {
-    if (loading) {
-      return;
-    }
+  private void search() {
     final String query = queryField.getString().trim();
     if (query.length() == 0) {
       navigator.showAlert(Lang.tr("search.error.empty_keyword"), AlertType.ERROR);
       return;
     }
+    int type = searchTypeGroup.getSelectedIndex();
+    if (type == TYPE_USER) {
+      openUser(query);
+      return;
+    }
+    if (loading) {
+      return;
+    }
     loading = true;
+    final boolean boards = type == TYPE_BOARDS;
     navigator.showLoadingAlert(
         Lang.tr("pinterest.loading"),
         new Runnable() {
@@ -137,6 +143,17 @@ public final class PinterestScreen extends BaseForm {
                     });
               }
             }));
+  }
+
+  private void openUser(String query) {
+    String username = PinterestApi.cleanUsername(query);
+    if (username.length() == 0) {
+      navigator.showAlert(Lang.tr("pinterest.username_required"), AlertType.ERROR);
+      return;
+    }
+    PinterestSearchHistoryManager.getInstance().record(username);
+    refreshHistory();
+    navigator.forward(new PinterestUserScreen(navigator, username));
   }
 
   private void showResults(String query, boolean boards, String text) {
@@ -184,35 +201,5 @@ public final class PinterestScreen extends BaseForm {
   private void showEmpty() {
     navigator.dismissAlert();
     navigator.showAlert(Lang.tr("pinterest.empty"), AlertType.INFO);
-  }
-
-  private void promptUser() {
-    final Form form = new Form(Lang.tr("pinterest.open_user"));
-    final TextField username =
-        new TextField(Lang.tr("pinterest.username"), "", 80, TextField.ANY);
-    form.append(username);
-    form.addCommand(Commands.ok());
-    form.addCommand(Commands.cancel());
-    form.setCommandListener(
-        new CommandListener() {
-          public void commandAction(Command command, Displayable displayable) {
-            if (command == Commands.cancel()) {
-              navigator.back();
-              return;
-            }
-            if (command != Commands.ok()) {
-              return;
-            }
-            String value = PinterestApi.cleanUsername(username.getString());
-            if (value.length() == 0) {
-              navigator.showAlert(Lang.tr("pinterest.username_required"), AlertType.ERROR);
-              return;
-            }
-            PinterestSearchHistoryManager.getInstance().record(value);
-            navigator.popTo(PinterestScreen.this);
-            navigator.forward(new PinterestUserScreen(navigator, value));
-          }
-        });
-    navigator.forward(form);
   }
 }

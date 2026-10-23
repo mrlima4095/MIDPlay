@@ -1,6 +1,7 @@
 package midplay.ui.screen;
 
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
@@ -9,6 +10,7 @@ import javax.microedition.rms.RecordStoreException;
 import midplay.MIDPlay;
 import midplay.net.JsonOperation;
 import midplay.store.Configuration;
+import midplay.store.MusicSearchHistoryManager;
 import midplay.store.SettingsManager;
 import midplay.ui.BaseForm;
 import midplay.ui.Commands;
@@ -23,6 +25,9 @@ public final class SearchScreen extends BaseForm {
       new TextField(Lang.tr("search.placeholder"), "", MAX_INPUT_LENGTH, 0);
   private final ChoiceGroup searchTypeGroup =
       new ChoiceGroup(Lang.tr("search.type"), ChoiceGroup.EXCLUSIVE);
+  private final ChoiceGroup history;
+  private final Command useHistory;
+  private final Command clearHistory;
   private String searchType;
   private final SettingsManager settingsManager;
 
@@ -31,7 +36,18 @@ public final class SearchScreen extends BaseForm {
     this.settingsManager = SettingsManager.getInstance();
     this.searchType = settingsManager.getCurrentSearchType();
     addComponents();
+    history =
+        new ChoiceGroup(
+            Lang.tr("open_uri.history"),
+            Choice.POPUP,
+            MusicSearchHistoryManager.getInstance().getItems(),
+            null);
+    append(history);
+    useHistory = new Command(Lang.tr("open_uri.use"), Command.SCREEN, 1);
+    clearHistory = new Command(Lang.tr("open_uri.clear"), Command.SCREEN, 2);
     addCommand(Commands.ok());
+    addCommand(useHistory);
+    addCommand(clearHistory);
   }
 
   private void addComponents() {
@@ -52,6 +68,26 @@ public final class SearchScreen extends BaseForm {
   protected void handleCommand(Command c, Displayable d) {
     if (c == Commands.ok()) {
       search();
+    } else if (c == useHistory) {
+      useSelectedHistory();
+    } else if (c == clearHistory) {
+      MusicSearchHistoryManager.getInstance().clear();
+      refreshHistory();
+    }
+  }
+
+  private void useSelectedHistory() {
+    int selected = history.getSelectedIndex();
+    if (selected >= 0 && selected < history.size()) {
+      searchField.setString(history.getString(selected));
+    }
+  }
+
+  private void refreshHistory() {
+    history.deleteAll();
+    String[] items = MusicSearchHistoryManager.getInstance().getItems();
+    for (int i = 0; i < items.length; i++) {
+      history.append(items[i], null);
     }
   }
 
@@ -76,6 +112,8 @@ public final class SearchScreen extends BaseForm {
       settingsManager.saveSearchType(this.searchType);
     } catch (RecordStoreException e) {
     }
+    MusicSearchHistoryManager.getInstance().record(keyword);
+    refreshHistory();
     navigator.showLoadingAlert(Lang.tr("search.status.searching", keyword));
     final String title = Lang.tr("search.results") + ": " + keyword;
     if (searchType.equals(Configuration.SEARCH_TRACK)) {
