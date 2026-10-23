@@ -163,8 +163,7 @@ public final class PinterestMultiSelectScreen extends BulkSelectList {
                 if (onChanged != null) {
                   onChanged.run();
                 }
-                navigator.back();
-                navigator.showAlert(
+                navigator.backAndShowAlert(
                     Lang.tr("pinterest.saved_many", String.valueOf(added)),
                     AlertType.CONFIRMATION);
               }
@@ -283,8 +282,7 @@ public final class PinterestMultiSelectScreen extends BulkSelectList {
                 if (onChanged != null) {
                   onChanged.run();
                 }
-                navigator.back();
-                navigator.showAlert(
+                navigator.backAndShowAlert(
                     Lang.tr("pinterest.moved_many", String.valueOf(moved)),
                     AlertType.CONFIRMATION);
               }
@@ -328,8 +326,7 @@ public final class PinterestMultiSelectScreen extends BulkSelectList {
             if (onChanged != null) {
               onChanged.run();
             }
-            navigator.back();
-            navigator.showAlert(
+            navigator.backAndShowAlert(
                 Lang.tr("pinterest.removed_many", String.valueOf(removed)),
                 AlertType.CONFIRMATION);
           }

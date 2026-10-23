@@ -89,16 +89,24 @@ public final class PinterestFolderPickerScreen extends List implements CommandLi
             if (c != Commands.ok()) {
               return;
             }
-            String id = PinterestFavoritesManager.getInstance().createFolder(name.getString());
+            final String id =
+                PinterestFavoritesManager.getInstance().createFolder(name.getString());
             if (id == null) {
               navigator.showAlert(Lang.tr("pinterest.folder_name_required"), javax.microedition.lcdui.AlertType.ERROR);
               return;
             }
-            navigator.closeDialog();
-            navigator.back();
-            if (listener != null) {
-              listener.onFolderSelected(id);
-            }
+            // Restore the picker first, then pop it and run the save action. Doing this in one
+            // serialized step keeps the confirmation alert anchored on the screen that opened
+            // the picker instead of leaving the user on the prompt.
+            navigator.restoreDialogAndThen(
+                new Runnable() {
+                  public void run() {
+                    navigator.back();
+                    if (listener != null) {
+                      listener.onFolderSelected(id);
+                    }
+                  }
+                });
           }
         });
     navigator.showDialog(form);
