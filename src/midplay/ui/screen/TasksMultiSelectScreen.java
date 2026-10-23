@@ -2,35 +2,27 @@ package midplay.ui.screen;
 
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.List;
 import midplay.store.TasksManager;
 import midplay.store.TasksManager.Task;
+import midplay.ui.BulkSelectList;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.util.DateTime;
 import midplay.util.Lang;
 
 /** Multiple-selection mode for tasks: select all, deselect all and bulk delete. */
-public final class TasksMultiSelectScreen extends List implements CommandListener {
-  private final Navigator navigator;
+public final class TasksMultiSelectScreen extends BulkSelectList {
   private final Runnable onClose;
-  private final Command selectAllCommand;
-  private final Command deselectAllCommand;
   private final Command deleteCommand;
   private Task[] tasks;
 
   public TasksMultiSelectScreen(Navigator navigator, Task[] tasks, Runnable onClose) {
-    super(Lang.tr("task.select_multiple"), List.MULTIPLE);
-    this.navigator = navigator;
+    super(navigator, Lang.tr("task.select_multiple"), "task.select_all", "task.deselect_all");
     this.onClose = onClose;
     this.tasks = tasks == null ? new Task[0] : tasks;
-    selectAllCommand = new Command(Lang.tr("task.select_all"), Command.SCREEN, 1);
-    deselectAllCommand = new Command(Lang.tr("task.deselect_all"), Command.SCREEN, 2);
     deleteCommand = new Command(Lang.tr("task.delete_selected"), Command.SCREEN, 3);
-    addCommand(selectAllCommand);
-    addCommand(deselectAllCommand);
+    installBulkCommands();
     addCommand(deleteCommand);
     addCommand(Commands.back());
     setCommandListener(this);
@@ -68,13 +60,10 @@ public final class TasksMultiSelectScreen extends List implements CommandListene
 
   public void commandAction(Command command, Displayable displayable) {
     try {
-      if (command == Commands.back()) {
-        navigator.back();
-      } else if (command == selectAllCommand) {
-        setAllSelected(true);
-      } else if (command == deselectAllCommand) {
-        setAllSelected(false);
-      } else if (command == deleteCommand) {
+      if (handleBack(command) || handleBulkCommand(command)) {
+        return;
+      }
+      if (command == deleteCommand) {
         deleteSelected();
       }
     } catch (Exception e) {
@@ -82,17 +71,8 @@ public final class TasksMultiSelectScreen extends List implements CommandListene
     }
   }
 
-  private void setAllSelected(boolean selected) {
-    boolean[] flags = new boolean[size()];
-    for (int i = 0; i < flags.length; i++) {
-      flags[i] = selected;
-    }
-    setSelectedFlags(flags);
-  }
-
   private Task[] getSelectedTasks() {
-    boolean[] flags = new boolean[tasks.length];
-    getSelectedFlags(flags);
+    boolean[] flags = selectedFlags();
     int count = 0;
     for (int i = 0; i < flags.length; i++) {
       if (flags[i]) {

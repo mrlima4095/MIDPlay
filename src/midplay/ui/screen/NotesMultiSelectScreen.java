@@ -1,39 +1,33 @@
 package midplay.ui.screen;
 
 import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextField;
 import midplay.store.NotesManager;
 import midplay.store.NotesManager.Note;
+import midplay.ui.BulkSelectList;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
 
-public final class NotesMultiSelectScreen extends List implements CommandListener {
-  private final Navigator navigator;
+public final class NotesMultiSelectScreen extends BulkSelectList {
   private final Note[] notes;
   private final Runnable onDone;
-  private final Command selectAllCommand = new Command(Lang.tr("note.select_all"), Command.SCREEN, 1);
-  private final Command deselectAllCommand = new Command(Lang.tr("note.deselect_all"), Command.SCREEN, 2);
   private final Command deleteCommand = new Command(Lang.tr("note.delete_selected"), Command.SCREEN, 3);
   private final Command exportCommand = new Command(Lang.tr("note.export_selected"), Command.SCREEN, 4);
   private final Command vaultCommand = new Command(Lang.tr("vault.protect"), Command.SCREEN, 5);
 
   public NotesMultiSelectScreen(Navigator navigator, Note[] notes, Runnable onDone) {
-    super(Lang.tr("note.select_multiple"), Choice.MULTIPLE);
-    this.navigator = navigator;
+    super(navigator, Lang.tr("note.select_multiple"), "note.select_all", "note.deselect_all");
     this.notes = notes;
     this.onDone = onDone;
     for (int i = 0; i < notes.length; i++) {
       append(notes[i].title, null);
     }
-    addCommand(selectAllCommand);
-    addCommand(deselectAllCommand);
+    installBulkCommands();
     addCommand(deleteCommand);
     addCommand(exportCommand);
     addCommand(vaultCommand);
@@ -42,13 +36,10 @@ public final class NotesMultiSelectScreen extends List implements CommandListene
   }
 
   public void commandAction(Command command, Displayable displayable) {
-    if (command == Commands.back()) {
-      navigator.back();
-    } else if (command == selectAllCommand) {
-      setAllSelected(true);
-    } else if (command == deselectAllCommand) {
-      setAllSelected(false);
-    } else if (command == deleteCommand) {
+    if (handleBack(command) || handleBulkCommand(command)) {
+      return;
+    }
+    if (command == deleteCommand) {
       deleteSelected();
     } else if (command == exportCommand) {
       exportSelected();
@@ -57,20 +48,21 @@ public final class NotesMultiSelectScreen extends List implements CommandListene
     }
   }
 
-  private void setAllSelected(boolean selected) {
-    boolean[] flags = new boolean[size()];
-    for (int i = 0; i < flags.length; i++) flags[i] = selected;
-    setSelectedFlags(flags);
-  }
-
   private Note[] getSelectedNotes() {
-    boolean[] flags = new boolean[notes.length];
-    getSelectedFlags(flags);
+    boolean[] flags = selectedFlags();
     int count = 0;
-    for (int i = 0; i < flags.length; i++) if (flags[i]) count++;
+    for (int i = 0; i < flags.length; i++) {
+      if (flags[i]) {
+        count++;
+      }
+    }
     Note[] selected = new Note[count];
     int idx = 0;
-    for (int i = 0; i < flags.length; i++) if (flags[i]) selected[idx++] = notes[i];
+    for (int i = 0; i < flags.length; i++) {
+      if (flags[i]) {
+        selected[idx++] = notes[i];
+      }
+    }
     return selected;
   }
 

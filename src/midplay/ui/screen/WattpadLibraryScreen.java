@@ -5,7 +5,6 @@ import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.List;
 import midplay.MIDPlay;
@@ -16,8 +15,8 @@ import midplay.store.WattpadProgressManager;
 import midplay.ui.BaseList;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
+import midplay.ui.Sharing;
 import midplay.util.Lang;
-import mpgram.MP;
 
 /**
  * Local Wattpad reading list: stories opened before, each one showing the chapter where the reader
@@ -245,15 +244,7 @@ public final class WattpadLibraryScreen extends BaseList {
 
   /** Sends the story link through MPGram; the user picks the chat that will receive it. */
   private void share(String[] entry) {
-    final WattpadLibraryScreen library = this;
-    MP.shareText(
-        MIDPlay.getInstance(),
-        new Runnable() {
-          public void run() {
-            Display.getDisplay(MIDPlay.getInstance()).setCurrent(library);
-          }
-        },
-        displayTitle(entry) + "\n" + storyUrl(entry));
+    Sharing.toMPGram(this, displayTitle(entry) + "\n" + storyUrl(entry));
   }
 
   private void confirmRemove(final String[] entry) {

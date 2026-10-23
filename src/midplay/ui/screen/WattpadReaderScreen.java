@@ -4,7 +4,6 @@ import java.util.Vector;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.StringItem;
@@ -19,9 +18,9 @@ import midplay.ui.BaseForm;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
+import midplay.ui.Sharing;
 import midplay.util.Lang;
 import midplay.util.Pager;
-import mpgram.MP;
 
 /**
  * Reads one Wattpad chapter as read-only scrollable text, split into pages of a configurable size
@@ -154,15 +153,7 @@ public final class WattpadReaderScreen extends BaseForm {
 
   /** Shares the chapter link straight through MPGram, without an intermediate menu. */
   private void shareChapter() {
-    final WattpadReaderScreen reader = this;
-    MP.shareText(
-        MIDPlay.getInstance(),
-        new Runnable() {
-          public void run() {
-            Display.getDisplay(MIDPlay.getInstance()).setCurrent(reader);
-          }
-        },
-        chapterTitle + "\nhttps://www.wattpad.com/" + partId);
+    Sharing.toMPGram(this, chapterTitle + "\nhttps://www.wattpad.com/" + partId);
   }
 
   /** Saves only the page currently on screen, not the whole chapter. */
