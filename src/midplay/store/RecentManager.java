@@ -3,7 +3,6 @@ package midplay.store;
 import cc.nnproject.json.JSON;
 import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
-import javax.microedition.rms.RecordStoreException;
 import midplay.model.Playlist;
 import midplay.model.RecentItem;
 import midplay.model.Track;
@@ -127,18 +126,12 @@ public class RecentManager {
 
   public void clear() {
     cached = new JSONArray();
-    try {
-      storage.save("[]");
-    } catch (RecordStoreException e) {
-    }
+    storage.saveAsync("[]");
   }
 
   private void save(JSONArray arr) {
     cached = arr;
-    try {
-      storage.save(arr.toString());
-    } catch (RecordStoreException e) {
-    }
+    storage.saveAsync(arr.toString());
   }
 
   public void close() {

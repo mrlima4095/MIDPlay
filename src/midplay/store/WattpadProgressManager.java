@@ -4,7 +4,6 @@ import cc.nnproject.json.JSON;
 import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
 import java.util.Vector;
-import javax.microedition.rms.RecordStoreException;
 
 /**
  * Local Wattpad reading list. Remembers, for every story opened, the last chapter read plus enough
@@ -329,9 +328,6 @@ public final class WattpadProgressManager {
 
   private void save(JSONArray next) {
     entries = next;
-    try {
-      storage.save(next.toString());
-    } catch (RecordStoreException e) {
-    }
+    storage.saveAsync(next.toString());
   }
 }

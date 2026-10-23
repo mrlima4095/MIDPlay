@@ -3,7 +3,6 @@ package midplay.store;
 import cc.nnproject.json.JSON;
 import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
-import javax.microedition.rms.RecordStoreException;
 
 /**
  * Recent search terms persisted in RMS, most recent first. Subclasses only provide the record-store
@@ -82,9 +81,6 @@ public abstract class SearchHistoryStore {
 
   private void save(JSONArray next) {
     entries = next;
-    try {
-      storage.save(next.toString());
-    } catch (RecordStoreException e) {
-    }
+    storage.saveAsync(next.toString());
   }
 }

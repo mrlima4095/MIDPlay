@@ -22,6 +22,7 @@ import midplay.player.PlayerScreen;
 import midplay.store.Configuration;
 import midplay.store.DownloadManager;
 import midplay.store.FavoritesManager;
+import midplay.store.JsonRecordStore;
 import midplay.store.LastSessionManager;
 import midplay.store.NotesManager;
 import midplay.store.RecentManager;
@@ -444,6 +445,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       }
     } catch (Exception e) {
     }
+    try {
+      JsonRecordStore.flushAll();
+    } catch (Exception e) {
+    }
   }
 
   public void destroyApp(boolean unconditional) {
@@ -480,6 +485,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
         }
         playerScreen = null;
       }
+    } catch (Exception e) {
+    }
+    try {
+      JsonRecordStore.flushAll();
     } catch (Exception e) {
     }
     try {
@@ -651,6 +660,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
         Lang.tr("confirm.exit"),
         new Runnable() {
           public void run() {
+            try {
+              JsonRecordStore.flushAll();
+            } catch (Exception e) {
+            }
             notifyDestroyed();
           }
         });

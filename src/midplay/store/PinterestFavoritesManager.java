@@ -4,7 +4,6 @@ import cc.nnproject.json.JSON;
 import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
 import java.util.Vector;
-import javax.microedition.rms.RecordStoreException;
 import midplay.net.PinterestApi;
 
 /**
@@ -604,33 +603,23 @@ public final class PinterestFavoritesManager {
     }
   }
 
+  // The in-memory array is the source of truth for the session; the whole JSON document is written
+  // by the background writer so a large list does not stall the UI thread.
   private boolean savePins(JSONArray next) {
     pins = next;
-    try {
-      pinsStorage.save(next.toString());
-      return true;
-    } catch (RecordStoreException e) {
-      return false;
-    }
+    pinsStorage.saveAsync(next.toString());
+    return true;
   }
 
   private boolean saveBoards(JSONArray next) {
     boards = next;
-    try {
-      boardsStorage.save(next.toString());
-      return true;
-    } catch (RecordStoreException e) {
-      return false;
-    }
+    boardsStorage.saveAsync(next.toString());
+    return true;
   }
 
   private boolean saveFolders(JSONArray next) {
     folders = next;
-    try {
-      foldersStorage.save(next.toString());
-      return true;
-    } catch (RecordStoreException e) {
-      return false;
-    }
+    foldersStorage.saveAsync(next.toString());
+    return true;
   }
 }

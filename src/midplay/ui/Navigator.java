@@ -11,6 +11,7 @@ import javax.microedition.lcdui.Gauge;
 import javax.microedition.midlet.MIDlet;
 import midplay.MIDPlay;
 import midplay.store.Configuration;
+import midplay.store.JsonRecordStore;
 import midplay.util.Lang;
 import midplay.util.Utils;
 
@@ -90,6 +91,7 @@ public class Navigator {
                   if (app != null) {
                     app.exitApp();
                   } else {
+                    JsonRecordStore.flushAll();
                     midlet.notifyDestroyed();
                   }
                   return;
@@ -336,6 +338,7 @@ public class Navigator {
                 } else if (rootView != null) {
                   display.setCurrent(rootView);
                 } else {
+                  JsonRecordStore.flushAll();
                   midlet.notifyDestroyed();
                 }
               }

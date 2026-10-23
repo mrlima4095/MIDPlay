@@ -3,7 +3,6 @@ package midplay.store;
 import cc.nnproject.json.JSON;
 import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
-import javax.microedition.rms.RecordStoreException;
 
 public final class UriHistoryManager {
   private static final int MAX_ITEMS = 10;
@@ -85,9 +84,6 @@ public final class UriHistoryManager {
 
   private void save(JSONArray next) {
     entries = next;
-    try {
-      storage.save(next.toString());
-    } catch (RecordStoreException e) {
-    }
+    storage.saveAsync(next.toString());
   }
 }

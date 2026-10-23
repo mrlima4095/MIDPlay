@@ -90,6 +90,7 @@ public class SleepTimerManager {
           new TimerTask() {
             public void run() {
               try {
+                midplay.store.JsonRecordStore.flushAll();
                 MIDPlay.getInstance().notifyDestroyed();
               } catch (Throwable t) {
               }
