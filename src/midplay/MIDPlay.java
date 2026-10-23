@@ -318,6 +318,49 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     platformRequest(uri);
   }
 
+  /**
+   * Opens one of MIDPlay's own screens when the user types a shortcut in Open URI. Returns {@code
+   * false} when the text is not a known shortcut, so the caller can treat it as a real URI.
+   *
+   * <p>Accepted forms: {@code wattpad}, {@code pinterest}, {@code mpgram}, {@code notes}, {@code
+   * tasks}, {@code playing}, optionally prefixed with {@code midplay:} or {@code midplay://}.
+   */
+  public boolean openInternalUri(String uri) {
+    String key = uri == null ? "" : uri.trim();
+    if (key.regionMatches(true, 0, "midplay:", 0, 8)) {
+      key = key.substring(8);
+      while (key.startsWith("//")) {
+        key = key.substring(2);
+      }
+      key = key.trim();
+    }
+    if (key.equalsIgnoreCase("wattpad")) {
+      goToWattpadScreen();
+      return true;
+    }
+    if (key.equalsIgnoreCase("pinterest")) {
+      goToPinterestScreen();
+      return true;
+    }
+    if (key.equalsIgnoreCase("mpgram")) {
+      openMPGram();
+      return true;
+    }
+    if (key.equalsIgnoreCase("notes")) {
+      goToNotesScreen();
+      return true;
+    }
+    if (key.equalsIgnoreCase("tasks")) {
+      goToTasksScreen();
+      return true;
+    }
+    if (key.equalsIgnoreCase("playing")) {
+      openNowPlaying();
+      return true;
+    }
+    return false;
+  }
+
   private void openMPGram() {
     MP.open(
         this,
