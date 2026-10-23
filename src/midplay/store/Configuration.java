@@ -25,6 +25,7 @@ public class Configuration {
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
   public static final String DEFAULT_WATTPAD_PATH = "file:///SDCard/MIDPlay/Wattpad/";
+  public static final String DEFAULT_PINTEREST_PATH = "file:///SDCard/MIDPlay/Pinterest/";
 
   public static final String MENU_SEARCH = "menu.search";
   public static final String MENU_FAVORITES = "menu.favorites";
@@ -42,8 +43,18 @@ public class Configuration {
   public static final String MENU_TASKS = "menu.tasks";
   public static final String MENU_NOW_PLAYING = "menu.now_playing";
   public static final String MENU_WATTPAD = "menu.wattpad";
+  public static final String MENU_PINTEREST = "menu.pinterest";
 
   public static final String DEFAULT_HTTP_PROXY = "http://opentty.fun/proxy.php?";
+
+  public static final String DEFAULT_PINTEREST_API_URL = "http://opentty.fun/pinterest.php";
+  public static final String DEFAULT_PINTEREST_IMAGE_PROXY = "http://opentty.fun/proxy.php?url=";
+  public static final int DEFAULT_PINTEREST_PINS_PER_PAGE = 20;
+  public static final int PINTEREST_PINS_PER_PAGE_MIN = 1;
+  public static final int PINTEREST_PINS_PER_PAGE_MAX = 25;
+
+  public static final int ECONOMY_MODE_OFF = 0;
+  public static final int ECONOMY_MODE_ON = 1;
 
   public static final int DEFAULT_WATTPAD_PAGE_CHARS = 2000;
   public static final int WATTPAD_PAGE_CHARS_MIN = 500;
@@ -133,6 +144,7 @@ public class Configuration {
   public static Image notesIcon;
   public static Image tasksIcon;
   public static Image wattpadIcon;
+  public static Image pinterestIcon;
   public static Image fileExplorerIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
@@ -172,6 +184,7 @@ public class Configuration {
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();
     wattpadIcon = createWattpadIcon();
+    pinterestIcon = createPinterestIcon();
     fileExplorerIcon = createFileExplorerIcon();
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
@@ -270,6 +283,25 @@ public class Configuration {
     thickLine(graphics, 14, 25, 18, 15, 4);
     thickLine(graphics, 18, 15, 22, 25, 4);
     thickLine(graphics, 22, 25, 27, 10, 4);
+    return image;
+  }
+
+  private static Image createPinterestIcon() {
+    Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
+    // Pinterest red rounded badge.
+    graphics.setColor(0xB0001B);
+    graphics.fillRoundRect(2, 2, 33, 33, 9, 9);
+    graphics.setColor(0xE60023);
+    graphics.fillRoundRect(3, 3, 30, 30, 8, 8);
+    // White "P" drawn with thick strokes.
+    graphics.setColor(0xFFFFFF);
+    thickLine(graphics, 12, 8, 12, 28, 4);
+    thickLine(graphics, 12, 9, 21, 9, 4);
+    thickLine(graphics, 21, 9, 25, 13, 4);
+    thickLine(graphics, 25, 13, 24, 18, 4);
+    thickLine(graphics, 24, 18, 20, 21, 4);
+    thickLine(graphics, 20, 21, 12, 21, 4);
     return image;
   }
 

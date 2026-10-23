@@ -33,6 +33,7 @@ import midplay.ui.MenuManager;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.ui.PlaylistsListForwarder;
+import midplay.ui.PinterestLinks;
 import midplay.ui.WattpadLinks;
 import midplay.ui.screen.EqualizerScreen;
 import midplay.ui.screen.FavoritesScreen;
@@ -44,6 +45,7 @@ import midplay.ui.screen.FileBrowserScreen;
 import midplay.ui.screen.OpenUriScreen;
 import midplay.ui.screen.NotesScreen;
 import midplay.ui.screen.TasksScreen;
+import midplay.ui.screen.PinterestScreen;
 import midplay.ui.screen.WattpadScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
@@ -209,6 +211,13 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
             goToWattpadScreen();
           }
         });
+    menuManager.registerAction(
+        Configuration.MENU_PINTEREST,
+        new Runnable() {
+          public void run() {
+            goToPinterestScreen();
+          }
+        });
   }
 
   public void openUri() {
@@ -269,6 +278,14 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     WattpadLinks.open(navigator, url);
   }
 
+  public void openPinterestLinkFromMPGram(String url) {
+    PinterestLinks.open(navigator, url);
+  }
+
+  public void openPinterestLinkFromGH(String url) {
+    PinterestLinks.open(navigator, url);
+  }
+
   public void openWattpadLinkFromGH(String url) {
     WattpadLinks.open(navigator, url);
   }
@@ -291,6 +308,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   public void openExternalUri(String uri) throws ConnectionNotFoundException {
     if (WattpadLinks.isWattpad(uri)) {
       WattpadLinks.open(navigator, uri);
+      return;
+    }
+    if (PinterestLinks.isPinterest(uri)) {
+      PinterestLinks.open(navigator, uri);
       return;
     }
     platformRequest(uri);
@@ -613,6 +634,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
 
   private void goToWattpadScreen() {
     navigator.forward(new WattpadScreen(navigator));
+  }
+
+  private void goToPinterestScreen() {
+    navigator.forward(new PinterestScreen(navigator));
   }
 
   private void showExitConfirmation() {

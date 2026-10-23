@@ -266,6 +266,41 @@ public class Utils {
     return Image.createRGBImage(dst, targetWidth, targetHeight, true);
   }
 
+  /** Scales an image down/up while preserving its aspect ratio, fitting inside the box. */
+  public static Image resizeImageToFitInside(Image src, int maxWidth, int maxHeight) {
+    int srcWidth = src.getWidth();
+    int srcHeight = src.getHeight();
+    if (srcWidth <= 0 || srcHeight <= 0 || maxWidth <= 0 || maxHeight <= 0) {
+      return src;
+    }
+    double scaleX = (double) maxWidth / srcWidth;
+    double scaleY = (double) maxHeight / srcHeight;
+    double scale = scaleX < scaleY ? scaleX : scaleY;
+    if (scale >= 1.0) {
+      return src;
+    }
+    int targetWidth = (int) (srcWidth * scale);
+    int targetHeight = (int) (srcHeight * scale);
+    if (targetWidth < 1) {
+      targetWidth = 1;
+    }
+    if (targetHeight < 1) {
+      targetHeight = 1;
+    }
+    int[] dst = new int[targetWidth * targetHeight];
+    int[] srcRow = new int[srcWidth];
+    int dstIndex = 0;
+    for (int dy = 0; dy < targetHeight; dy++) {
+      int srcY = (dy * srcHeight) / targetHeight;
+      src.getRGB(srcRow, 0, srcWidth, 0, srcY, srcWidth, 1);
+      for (int dx = 0; dx < targetWidth; dx++) {
+        int srcX = (dx * srcWidth) / targetWidth;
+        dst[dstIndex++] = srcRow[srcX];
+      }
+    }
+    return Image.createRGBImage(dst, targetWidth, targetHeight, true);
+  }
+
   public static Image stampBadge(Image base, Image badge) {
     int baseW = base.getWidth();
     int baseH = base.getHeight();

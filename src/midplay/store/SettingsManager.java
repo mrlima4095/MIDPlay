@@ -36,6 +36,11 @@ public class SettingsManager {
   private static int currentWattpadPageChars;
   private static int currentWattpadMature;
   private static int currentWattpadLanguage;
+  private static String currentPinterestApiUrl;
+  private static String currentPinterestImageProxy;
+  private static int currentPinterestPinsPerPage;
+  private static String currentPinterestPath;
+  private static int currentEconomyMode;
 
   public static SettingsManager getInstance() {
     if (instance == null) {
@@ -140,6 +145,16 @@ public class SettingsManager {
         settings.getInt("wattpadPageChars", Configuration.DEFAULT_WATTPAD_PAGE_CHARS);
     currentWattpadMature = settings.getInt("wattpadMature", Configuration.WATTPAD_MATURE_OFF);
     currentWattpadLanguage = settings.getInt("wattpadLanguage", 0);
+    currentPinterestApiUrl =
+        settings.getString("pinterestApiUrl", Configuration.DEFAULT_PINTEREST_API_URL);
+    currentPinterestImageProxy =
+        settings.getString("pinterestImageProxy", Configuration.DEFAULT_PINTEREST_IMAGE_PROXY);
+    currentPinterestPinsPerPage =
+        settings.getInt(
+            "pinterestPinsPerPage", Configuration.DEFAULT_PINTEREST_PINS_PER_PAGE);
+    currentPinterestPath =
+        settings.getString("pinterestPath", Configuration.DEFAULT_PINTEREST_PATH);
+    currentEconomyMode = settings.getInt("economyMode", Configuration.ECONOMY_MODE_OFF);
   }
 
   private JSONObject getSettingsJSON() {
@@ -175,6 +190,11 @@ public class SettingsManager {
     settings.put("wattpadPageChars", Configuration.DEFAULT_WATTPAD_PAGE_CHARS);
     settings.put("wattpadMature", Configuration.WATTPAD_MATURE_OFF);
     settings.put("wattpadLanguage", 0);
+    settings.put("pinterestApiUrl", Configuration.DEFAULT_PINTEREST_API_URL);
+    settings.put("pinterestImageProxy", Configuration.DEFAULT_PINTEREST_IMAGE_PROXY);
+    settings.put("pinterestPinsPerPage", Configuration.DEFAULT_PINTEREST_PINS_PER_PAGE);
+    settings.put("pinterestPath", Configuration.DEFAULT_PINTEREST_PATH);
+    settings.put("economyMode", Configuration.ECONOMY_MODE_OFF);
     settings.put("vaultPasswordHash", "");
     return settings;
   }
@@ -367,6 +387,86 @@ public class SettingsManager {
   public void saveWattpadLanguage(int language) throws RecordStoreException {
     saveSetting("wattpadLanguage", language);
     currentWattpadLanguage = language;
+  }
+
+  /** Base URL of the Pinterest JSON proxy (defaults to {@code opentty.fun/pinterest.php}). */
+  public String getPinterestApiUrl() {
+    if (currentPinterestApiUrl == null || currentPinterestApiUrl.length() == 0) {
+      currentPinterestApiUrl = Configuration.DEFAULT_PINTEREST_API_URL;
+    }
+    return currentPinterestApiUrl;
+  }
+
+  public void savePinterestApiUrl(String url) throws RecordStoreException {
+    String value = url == null ? "" : url.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_PINTEREST_API_URL;
+    }
+    saveSetting("pinterestApiUrl", value);
+    currentPinterestApiUrl = value;
+  }
+
+  /** Prefix used to fetch Pinterest images, ending with {@code url=} by default. */
+  public String getPinterestImageProxy() {
+    if (currentPinterestImageProxy == null || currentPinterestImageProxy.length() == 0) {
+      currentPinterestImageProxy = Configuration.DEFAULT_PINTEREST_IMAGE_PROXY;
+    }
+    return currentPinterestImageProxy;
+  }
+
+  public void savePinterestImageProxy(String url) throws RecordStoreException {
+    String value = url == null ? "" : url.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_PINTEREST_IMAGE_PROXY;
+    }
+    saveSetting("pinterestImageProxy", value);
+    currentPinterestImageProxy = value;
+  }
+
+  /** Number of pins/boards requested per page (1..25). */
+  public int getPinterestPinsPerPage() {
+    if (currentPinterestPinsPerPage < Configuration.PINTEREST_PINS_PER_PAGE_MIN
+        || currentPinterestPinsPerPage > Configuration.PINTEREST_PINS_PER_PAGE_MAX) {
+      currentPinterestPinsPerPage = Configuration.DEFAULT_PINTEREST_PINS_PER_PAGE;
+    }
+    return currentPinterestPinsPerPage;
+  }
+
+  public void savePinterestPinsPerPage(int count) throws RecordStoreException {
+    int value = count;
+    if (value < Configuration.PINTEREST_PINS_PER_PAGE_MIN) {
+      value = Configuration.PINTEREST_PINS_PER_PAGE_MIN;
+    } else if (value > Configuration.PINTEREST_PINS_PER_PAGE_MAX) {
+      value = Configuration.PINTEREST_PINS_PER_PAGE_MAX;
+    }
+    saveSetting("pinterestPinsPerPage", value);
+    currentPinterestPinsPerPage = value;
+  }
+
+  /** Folder where downloaded Pinterest photos are stored on the memory card. */
+  public String getPinterestPath() {
+    if (currentPinterestPath == null || currentPinterestPath.length() == 0) {
+      currentPinterestPath = Configuration.DEFAULT_PINTEREST_PATH;
+    }
+    return currentPinterestPath;
+  }
+
+  public void savePinterestPath(String path) throws RecordStoreException {
+    String value = path == null ? "" : path.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_PINTEREST_PATH;
+    }
+    saveSetting("pinterestPath", value);
+    currentPinterestPath = value;
+  }
+
+  public int getEconomyMode() {
+    return currentEconomyMode;
+  }
+
+  public void saveEconomyMode(int mode) throws RecordStoreException {
+    saveSetting("economyMode", mode);
+    currentEconomyMode = mode;
   }
 
   public void saveRepeatMode(int repeatMode) throws RecordStoreException {
