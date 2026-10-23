@@ -452,9 +452,6 @@
   "pinterest": {
     "title": "Pinterest",
     "search_field": "חיפוש ב-Pinterest",
-    "search_pins": "חיפוש פינים",
-    "search_boards": "חיפוש לוחות",
-    "open_user": "פתיחת משתמש",
     "search_user": "משתמשים",
     "username": "שם משתמש",
     "username_required": "הזן שם משתמש",
@@ -551,7 +548,6 @@
   "wattpad": {
     "title": "Wattpad",
     "search_field": "סיפור, סופר או תג",
-    "search": "חיפוש",
     "stories": "סיפורים",
     "language_any": "כל השפות",
     "empty": "לא נמצאו סיפורים",
@@ -569,7 +565,6 @@
     "chapters_short": "פרקים",
     "mature": "18+",
     "error": "לא ניתן לטעון את הפרק",
-    "search_users": "חיפוש סופרים",
     "users": "סופרים",
     "user_stories": "סיפורים מאת {0}",
     "user_not_found": "המשתמש לא נמצא",

@@ -452,9 +452,6 @@
   "pinterest": {
     "title": "Pinterest",
     "search_field": "Pinterest'te ara",
-    "search_pins": "Pin ara",
-    "search_boards": "Pano ara",
-    "open_user": "Kullanıcı aç",
     "search_user": "Kullanıcılar",
     "username": "Kullanıcı adı",
     "username_required": "Bir kullanıcı adı girin",
@@ -551,7 +548,6 @@
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Hikâye, yazar veya etiket",
-    "search": "Ara",
     "stories": "Hikâyeler",
     "language_any": "Tüm diller",
     "empty": "Hikâye bulunamadı",
@@ -569,7 +565,6 @@
     "chapters_short": "böl.",
     "mature": "18+",
     "error": "Bölüm yüklenemedi",
-    "search_users": "Yazar ara",
     "users": "Yazarlar",
     "user_stories": "{0} tarafından yazılan hikâyeler",
     "user_not_found": "Kullanıcı bulunamadı",

@@ -452,9 +452,6 @@
   "pinterest": {
     "title": "Pinterest",
     "search_field": "Szukaj w Pinterest",
-    "search_pins": "Szukaj pinów",
-    "search_boards": "Szukaj tablic",
-    "open_user": "Otwórz użytkownika",
     "search_user": "Użytkownicy",
     "username": "Nazwa użytkownika",
     "username_required": "Podaj nazwę użytkownika",
@@ -551,7 +548,6 @@
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Historia, autor lub tag",
-    "search": "Szukaj",
     "stories": "Historie",
     "language_any": "Wszystkie języki",
     "empty": "Nie znaleziono historii",
@@ -569,7 +565,6 @@
     "chapters_short": "rozdz.",
     "mature": "18+",
     "error": "Nie można wczytać rozdziału",
-    "search_users": "Szukaj autorów",
     "users": "Autorzy",
     "user_stories": "Historie autorstwa {0}",
     "user_not_found": "Nie znaleziono użytkownika",

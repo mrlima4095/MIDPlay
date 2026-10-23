@@ -452,9 +452,6 @@
   "pinterest": {
     "title": "Pinterest",
     "search_field": "Search Pinterest",
-    "search_pins": "Search pins",
-    "search_boards": "Search boards",
-    "open_user": "Open user",
     "search_user": "Users",
     "username": "Username",
     "username_required": "Enter a username",
@@ -551,7 +548,6 @@
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Story, author or tag",
-    "search": "Search",
     "stories": "Stories",
     "language_any": "All languages",
     "empty": "No stories found",
@@ -569,7 +565,6 @@
     "chapters_short": "ch.",
     "mature": "18+",
     "error": "Could not load the chapter",
-    "search_users": "Search authors",
     "users": "Authors",
     "user_stories": "Stories by {0}",
     "user_not_found": "User not found",

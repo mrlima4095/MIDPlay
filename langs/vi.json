@@ -452,9 +452,6 @@
   "pinterest": {
     "title": "Pinterest",
     "search_field": "Tìm kiếm trên Pinterest",
-    "search_pins": "Tìm pin",
-    "search_boards": "Tìm bảng",
-    "open_user": "Mở người dùng",
     "search_user": "Người dùng",
     "username": "Tên người dùng",
     "username_required": "Nhập tên người dùng",
@@ -551,7 +548,6 @@
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Truyện, tác giả hoặc thẻ",
-    "search": "Tìm kiếm",
     "stories": "Truyện",
     "language_any": "Tất cả ngôn ngữ",
     "empty": "Không tìm thấy truyện",
@@ -569,7 +565,6 @@
     "chapters_short": "ch.",
     "mature": "18+",
     "error": "Không thể tải chương",
-    "search_users": "Tìm tác giả",
     "users": "Tác giả",
     "user_stories": "Truyện của {0}",
     "user_not_found": "Không tìm thấy người dùng",
