@@ -10,6 +10,7 @@ import javax.microedition.lcdui.TextField;
 import midplay.MIDPlay;
 import midplay.net.PinterestApi;
 import midplay.net.PinterestImageDownloadOperation;
+import midplay.store.Configuration;
 import midplay.store.PinterestFavoritesManager;
 import midplay.ui.BaseList;
 import midplay.ui.Commands;
@@ -75,6 +76,7 @@ public final class PinterestFavoritesScreen extends BaseList {
     }
     refresh();
     updateCommands();
+    loadThumbnails();
   }
 
   private void updateCommands() {
@@ -112,20 +114,38 @@ public final class PinterestFavoritesScreen extends BaseList {
       String type = (String) entry[0];
       String[] item = (String[]) entry[1];
       if (PinterestMultiSelectScreen.TYPE_FOLDER.equals(type)) {
-        append(
-            Lang.tr("pinterest.local_folder")
-                + ": "
-                + item[PinterestFavoritesManager.FOLDER_NAME]
-                + " ("
-                + item[PinterestFavoritesManager.FOLDER_COUNT]
-                + ")",
-            null);
+        append(item[PinterestFavoritesManager.FOLDER_NAME], Configuration.folderIcon);
       } else if (PinterestMultiSelectScreen.TYPE_BOARD.equals(type)) {
         append(Lang.tr("pinterest.saved_boards") + ": " + PinterestApi.boardLabel(item), null);
       } else {
         append(Lang.tr("pinterest.saved_pins") + ": " + PinterestApi.pinLabel(item), null);
       }
     }
+  }
+
+  /**
+   * Loads the thumbnail of each saved pin/board next to its row. Local folders keep the static
+   * folder icon, so their slots stay empty.
+   */
+  private void loadThumbnails() {
+    String[] urls = new String[entries.size()];
+    for (int i = 0; i < entries.size(); i++) {
+      Object[] entry = (Object[]) entries.elementAt(i);
+      String type = (String) entry[0];
+      if (PinterestMultiSelectScreen.TYPE_FOLDER.equals(type)) {
+        continue;
+      }
+      String[] item = (String[]) entry[1];
+      if (PinterestMultiSelectScreen.TYPE_BOARD.equals(type)) {
+        urls[i] = item[PinterestApi.BOARD_COVER];
+      } else {
+        urls[i] = item[PinterestApi.PIN_IMAGE];
+        if (urls[i] == null || urls[i].length() == 0) {
+          urls[i] = item[PinterestApi.PIN_IMAGE_LARGE];
+        }
+      }
+    }
+    loadArt(urls);
   }
 
   protected void handleSelection() {
@@ -220,9 +240,16 @@ public final class PinterestFavoritesScreen extends BaseList {
                   Lang.tr("pinterest.folder_name_required"), AlertType.ERROR);
               return;
             }
-            navigator.closeDialog();
-            reload();
-            navigator.showAlert(Lang.tr("pinterest.folder_created"), AlertType.CONFIRMATION);
+            navigator.restoreDialogAndThen(
+                new Runnable() {
+                  public void run() {
+                    reload();
+                    navigator.showAlert(
+                        Lang.tr("pinterest.folder_created"),
+                        AlertType.CONFIRMATION,
+                        PinterestFavoritesScreen.this);
+                  }
+                });
           }
         });
     navigator.showDialog(form);
@@ -259,9 +286,16 @@ public final class PinterestFavoritesScreen extends BaseList {
               navigator.showAlert(Lang.tr("pinterest.folder_name_required"), AlertType.ERROR);
               return;
             }
-            navigator.closeDialog();
-            reload();
-            navigator.showAlert(Lang.tr("pinterest.folder_renamed"), AlertType.CONFIRMATION);
+            navigator.restoreDialogAndThen(
+                new Runnable() {
+                  public void run() {
+                    reload();
+                    navigator.showAlert(
+                        Lang.tr("pinterest.folder_renamed"),
+                        AlertType.CONFIRMATION,
+                        PinterestFavoritesScreen.this);
+                  }
+                });
           }
         });
     navigator.showDialog(form);

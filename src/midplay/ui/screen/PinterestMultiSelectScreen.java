@@ -7,6 +7,7 @@ import javax.microedition.lcdui.Displayable;
 import midplay.MIDPlay;
 import midplay.net.PinterestApi;
 import midplay.net.PinterestImageDownloadOperation;
+import midplay.store.Configuration;
 import midplay.store.PinterestFavoritesManager;
 import midplay.ui.BulkSelectList;
 import midplay.ui.Commands;
@@ -52,7 +53,10 @@ public final class PinterestMultiSelectScreen extends BulkSelectList {
     this.rows = rows == null ? new Vector() : rows;
     this.onChanged = onChanged;
     for (int i = 0; i < this.rows.size(); i++) {
-      append(labelFor((Object[]) this.rows.elementAt(i)), null);
+      Object[] entry = (Object[]) this.rows.elementAt(i);
+      append(
+          labelFor(entry),
+          TYPE_FOLDER.equals(entry[0]) ? Configuration.folderIcon : null);
     }
     installBulkCommands();
     if (mode == MODE_RESULTS) {
@@ -94,7 +98,7 @@ public final class PinterestMultiSelectScreen extends BulkSelectList {
       return Lang.tr("pinterest.saved_boards") + ": " + PinterestApi.boardLabel(item);
     }
     if (TYPE_FOLDER.equals(type)) {
-      return Lang.tr("pinterest.local_folder") + ": " + item[PinterestFavoritesManager.FOLDER_NAME];
+      return item[PinterestFavoritesManager.FOLDER_NAME];
     }
     return PinterestApi.pinLabel(item);
   }

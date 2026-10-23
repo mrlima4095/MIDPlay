@@ -58,6 +58,20 @@ public final class PinterestFolderScreen extends BaseList {
     setCommandVisible(downloadCommand, hasItems);
     setCommandVisible(moveCommand, hasItems);
     setCommandVisible(removeCommand, hasItems);
+    loadThumbnails();
+  }
+
+  /** Loads a thumbnail for each saved pin in this folder. */
+  private void loadThumbnails() {
+    String[] urls = new String[entries.size()];
+    for (int i = 0; i < entries.size(); i++) {
+      String[] pin = (String[]) entries.elementAt(i);
+      urls[i] = pin[PinterestApi.PIN_IMAGE];
+      if (urls[i] == null || urls[i].length() == 0) {
+        urls[i] = pin[PinterestApi.PIN_IMAGE_LARGE];
+      }
+    }
+    loadArt(urls);
   }
 
   private void setCommandVisible(Command command, boolean visible) {
