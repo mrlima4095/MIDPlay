@@ -9,7 +9,6 @@ import javax.microedition.lcdui.Image;
 import midplay.MIDPlay;
 import midplay.net.HttpTextOperation;
 import midplay.net.RedditApi;
-import midplay.net.RedditImageDownloadOperation;
 import midplay.net.RedditThumbnailOperation;
 import midplay.store.Configuration;
 import midplay.store.RedditFavoritesManager;
@@ -40,13 +39,11 @@ public final class RedditResultsScreen extends BaseList {
   private final Command moreCommand;
   private final Command saveCommand;
   private final Command shareCommand;
-  private final Command downloadCommand;
   private final Command newCommand;
   private final Command topCommand;
   private String bookmark;
   private boolean hasMore;
   private boolean loading;
-  private boolean downloading;
   private boolean thumbsInFlight;
   private int thumbToken;
   private RedditThumbnailOperation thumbOperation;
@@ -79,7 +76,6 @@ public final class RedditResultsScreen extends BaseList {
     moreCommand = new Command(Lang.tr("reddit.more"), Command.SCREEN, 1);
     saveCommand = new Command(Lang.tr("reddit.save"), Command.SCREEN, 2);
     shareCommand = new Command(Lang.tr("reddit.share"), Command.SCREEN, 3);
-    downloadCommand = new Command(Lang.tr("reddit.download"), Command.SCREEN, 4);
     newCommand = new Command(Lang.tr("reddit.sort_new"), Command.SCREEN, 5);
     topCommand = new Command(Lang.tr("reddit.sort_top"), Command.SCREEN, 6);
     translateCommand = new Command(Lang.tr("reddit.translate"), Command.SCREEN, 8);
@@ -95,7 +91,6 @@ public final class RedditResultsScreen extends BaseList {
     }
     if (isPosts() && this.items.size() > 0) {
       addCommand(saveCommand);
-      addCommand(downloadCommand);
     }
     if (isSubPosts()) {
       addCommand(newCommand);
@@ -170,8 +165,6 @@ public final class RedditResultsScreen extends BaseList {
       saveSelected();
     } else if (c == shareCommand) {
       shareSelected();
-    } else if (c == downloadCommand) {
-      downloadSelected();
     } else if (c == newCommand) {
       reloadSub("new");
     } else if (c == topCommand) {
@@ -269,9 +262,6 @@ public final class RedditResultsScreen extends BaseList {
                     new Runnable() {
                       public void run() {
                         translating = false;
-                        if (reportErrors) {
-                          navigator.dismissAlert();
-                        }
                         String result = RedditApi.parseTranslation(response);
                         if (result.length() == 0) {
                           if (reportErrors) {
@@ -296,6 +286,9 @@ public final class RedditResultsScreen extends BaseList {
                         }
                         titlesTranslated = true;
                         showOriginal = false;
+                        if (reportErrors) {
+                          navigator.dismissAlert();
+                        }
                         refresh();
                         updateTranslateCommands();
                       }
@@ -308,7 +301,6 @@ public final class RedditResultsScreen extends BaseList {
                       public void run() {
                         translating = false;
                         if (reportErrors) {
-                          navigator.dismissAlert();
                           navigator.showAlert(
                               Lang.tr("reddit.translate_error"), AlertType.ERROR);
                         }
@@ -417,7 +409,6 @@ public final class RedditResultsScreen extends BaseList {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         String error = RedditApi.parseError(response);
                         if (error.length() > 0) {
                           navigator.showAlert(error, AlertType.ERROR);
@@ -447,7 +438,6 @@ public final class RedditResultsScreen extends BaseList {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });
@@ -492,54 +482,6 @@ public final class RedditResultsScreen extends BaseList {
     Sharing.toMPGram(this, text);
   }
 
-  private void downloadSelected() {
-    final String[] item = selectedItem();
-    if (item == null || !isPosts() || downloading) {
-      return;
-    }
-    final String source = item[RedditApi.POST_THUMB];
-    if (source == null || source.length() == 0) {
-      navigator.showAlert(Lang.tr("reddit.no_image"), AlertType.INFO);
-      return;
-    }
-    downloading = true;
-    navigator.showLoadingAlert(
-        Lang.tr("reddit.downloading"),
-        new Runnable() {
-          public void run() {
-            downloading = false;
-          }
-        });
-    MIDPlay.startOperation(
-        new RedditImageDownloadOperation(
-            source,
-            "reddit_" + item[RedditApi.POST_ID] + ".jpg",
-            new RedditImageDownloadOperation.Listener() {
-              public void onDownloaded(final String path) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        downloading = false;
-                        navigator.dismissAlert();
-                        navigator.showAlert(
-                            Lang.tr("reddit.downloaded", path), AlertType.CONFIRMATION);
-                      }
-                    });
-              }
-
-              public void onError(final Exception e) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        downloading = false;
-                        navigator.dismissAlert();
-                        navigator.showAlert(Lang.tr("reddit.download_error"), AlertType.ERROR);
-                      }
-                    });
-              }
-            }));
-  }
-
   private void loadMore() {
     if (loading || !hasMore) {
       return;
@@ -576,7 +518,6 @@ public final class RedditResultsScreen extends BaseList {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });
