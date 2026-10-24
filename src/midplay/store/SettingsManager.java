@@ -40,6 +40,10 @@ public class SettingsManager {
   private static String currentPinterestImageProxy;
   private static int currentPinterestPinsPerPage;
   private static String currentPinterestPath;
+  private static String currentRedditApiUrl;
+  private static String currentRedditImageProxy;
+  private static int currentRedditPostsPerPage;
+  private static String currentRedditPath;
   private static int currentEconomyMode;
 
   public static SettingsManager getInstance() {
@@ -154,6 +158,14 @@ public class SettingsManager {
             "pinterestPinsPerPage", Configuration.DEFAULT_PINTEREST_PINS_PER_PAGE);
     currentPinterestPath =
         settings.getString("pinterestPath", Configuration.DEFAULT_PINTEREST_PATH);
+    currentRedditApiUrl =
+        settings.getString("redditApiUrl", Configuration.DEFAULT_REDDIT_API_URL);
+    currentRedditImageProxy =
+        settings.getString("redditImageProxy", Configuration.DEFAULT_REDDIT_IMAGE_PROXY);
+    currentRedditPostsPerPage =
+        settings.getInt("redditPostsPerPage", Configuration.DEFAULT_REDDIT_POSTS_PER_PAGE);
+    currentRedditPath =
+        settings.getString("redditPath", Configuration.DEFAULT_REDDIT_PATH);
     currentEconomyMode = settings.getInt("economyMode", Configuration.ECONOMY_MODE_OFF);
   }
 
@@ -194,6 +206,10 @@ public class SettingsManager {
     settings.put("pinterestImageProxy", Configuration.DEFAULT_PINTEREST_IMAGE_PROXY);
     settings.put("pinterestPinsPerPage", Configuration.DEFAULT_PINTEREST_PINS_PER_PAGE);
     settings.put("pinterestPath", Configuration.DEFAULT_PINTEREST_PATH);
+    settings.put("redditApiUrl", Configuration.DEFAULT_REDDIT_API_URL);
+    settings.put("redditImageProxy", Configuration.DEFAULT_REDDIT_IMAGE_PROXY);
+    settings.put("redditPostsPerPage", Configuration.DEFAULT_REDDIT_POSTS_PER_PAGE);
+    settings.put("redditPath", Configuration.DEFAULT_REDDIT_PATH);
     settings.put("economyMode", Configuration.ECONOMY_MODE_OFF);
     settings.put("vaultPasswordHash", "");
     return settings;
@@ -459,6 +475,77 @@ public class SettingsManager {
     }
     saveSetting("pinterestPath", value);
     currentPinterestPath = value;
+  }
+
+  /** Base URL of the Reddit JSON proxy (defaults to {@code opentty.fun/reddit.php}). */
+  public String getRedditApiUrl() {
+    if (currentRedditApiUrl == null || currentRedditApiUrl.length() == 0) {
+      currentRedditApiUrl = Configuration.DEFAULT_REDDIT_API_URL;
+    }
+    return currentRedditApiUrl;
+  }
+
+  public void saveRedditApiUrl(String url) throws RecordStoreException {
+    String value = url == null ? "" : url.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_REDDIT_API_URL;
+    }
+    saveSetting("redditApiUrl", value);
+    currentRedditApiUrl = value;
+  }
+
+  /** Prefix used to fetch Reddit images, ending with {@code url=} by default. */
+  public String getRedditImageProxy() {
+    if (currentRedditImageProxy == null || currentRedditImageProxy.length() == 0) {
+      currentRedditImageProxy = Configuration.DEFAULT_REDDIT_IMAGE_PROXY;
+    }
+    return currentRedditImageProxy;
+  }
+
+  public void saveRedditImageProxy(String url) throws RecordStoreException {
+    String value = url == null ? "" : url.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_REDDIT_IMAGE_PROXY;
+    }
+    saveSetting("redditImageProxy", value);
+    currentRedditImageProxy = value;
+  }
+
+  /** Number of posts requested per page (1..25). */
+  public int getRedditPostsPerPage() {
+    if (currentRedditPostsPerPage < Configuration.REDDIT_POSTS_PER_PAGE_MIN
+        || currentRedditPostsPerPage > Configuration.REDDIT_POSTS_PER_PAGE_MAX) {
+      currentRedditPostsPerPage = Configuration.DEFAULT_REDDIT_POSTS_PER_PAGE;
+    }
+    return currentRedditPostsPerPage;
+  }
+
+  public void saveRedditPostsPerPage(int count) throws RecordStoreException {
+    int value = count;
+    if (value < Configuration.REDDIT_POSTS_PER_PAGE_MIN) {
+      value = Configuration.REDDIT_POSTS_PER_PAGE_MIN;
+    } else if (value > Configuration.REDDIT_POSTS_PER_PAGE_MAX) {
+      value = Configuration.REDDIT_POSTS_PER_PAGE_MAX;
+    }
+    saveSetting("redditPostsPerPage", value);
+    currentRedditPostsPerPage = value;
+  }
+
+  /** Folder where downloaded Reddit photos are stored on the memory card. */
+  public String getRedditPath() {
+    if (currentRedditPath == null || currentRedditPath.length() == 0) {
+      currentRedditPath = Configuration.DEFAULT_REDDIT_PATH;
+    }
+    return currentRedditPath;
+  }
+
+  public void saveRedditPath(String path) throws RecordStoreException {
+    String value = path == null ? "" : path.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_REDDIT_PATH;
+    }
+    saveSetting("redditPath", value);
+    currentRedditPath = value;
   }
 
   public int getEconomyMode() {

@@ -66,7 +66,12 @@ public class MenuManager {
     // The Wikipedia and weather sections were removed from the app.
     removeMenuItem("menu.wikipedia");
     removeMenuItem("menu.weather");
+    boolean hadReddit = hasMenuItem(Configuration.MENU_REDDIT);
     ensureDefaultItemsPresent();
+    // On upgrades, drop Reddit right after Pinterest instead of at the end of the menu.
+    if (!hadReddit) {
+      placeAfter(Configuration.MENU_REDDIT, Configuration.MENU_PINTEREST);
+    }
   }
 
   /** Reorders the menu so that {@code key} sits right after {@code anchorKey}. */
@@ -164,9 +169,10 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_TASKS, 10, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_WATTPAD, 11, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_PINTEREST, 12, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 13, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 14, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 15, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_REDDIT, 13, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 14, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 15, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 16, true));
     return defaultConfig;
   }
 

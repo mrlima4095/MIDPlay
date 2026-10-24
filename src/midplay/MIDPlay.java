@@ -47,6 +47,7 @@ import midplay.ui.screen.OpenUriScreen;
 import midplay.ui.screen.NotesScreen;
 import midplay.ui.screen.TasksScreen;
 import midplay.ui.screen.PinterestScreen;
+import midplay.ui.screen.RedditScreen;
 import midplay.ui.screen.WattpadScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
@@ -219,6 +220,13 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
             goToPinterestScreen();
           }
         });
+    menuManager.registerAction(
+        Configuration.MENU_REDDIT,
+        new Runnable() {
+          public void run() {
+            goToRedditScreen();
+          }
+        });
   }
 
   public void openUri() {
@@ -340,6 +348,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     }
     if (key.equalsIgnoreCase("pinterest")) {
       goToPinterestScreen();
+      return true;
+    }
+    if (key.equalsIgnoreCase("reddit")) {
+      goToRedditScreen();
       return true;
     }
     if (key.equalsIgnoreCase("mpgram")) {
@@ -696,6 +708,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
 
   private void goToPinterestScreen() {
     navigator.forward(new PinterestScreen(navigator));
+  }
+
+  private void goToRedditScreen() {
+    navigator.forward(new RedditScreen(navigator));
   }
 
   private void showExitConfirmation() {

@@ -26,6 +26,7 @@ public class Configuration {
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
   public static final String DEFAULT_WATTPAD_PATH = "file:///SDCard/MIDPlay/Wattpad/";
   public static final String DEFAULT_PINTEREST_PATH = "file:///SDCard/MIDPlay/Pinterest/";
+  public static final String DEFAULT_REDDIT_PATH = "file:///SDCard/MIDPlay/Reddit/";
 
   public static final String MENU_SEARCH = "menu.search";
   public static final String MENU_FAVORITES = "menu.favorites";
@@ -44,6 +45,7 @@ public class Configuration {
   public static final String MENU_NOW_PLAYING = "menu.now_playing";
   public static final String MENU_WATTPAD = "menu.wattpad";
   public static final String MENU_PINTEREST = "menu.pinterest";
+  public static final String MENU_REDDIT = "menu.reddit";
 
   public static final String DEFAULT_HTTP_PROXY = "http://opentty.fun/proxy.php?";
 
@@ -52,6 +54,12 @@ public class Configuration {
   public static final int DEFAULT_PINTEREST_PINS_PER_PAGE = 20;
   public static final int PINTEREST_PINS_PER_PAGE_MIN = 1;
   public static final int PINTEREST_PINS_PER_PAGE_MAX = 25;
+
+  public static final String DEFAULT_REDDIT_API_URL = "http://opentty.fun/reddit.php";
+  public static final String DEFAULT_REDDIT_IMAGE_PROXY = "http://opentty.fun/proxy.php?url=";
+  public static final int DEFAULT_REDDIT_POSTS_PER_PAGE = 20;
+  public static final int REDDIT_POSTS_PER_PAGE_MIN = 1;
+  public static final int REDDIT_POSTS_PER_PAGE_MAX = 25;
 
   public static final int ECONOMY_MODE_OFF = 0;
   public static final int ECONOMY_MODE_ON = 1;
@@ -145,6 +153,7 @@ public class Configuration {
   public static Image tasksIcon;
   public static Image wattpadIcon;
   public static Image pinterestIcon;
+  public static Image redditIcon;
   public static Image fileExplorerIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
@@ -185,6 +194,7 @@ public class Configuration {
     tasksIcon = createTasksIcon();
     wattpadIcon = createWattpadIcon();
     pinterestIcon = createPinterestIcon();
+    redditIcon = createRedditIcon();
     fileExplorerIcon = createFileExplorerIcon();
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
@@ -302,6 +312,34 @@ public class Configuration {
     thickLine(graphics, 25, 13, 24, 18, 4);
     thickLine(graphics, 24, 18, 20, 21, 4);
     thickLine(graphics, 20, 21, 12, 21, 4);
+    return image;
+  }
+
+  private static Image createRedditIcon() {
+    Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
+    // Orange rounded badge.
+    graphics.setColor(0xC13A00);
+    graphics.fillRoundRect(2, 3, 32, 30, 9, 9);
+    graphics.setColor(0xFF4500);
+    graphics.fillRoundRect(3, 4, 30, 28, 8, 8);
+    // Antenna.
+    graphics.setColor(0xC13A00);
+    graphics.fillRect(17, 1, 2, 6);
+    graphics.fillArc(19, 0, 4, 4, 0, 360);
+    // Eyes, slightly angled for the Reddit face.
+    graphics.setColor(0xFFFFFF);
+    graphics.fillArc(10, 13, 6, 6, 0, 360);
+    graphics.fillArc(20, 13, 6, 6, 0, 360);
+    graphics.setColor(0x7A2300);
+    graphics.fillArc(12, 15, 3, 3, 0, 360);
+    graphics.fillArc(22, 15, 3, 3, 0, 360);
+    // Smile.
+    graphics.setColor(0xFFFFFF);
+    graphics.drawArc(11, 17, 14, 10, 200, 140);
+    // Ears.
+    graphics.fillArc(2, 12, 6, 6, 0, 360);
+    graphics.fillArc(28, 12, 6, 6, 0, 360);
     return image;
   }
 

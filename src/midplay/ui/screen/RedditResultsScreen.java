@@ -1,0 +1,533 @@
+package midplay.ui.screen;
+
+import java.util.Hashtable;
+import java.util.Vector;
+import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Image;
+import midplay.MIDPlay;
+import midplay.net.HttpTextOperation;
+import midplay.net.RedditApi;
+import midplay.net.RedditImageDownloadOperation;
+import midplay.net.RedditThumbnailOperation;
+import midplay.store.Configuration;
+import midplay.store.RedditFavoritesManager;
+import midplay.store.SettingsManager;
+import midplay.ui.BaseList;
+import midplay.ui.Navigator;
+import midplay.ui.Sharing;
+import midplay.util.Lang;
+
+/**
+ * Paginated list of Reddit posts, subreddits or users. A subreddit opens its newest posts, a user
+ * opens their posts, and a post opens its detail screen.
+ */
+public final class RedditResultsScreen extends BaseList {
+  public static final int SOURCE_SEARCH_SUBREDDITS = 0;
+  public static final int SOURCE_SEARCH_USERS = 1;
+  public static final int SOURCE_SEARCH_POSTS = 2;
+  public static final int SOURCE_SUBPOSTS = 3;
+  public static final int SOURCE_USER_POSTS = 4;
+
+  private final int source;
+  private final String sourceId;
+  private final String sourceQuery;
+  private final String sourceSort;
+  private final Vector items;
+  private final Hashtable ids = new Hashtable();
+  private final Hashtable thumbCache = new Hashtable();
+  private final Command moreCommand;
+  private final Command saveCommand;
+  private final Command shareCommand;
+  private final Command downloadCommand;
+  private final Command newCommand;
+  private final Command topCommand;
+  private String bookmark;
+  private boolean hasMore;
+  private boolean loading;
+  private boolean downloading;
+  private boolean thumbsInFlight;
+  private int thumbToken;
+  private RedditThumbnailOperation thumbOperation;
+
+  public RedditResultsScreen(
+      Navigator navigator,
+      int source,
+      String sourceId,
+      String sourceQuery,
+      String sourceSort,
+      String title,
+      Vector items,
+      String bookmark) {
+    super(title, navigator);
+    this.source = source;
+    this.sourceId = sourceId == null ? "" : sourceId;
+    this.sourceQuery = sourceQuery == null ? "" : sourceQuery;
+    this.sourceSort = sourceSort == null ? "" : sourceSort;
+    this.items = items == null ? new Vector() : items;
+    this.bookmark = bookmark == null ? "" : bookmark;
+    hasMore = this.bookmark.length() > 0;
+    moreCommand = new Command(Lang.tr("reddit.more"), Command.SCREEN, 1);
+    saveCommand = new Command(Lang.tr("reddit.save"), Command.SCREEN, 2);
+    shareCommand = new Command(Lang.tr("reddit.share"), Command.SCREEN, 3);
+    downloadCommand = new Command(Lang.tr("reddit.download"), Command.SCREEN, 4);
+    newCommand = new Command(Lang.tr("reddit.sort_new"), Command.SCREEN, 5);
+    topCommand = new Command(Lang.tr("reddit.sort_top"), Command.SCREEN, 6);
+    for (int i = 0; i < this.items.size(); i++) {
+      String id = idOf((String[]) this.items.elementAt(i));
+      ids.put(id, id);
+    }
+    if (this.items.size() > 0) {
+      addCommand(shareCommand);
+    }
+    if (isPosts() && this.items.size() > 0) {
+      addCommand(saveCommand);
+      addCommand(downloadCommand);
+    }
+    if (isSubPosts()) {
+      addCommand(newCommand);
+      addCommand(topCommand);
+    }
+    if (hasMore) {
+      addCommand(moreCommand);
+    }
+    refresh();
+    loadThumbnails();
+  }
+
+  protected void populateItems() {
+    for (int i = 0; i < items.size(); i++) {
+      String[] item = (String[]) items.elementAt(i);
+      String thumbUrl = thumbnailUrl(item);
+      Image image =
+          thumbUrl == null || thumbUrl.length() == 0
+              ? null
+              : (Image) thumbCache.get(thumbUrl);
+      append(label(item), image);
+    }
+  }
+
+  private String label(String[] item) {
+    if (isPosts()) {
+      return RedditApi.postLabel(item);
+    }
+    if (isUsers()) {
+      return RedditApi.userLabel(item);
+    }
+    return RedditApi.subredditLabel(item);
+  }
+
+  protected void handleSelection() {
+    int index = getSelectedIndex();
+    if (index < 0 || index >= items.size() || loading) {
+      return;
+    }
+    String[] item = (String[]) items.elementAt(index);
+    if (isPosts()) {
+      navigator.forward(new RedditPostScreen(navigator, item));
+    } else if (isUsers()) {
+      openUser(item[RedditApi.USER_NAME]);
+    } else {
+      openSubreddit(item[RedditApi.SUB_NAME]);
+    }
+  }
+
+  protected void handleCommand(Command c, Displayable d) {
+    if (c == moreCommand) {
+      loadMore();
+    } else if (c == saveCommand) {
+      saveSelected();
+    } else if (c == shareCommand) {
+      shareSelected();
+    } else if (c == downloadCommand) {
+      downloadSelected();
+    } else if (c == newCommand) {
+      reloadSub("new");
+    } else if (c == topCommand) {
+      reloadSub("top");
+    }
+  }
+
+  private boolean isPosts() {
+    return source == SOURCE_SEARCH_POSTS
+        || source == SOURCE_SUBPOSTS
+        || source == SOURCE_USER_POSTS;
+  }
+
+  private boolean isSubPosts() {
+    return source == SOURCE_SUBPOSTS && sourceId.length() > 0;
+  }
+
+  private boolean isUsers() {
+    return source == SOURCE_SEARCH_USERS;
+  }
+
+  private String[] selectedItem() {
+    int index = getSelectedIndex();
+    if (index < 0 || index >= items.size()) {
+      return null;
+    }
+    return (String[]) items.elementAt(index);
+  }
+
+  private void openSubreddit(String subreddit) {
+    if (loading || subreddit.length() == 0) {
+      return;
+    }
+    loadPosts(RedditApi.subPostsUrl(subreddit, "new", ""), SOURCE_SUBPOSTS, subreddit, "", "new",
+        Lang.tr("reddit.results_posts", "r/" + subreddit));
+  }
+
+  private void openUser(String username) {
+    if (loading || username.length() == 0) {
+      return;
+    }
+    loadPosts(RedditApi.userPostsUrl(username, ""), SOURCE_USER_POSTS, username, "", "",
+        Lang.tr("reddit.results_user_posts", username));
+  }
+
+  private void reloadSub(String sort) {
+    if (loading || sourceId.length() == 0) {
+      return;
+    }
+    loadPosts(RedditApi.subPostsUrl(sourceId, sort, ""), SOURCE_SUBPOSTS, sourceId, "", sort,
+        Lang.tr("reddit.results_posts", "r/" + sourceId));
+  }
+
+  private void loadPosts(
+      final String url,
+      final int newSource,
+      final String id,
+      final String query,
+      final String sort,
+      final String title) {
+    loading = true;
+    navigator.showLoadingAlert(
+        Lang.tr("reddit.loading"),
+        new Runnable() {
+          public void run() {
+            loading = false;
+          }
+        });
+    MIDPlay.startOperation(
+        new HttpTextOperation(
+            url,
+            new HttpTextOperation.Listener() {
+              public void onText(final String response) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        navigator.dismissAlert();
+                        String error = RedditApi.parseError(response);
+                        if (error.length() > 0) {
+                          navigator.showAlert(error, AlertType.ERROR);
+                          return;
+                        }
+                        Vector posts = RedditApi.parsePosts(response);
+                        if (posts.size() == 0) {
+                          navigator.showAlert(Lang.tr("reddit.empty"), AlertType.INFO);
+                          return;
+                        }
+                        navigator.forward(
+                            new RedditResultsScreen(
+                                navigator,
+                                newSource,
+                                id,
+                                query,
+                                sort,
+                                title,
+                                posts,
+                                RedditApi.parseBookmark(response)));
+                      }
+                    });
+              }
+
+              public void onError(final Exception e) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        navigator.dismissAlert();
+                        navigator.showAlert(e.toString(), AlertType.ERROR);
+                      }
+                    });
+              }
+            }));
+  }
+
+  private void saveSelected() {
+    String[] item = selectedItem();
+    if (item == null || !isPosts()) {
+      return;
+    }
+    int result = RedditFavoritesManager.getInstance().savePost(item);
+    if (result == RedditFavoritesManager.ALREADY_EXISTS) {
+      navigator.showAlert(Lang.tr("reddit.already_saved"), AlertType.INFO);
+    } else if (result == RedditFavoritesManager.SUCCESS) {
+      navigator.showAlert(Lang.tr("reddit.saved_post"), AlertType.CONFIRMATION);
+    } else {
+      navigator.showAlert(Lang.tr("reddit.save_error"), AlertType.ERROR);
+    }
+  }
+
+  private void shareSelected() {
+    String[] item = selectedItem();
+    if (item == null) {
+      return;
+    }
+    String text;
+    if (isPosts()) {
+      text = RedditApi.postLabel(item) + "\n" + RedditApi.postWebUrl(item);
+    } else if (isUsers()) {
+      text =
+          RedditApi.userLabel(item)
+              + "\n"
+              + RedditApi.userWebUrl(item[RedditApi.USER_NAME]);
+    } else {
+      text =
+          RedditApi.subredditLabel(item)
+              + "\n"
+              + RedditApi.subredditWebUrl(item[RedditApi.SUB_NAME]);
+    }
+    Sharing.toMPGram(this, text);
+  }
+
+  private void downloadSelected() {
+    final String[] item = selectedItem();
+    if (item == null || !isPosts() || downloading) {
+      return;
+    }
+    final String source = item[RedditApi.POST_THUMB];
+    if (source == null || source.length() == 0) {
+      navigator.showAlert(Lang.tr("reddit.no_image"), AlertType.INFO);
+      return;
+    }
+    downloading = true;
+    navigator.showLoadingAlert(
+        Lang.tr("reddit.downloading"),
+        new Runnable() {
+          public void run() {
+            downloading = false;
+          }
+        });
+    MIDPlay.startOperation(
+        new RedditImageDownloadOperation(
+            source,
+            "reddit_" + item[RedditApi.POST_ID] + ".jpg",
+            new RedditImageDownloadOperation.Listener() {
+              public void onDownloaded(final String path) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        downloading = false;
+                        navigator.dismissAlert();
+                        navigator.showAlert(
+                            Lang.tr("reddit.downloaded", path), AlertType.CONFIRMATION);
+                      }
+                    });
+              }
+
+              public void onError(final Exception e) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        downloading = false;
+                        navigator.dismissAlert();
+                        navigator.showAlert(Lang.tr("reddit.download_error"), AlertType.ERROR);
+                      }
+                    });
+              }
+            }));
+  }
+
+  private void loadMore() {
+    if (loading || !hasMore) {
+      return;
+    }
+    final String url = nextPageUrl();
+    if (url.length() == 0) {
+      return;
+    }
+    loading = true;
+    navigator.showLoadingAlert(
+        Lang.tr("status.loading"),
+        new Runnable() {
+          public void run() {
+            loading = false;
+          }
+        });
+    MIDPlay.startOperation(
+        new HttpTextOperation(
+            url,
+            new HttpTextOperation.Listener() {
+              public void onText(final String response) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        navigator.dismissAlert();
+                        appendMore(response);
+                      }
+                    });
+              }
+
+              public void onError(final Exception e) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        navigator.dismissAlert();
+                        navigator.showAlert(e.toString(), AlertType.ERROR);
+                      }
+                    });
+              }
+            }));
+  }
+
+  private String nextPageUrl() {
+    if (source == SOURCE_SEARCH_POSTS) {
+      return RedditApi.searchPostsUrl(sourceId, sourceQuery, bookmark);
+    }
+    if (source == SOURCE_SUBPOSTS) {
+      return RedditApi.subPostsUrl(sourceId, sourceSort, bookmark);
+    }
+    if (source == SOURCE_USER_POSTS) {
+      return RedditApi.userPostsUrl(sourceId, bookmark);
+    }
+    return "";
+  }
+
+  private void appendMore(String response) {
+    String error = RedditApi.parseError(response);
+    if (error.length() > 0) {
+      navigator.showAlert(error, AlertType.ERROR);
+      return;
+    }
+    Vector more = RedditApi.parsePosts(response);
+    String newBookmark = RedditApi.parseBookmark(response);
+    boolean end = newBookmark.length() == 0 || newBookmark.equals(bookmark);
+    int added = 0;
+    for (int i = 0; i < more.size(); i++) {
+      String[] item = (String[]) more.elementAt(i);
+      String id = idOf(item);
+      if (ids.containsKey(id)) {
+        continue;
+      }
+      ids.put(id, id);
+      items.addElement(item);
+      added++;
+    }
+    bookmark = newBookmark;
+    if (end) {
+      hasMore = false;
+      removeCommand(moreCommand);
+    }
+    if (added > 0) {
+      refresh();
+      loadThumbnails();
+    }
+    if (end) {
+      navigator.showAlert(Lang.tr("reddit.end"), AlertType.INFO);
+    }
+  }
+
+  private static String idOf(String[] item) {
+    return item[0];
+  }
+
+  private String thumbnailUrl(String[] item) {
+    if (isPosts()) {
+      return item[RedditApi.POST_THUMB];
+    }
+    if (isUsers()) {
+      return null;
+    }
+    return item[RedditApi.SUB_ICON];
+  }
+
+  protected void showNotify() {
+    super.showNotify();
+    loadThumbnails();
+  }
+
+  protected void hideNotify() {
+    cancelThumbnails();
+    super.hideNotify();
+  }
+
+  private void loadThumbnails() {
+    if (thumbsInFlight
+        || SettingsManager.getInstance().getCurrentThumbnails() == Configuration.THUMBNAILS_OFF) {
+      return;
+    }
+    String[] urls = new String[items.size()];
+    int count = 0;
+    for (int i = 0; i < items.size() && count < RedditApi.MAX_THUMBNAILS; i++) {
+      String[] item = (String[]) items.elementAt(i);
+      String url = thumbnailUrl(item);
+      if (url == null || url.length() == 0 || thumbCache.containsKey(url)) {
+        continue;
+      }
+      urls[i] = url;
+      count++;
+    }
+    if (count == 0) {
+      return;
+    }
+    cancelThumbnails();
+    final int token = ++thumbToken;
+    thumbsInFlight = true;
+    thumbOperation =
+        new RedditThumbnailOperation(
+            urls,
+            36,
+            new RedditThumbnailOperation.Listener() {
+              public void onImage(final int index, final Image image) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        if (token != thumbToken || index < 0 || index >= items.size()) {
+                          return;
+                        }
+                        String[] item = (String[]) items.elementAt(index);
+                        String url = thumbnailUrl(item);
+                        if (url != null && url.length() > 0) {
+                          thumbCache.put(url, image);
+                        }
+                        if (index < size()) {
+                          set(index, getString(index), image);
+                        }
+                      }
+                    });
+              }
+
+              public void onDone() {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        if (token == thumbToken) {
+                          thumbsInFlight = false;
+                        }
+                      }
+                    });
+              }
+
+              public void onError(Exception e) {
+                // A single failed thumbnail is ignored; the operation still continues with the
+                // remaining images and reports completion through onDone().
+              }
+            });
+    thumbOperation.start();
+  }
+
+  private void cancelThumbnails() {
+    if (thumbOperation != null) {
+      thumbOperation.stop();
+      thumbOperation = null;
+    }
+    thumbsInFlight = false;
+    thumbToken++;
+  }
+}
