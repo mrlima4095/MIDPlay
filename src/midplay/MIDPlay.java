@@ -35,6 +35,7 @@ import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.ui.PlaylistsListForwarder;
 import midplay.ui.PinterestLinks;
+import midplay.ui.RedditLinks;
 import midplay.ui.WattpadLinks;
 import midplay.ui.screen.EqualizerScreen;
 import midplay.ui.screen.FavoritesScreen;
@@ -295,6 +296,14 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     PinterestLinks.open(navigator, url);
   }
 
+  public void openRedditLinkFromMPGram(String url) {
+    RedditLinks.open(navigator, url);
+  }
+
+  public void openRedditLinkFromGH(String url) {
+    RedditLinks.open(navigator, url);
+  }
+
   public void openWattpadLinkFromGH(String url) {
     WattpadLinks.open(navigator, url);
   }
@@ -321,6 +330,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     }
     if (PinterestLinks.isPinterest(uri)) {
       PinterestLinks.open(navigator, uri);
+      return;
+    }
+    if (RedditLinks.isReddit(uri)) {
+      RedditLinks.open(navigator, uri);
       return;
     }
     platformRequest(uri);
