@@ -68,45 +68,40 @@ public class MenuManager {
     removeMenuItem("menu.weather");
     boolean hadReddit = hasMenuItem(Configuration.MENU_REDDIT);
     ensureDefaultItemsPresent();
-    // On upgrades, drop Reddit right after Pinterest instead of at the end of the menu.
+    // On upgrades, slot Reddit in right after Pinterest without touching the rest
+    // of the user's custom arrangement.
     if (!hadReddit) {
-      placeAfter(Configuration.MENU_REDDIT, Configuration.MENU_PINTEREST);
+      insertAfterAnchor(Configuration.MENU_REDDIT, Configuration.MENU_PINTEREST);
     }
   }
 
-  /** Reorders the menu so that {@code key} sits right after {@code anchorKey}. */
-  private void placeAfter(String key, String anchorKey) {
-    MenuItem moved = null;
-    Vector ordered = new Vector();
+  /**
+   * Places {@code key} right after {@code anchorKey} by nudging the order of the
+   * entries below the anchor down by one. Unlike a full renumbering this never
+   * rebuilds the menu from scratch, so the user's own ordering is preserved.
+   */
+  private void insertAfterAnchor(String key, String anchorKey) {
+    MenuItem inserted = null;
+    MenuItem anchor = null;
     for (int i = 0; i < menuItems.size(); i++) {
       MenuItem item = (MenuItem) menuItems.elementAt(i);
       if (key.equals(item.key)) {
-        moved = item;
-      } else {
-        ordered.addElement(item);
+        inserted = item;
+      } else if (anchorKey.equals(item.key)) {
+        anchor = item;
       }
     }
-    if (moved == null) {
+    if (inserted == null || anchor == null) {
       return;
     }
-    int anchorIndex = -1;
-    for (int i = 0; i < ordered.size(); i++) {
-      if (anchorKey.equals(((MenuItem) ordered.elementAt(i)).key)) {
-        anchorIndex = i;
-        break;
+    int anchorOrder = anchor.order;
+    for (int i = 0; i < menuItems.size(); i++) {
+      MenuItem item = (MenuItem) menuItems.elementAt(i);
+      if (item != inserted && item.order > anchorOrder) {
+        item.order++;
       }
     }
-    if (anchorIndex < 0) {
-      ordered.addElement(moved);
-    } else {
-      ordered.insertElementAt(moved, anchorIndex + 1);
-    }
-    menuItems.removeAllElements();
-    for (int i = 0; i < ordered.size(); i++) {
-      MenuItem item = (MenuItem) ordered.elementAt(i);
-      item.order = i + 1;
-      menuItems.addElement(item);
-    }
+    inserted.order = anchorOrder + 1;
     saveMenuConfig();
   }
 
