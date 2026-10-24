@@ -634,7 +634,8 @@
     "remove_selected": "Seçilenleri kaldır",
     "remove_selected_confirm": "Seçilen {0} gönderi kaydedilenlerden kaldırılsın mı?",
     "removed_many": "Kaldırıldı: {0}",
-    "link_error": "Bu Reddit bağlantısı açılamadı"
+    "link_error": "Bu Reddit bağlantısı açılamadı",
+    "comments_pending": "Bu gönderinin yorumları henüz arşivlenmedi. Birazdan tekrar deneyin."
   },
   "wattpad": {
     "title": "Wattpad",

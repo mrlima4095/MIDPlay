@@ -20,6 +20,7 @@ public final class RedditCommentsScreen extends BaseList {
   private final Command reloadCommand;
   private Vector items = new Vector();
   private boolean loading;
+  private boolean pending;
 
   public RedditCommentsScreen(Navigator navigator, String postId, String postTitle) {
     super(Lang.tr("reddit.comments_title"), navigator);
@@ -38,7 +39,7 @@ public final class RedditCommentsScreen extends BaseList {
 
   protected void populateItems() {
     if (items.size() == 0) {
-      append(Lang.tr("reddit.no_comments"), null);
+      append(Lang.tr(pending ? "reddit.comments_pending" : "reddit.no_comments"), null);
       return;
     }
     for (int i = 0; i < items.size(); i++) {
@@ -106,6 +107,7 @@ public final class RedditCommentsScreen extends BaseList {
                           navigator.showAlert(error, AlertType.ERROR);
                           return;
                         }
+                        pending = RedditApi.commentsPending(response);
                         items = RedditApi.parseComments(response);
                         refresh();
                       }

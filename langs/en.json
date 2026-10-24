@@ -634,7 +634,8 @@
     "remove_selected": "Remove selected",
     "remove_selected_confirm": "Remove {0} selected posts from saved?",
     "removed_many": "Removed: {0}",
-    "link_error": "Could not open this Reddit link"
+    "link_error": "Could not open this Reddit link",
+    "comments_pending": "Comments for this post are not archived yet. Try again in a moment."
   },
   "wattpad": {
     "title": "Wattpad",

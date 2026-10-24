@@ -318,6 +318,19 @@ public final class RedditApi {
     }
   }
 
+  /**
+   * True when the proxy has no comments yet and could not reach the fallback feed; the comments
+   * may appear in a moment, so the screen should invite the user to reload instead of saying the
+   * post has none.
+   */
+  public static boolean commentsPending(String json) {
+    try {
+      return JSON.getObject(json).getInt("pd", 0) != 0;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
   /** Translated text returned by the {@code translate} op, or an empty string on failure. */
   public static String parseTranslation(String json) {
     try {
