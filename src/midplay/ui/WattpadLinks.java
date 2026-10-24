@@ -11,6 +11,7 @@ import midplay.store.WattpadDownloadManager;
 import midplay.ui.screen.WattpadAuthorScreen;
 import midplay.ui.screen.WattpadReaderScreen;
 import midplay.ui.screen.WattpadResultsScreen;
+import midplay.ui.screen.WattpadScreen;
 import midplay.ui.screen.WattpadStoryScreen;
 import midplay.util.Lang;
 
@@ -38,7 +39,8 @@ public final class WattpadLinks {
     }
     String[] segment = segments(path);
     if (segment.length == 0) {
-      error(navigator);
+      // A bare wattpad.com link opens the Wattpad start screen.
+      navigator.forward(new WattpadScreen(navigator));
       return;
     }
     int start = segment[0].equalsIgnoreCase("amp") && segment.length > 1 ? 1 : 0;

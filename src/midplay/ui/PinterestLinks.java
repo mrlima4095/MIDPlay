@@ -7,6 +7,7 @@ import midplay.net.HttpTextOperation;
 import midplay.net.PinterestApi;
 import midplay.ui.screen.PinterestBoardScreen;
 import midplay.ui.screen.PinterestPinScreen;
+import midplay.ui.screen.PinterestScreen;
 import midplay.ui.screen.PinterestUserScreen;
 import midplay.util.Lang;
 
@@ -31,7 +32,8 @@ public final class PinterestLinks {
     }
     String[] segment = segments(path);
     if (segment.length == 0) {
-      error(navigator);
+      // A bare pinterest.com link opens the Pinterest start screen.
+      navigator.forward(new PinterestScreen(navigator));
       return;
     }
     String first = segment[0].toLowerCase();
