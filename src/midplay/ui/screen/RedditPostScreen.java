@@ -235,9 +235,6 @@ public final class RedditPostScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        if (reportErrors) {
-                          navigator.dismissAlert();
-                        }
                         String result = RedditApi.parseTranslation(response);
                         if (result.length() == 0) {
                           if (reportErrors) {
@@ -261,6 +258,9 @@ public final class RedditPostScreen extends BaseForm {
                         }
                         translated = true;
                         showOriginal = false;
+                        if (reportErrors) {
+                          navigator.dismissAlert();
+                        }
                         updateContent();
                         updateTranslateCommands();
                       }
@@ -273,7 +273,6 @@ public final class RedditPostScreen extends BaseForm {
                       public void run() {
                         loading = false;
                         if (reportErrors) {
-                          navigator.dismissAlert();
                           navigator.showAlert(
                               Lang.tr("reddit.translate_error"), AlertType.ERROR);
                         }
@@ -327,7 +326,6 @@ public final class RedditPostScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         showPosts(
                             response,
                             RedditResultsScreen.SOURCE_SUBPOSTS,
@@ -344,7 +342,6 @@ public final class RedditPostScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });
@@ -374,7 +371,6 @@ public final class RedditPostScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         showPosts(
                             response,
                             RedditResultsScreen.SOURCE_USER_POSTS,
@@ -391,7 +387,6 @@ public final class RedditPostScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });
@@ -448,7 +443,6 @@ public final class RedditPostScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(
                             Lang.tr("reddit.downloaded", path), AlertType.CONFIRMATION);
                       }
@@ -460,7 +454,6 @@ public final class RedditPostScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(Lang.tr("reddit.download_error"), AlertType.ERROR);
                       }
                     });

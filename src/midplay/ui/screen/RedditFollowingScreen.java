@@ -176,7 +176,6 @@ public final class RedditFollowingScreen extends BaseList {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         String error = RedditApi.parseError(response);
                         if (error.length() > 0) {
                           navigator.showAlert(error, AlertType.ERROR);
@@ -206,7 +205,6 @@ public final class RedditFollowingScreen extends BaseList {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });

@@ -180,13 +180,11 @@ public final class RedditScreen extends BaseForm {
                         refreshHistory();
                         String error = RedditApi.parseError(response);
                         if (error.length() > 0) {
-                          navigator.dismissAlert();
                           navigator.showAlert(error, AlertType.ERROR);
                           return;
                         }
                         java.util.Vector items = RedditApi.parsePosts(response);
                         if (items.size() == 0) {
-                          navigator.dismissAlert();
                           navigator.showAlert(Lang.tr("reddit.empty"), AlertType.INFO);
                           return;
                         }
@@ -209,7 +207,6 @@ public final class RedditScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });
@@ -242,13 +239,11 @@ public final class RedditScreen extends BaseForm {
                         refreshHistory();
                         String error = RedditApi.parseError(response);
                         if (error.length() > 0) {
-                          navigator.dismissAlert();
                           navigator.showAlert(error, AlertType.ERROR);
                           return;
                         }
                         java.util.Vector items = RedditApi.parseUsers(response);
                         if (items.size() == 0) {
-                          navigator.dismissAlert();
                           navigator.showAlert(Lang.tr("reddit.empty"), AlertType.INFO);
                           return;
                         }
@@ -271,7 +266,6 @@ public final class RedditScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });
@@ -304,13 +298,11 @@ public final class RedditScreen extends BaseForm {
                         refreshHistory();
                         String error = RedditApi.parseError(response);
                         if (error.length() > 0) {
-                          navigator.dismissAlert();
                           navigator.showAlert(error, AlertType.ERROR);
                           return;
                         }
                         java.util.Vector items = RedditApi.parseSubreddits(response);
                         if (items.size() == 0) {
-                          navigator.dismissAlert();
                           navigator.showAlert(Lang.tr("reddit.empty"), AlertType.INFO);
                           return;
                         }
@@ -333,7 +325,6 @@ public final class RedditScreen extends BaseForm {
                     new Runnable() {
                       public void run() {
                         loading = false;
-                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });

@@ -139,7 +139,6 @@ public final class RedditLinks {
                 navigator.callSerially(
                     new Runnable() {
                       public void run() {
-                        navigator.dismissAlert();
                         Vector posts = RedditApi.parsePosts(text);
                         if (posts.size() == 0) {
                           error(navigator);
@@ -204,7 +203,6 @@ public final class RedditLinks {
                 navigator.callSerially(
                     new Runnable() {
                       public void run() {
-                        navigator.dismissAlert();
                         Vector posts = RedditApi.parsePosts(text);
                         if (posts.size() == 0) {
                           error(navigator);
@@ -234,7 +232,6 @@ public final class RedditLinks {
     navigator.callSerially(
         new Runnable() {
           public void run() {
-            navigator.dismissAlert();
             error(navigator);
           }
         });
