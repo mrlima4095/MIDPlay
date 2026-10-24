@@ -183,11 +183,7 @@ public final class QueueTrackListScreen extends TrackListScreen {
       return;
     }
     FavoritesManager fm = FavoritesManager.getInstance();
-    for (int i = 0; i < queue.length; i++) {
-      if (queue[i] != null) {
-        fm.addTrackToPlaylist(custom, queue[i]);
-      }
-    }
+    fm.addTracksToPlaylist(custom, queue);
     navigator.back();
     navigator.showAlert(Lang.tr("playlist.status.created"), AlertType.CONFIRMATION, this);
   }

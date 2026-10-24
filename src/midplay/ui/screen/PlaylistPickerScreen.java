@@ -58,15 +58,10 @@ public final class PlaylistPickerScreen extends BaseList {
       return;
     }
     Playlist selectedPlaylist = customPlaylists[selectedIndex];
-    int added = 0;
-    int exists = 0;
-    int failed = 0;
-    for (int i = 0; i < tracksToAdd.length; i++) {
-      int result = favoritesManager.addTrackToPlaylist(selectedPlaylist, tracksToAdd[i]);
-      if (result == FavoritesManager.SUCCESS) added++;
-      else if (result == FavoritesManager.ALREADY_EXISTS) exists++;
-      else failed++;
-    }
+    int[] result = favoritesManager.addTracksToPlaylist(selectedPlaylist, tracksToAdd);
+    int added = result[0];
+    int exists = result[1];
+    int failed = result[2];
     navigator.back();
     if (tracksToAdd.length == 1 && added == 1) {
       navigator.showAlert(Lang.tr("playlist.status.track_added"), AlertType.CONFIRMATION, previousScreen);

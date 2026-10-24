@@ -18,7 +18,11 @@ public class FavoritesManager {
   public static final int ALREADY_EXISTS = 1;
   public static final int FAILED = 2;
 
-  private static final int MAX_TRACKS_PER_PLAYLIST = 200;
+  // A custom playlist can grow large, so its tracks are stored across several RMS records (chunks)
+  // instead of a single one, keeping every write well under the per-record size limit some devices
+  // impose. The cap below only bounds how many tracks a single playlist parses into memory at once.
+  private static final int MAX_TRACKS_PER_PLAYLIST = 1000;
+  private static final int MAX_CHUNK_BYTES = 16 * 1024;
 
   public static FavoritesManager getInstance() {
     if (instance == null) {
@@ -156,11 +160,58 @@ public class FavoritesManager {
         return FAILED;
       }
       record.tracks.addElement(track);
-      return savePlaylistTracks(playlist.getKey(), record.tracks, record.recordId)
-          ? SUCCESS
-          : FAILED;
+      return savePlaylistTracks(playlist.getKey(), record.tracks) ? SUCCESS : FAILED;
     } catch (Exception e) {
       return FAILED;
+    }
+  }
+
+  /**
+   * Adds several tracks to a custom playlist in one pass, loading and saving the track list only
+   * once so a bulk add of hundreds of files does not rewrite the record for every track.
+   *
+   * @return a three element array {@code {added, alreadyPresent, failed}}.
+   */
+  public int[] addTracksToPlaylist(Playlist playlist, Track[] tracks) {
+    int total = tracks == null ? 0 : tracks.length;
+    if (playlist == null || !playlist.isCustom() || tracks == null) {
+      return new int[] {0, 0, total};
+    }
+    int added = 0;
+    int exists = 0;
+    int failed = 0;
+    try {
+      TracksRecord record = loadTracksRecord(playlist.getKey());
+      for (int i = 0; i < tracks.length; i++) {
+        Track track = tracks[i];
+        if (track == null) {
+          failed++;
+          continue;
+        }
+        boolean duplicate = false;
+        for (int j = 0; j < record.tracks.size(); j++) {
+          if (((Track) record.tracks.elementAt(j)).isSame(track)) {
+            duplicate = true;
+            break;
+          }
+        }
+        if (duplicate) {
+          exists++;
+          continue;
+        }
+        if (record.tracks.size() >= MAX_TRACKS_PER_PLAYLIST) {
+          failed++;
+          continue;
+        }
+        record.tracks.addElement(track);
+        added++;
+      }
+      if (added > 0 && !savePlaylistTracks(playlist.getKey(), record.tracks)) {
+        return new int[] {0, exists, total - exists};
+      }
+      return new int[] {added, exists, failed};
+    } catch (Exception e) {
+      return new int[] {0, 0, total};
     }
   }
 
@@ -174,7 +225,7 @@ public class FavoritesManager {
         Track existingTrack = (Track) record.tracks.elementAt(i);
         if (existingTrack.isSame(track)) {
           record.tracks.removeElementAt(i);
-          return savePlaylistTracks(playlist.getKey(), record.tracks, record.recordId);
+          return savePlaylistTracks(playlist.getKey(), record.tracks);
         }
       }
       return false;
@@ -207,14 +258,13 @@ public class FavoritesManager {
       return false;
     }
     try {
-      TracksRecord record = loadTracksRecord(playlist.getKey());
       Vector tracks = new Vector();
       for (int i = 0; i < reordered.length; i++) {
         if (reordered[i] != null) {
           tracks.addElement(reordered[i]);
         }
       }
-      return savePlaylistTracks(playlist.getKey(), tracks, record.recordId);
+      return savePlaylistTracks(playlist.getKey(), tracks);
     } catch (Exception e) {
       return false;
     }
@@ -228,47 +278,61 @@ public class FavoritesManager {
   }
 
   private static final class TracksRecord {
-    int recordId = -1;
     final Vector tracks = new Vector();
   }
 
   private static final class TracksRecordEntry {
     final int recordId;
+    final int chunk;
     final JSONObject json;
 
-    TracksRecordEntry(int recordId, JSONObject json) {
+    TracksRecordEntry(int recordId, int chunk, JSONObject json) {
       this.recordId = recordId;
+      this.chunk = chunk;
       this.json = json;
     }
   }
 
-  private TracksRecordEntry findTracksRecordByKey(final String playlistKey) {
-    final TracksRecordEntry[] result = {null};
+  /** All records that hold one playlist's tracks, ordered by chunk index. */
+  private Vector findTracksRecordsByKey(final String playlistKey) {
+    final Vector result = new Vector();
+    if (playlistKey == null || playlistKey.length() == 0) {
+      return result;
+    }
     tracksStorage.forEachRecord(
         new RecordStoreManager.RecordHandler() {
           public boolean handle(int recordId, String data) {
-            if (playlistKey != null
-                && playlistKey.length() > 0
-                && data.indexOf(playlistKey) == -1) {
+            if (data.indexOf(playlistKey) == -1) {
               return true;
             }
-            JSONObject json = JSON.getObject(data);
-            if (playlistKey.equals(json.getString("playlistKey", ""))) {
-              result[0] = new TracksRecordEntry(recordId, json);
-              return false;
+            try {
+              JSONObject json = JSON.getObject(data);
+              if (playlistKey.equals(json.getString("playlistKey", ""))) {
+                result.addElement(new TracksRecordEntry(recordId, json.getInt("chunk", 0), json));
+              }
+            } catch (Exception e) {
             }
             return true;
           }
         });
-    return result[0];
+    Utils.bubbleSort(
+        result,
+        new Utils.Comparator() {
+          public boolean shouldSwap(Object a, Object b) {
+            return ((TracksRecordEntry) a).chunk > ((TracksRecordEntry) b).chunk;
+          }
+        });
+    return result;
   }
 
   private TracksRecord loadTracksRecord(final String playlistKey) {
     TracksRecord record = new TracksRecord();
-    TracksRecordEntry entry = findTracksRecordByKey(playlistKey);
-    if (entry != null) {
-      record.recordId = entry.recordId;
-      JSONArray tracksArray = entry.json.getArray("tracks");
+    Vector entries = findTracksRecordsByKey(playlistKey);
+    for (int e = 0; e < entries.size(); e++) {
+      JSONArray tracksArray = ((TracksRecordEntry) entries.elementAt(e)).json.getArray("tracks");
+      if (tracksArray == null) {
+        continue;
+      }
       for (int i = 0; i < tracksArray.size(); i++) {
         Track track = Track.fromJSON(tracksArray.getObject(i));
         if (track != null) {
@@ -280,38 +344,67 @@ public class FavoritesManager {
   }
 
   private int countTracks(final String playlistKey) {
-    TracksRecordEntry entry = findTracksRecordByKey(playlistKey);
-    return entry == null ? 0 : entry.json.getArray("tracks").size();
+    int count = 0;
+    Vector entries = findTracksRecordsByKey(playlistKey);
+    for (int e = 0; e < entries.size(); e++) {
+      JSONArray tracksArray = ((TracksRecordEntry) entries.elementAt(e)).json.getArray("tracks");
+      if (tracksArray != null) {
+        count += tracksArray.size();
+      }
+    }
+    return count;
   }
 
-  private boolean savePlaylistTracks(String playlistKey, Vector trackList, int recordId) {
+  /**
+   * Rewrites a playlist's tracks as one or more chunked records. The old records are removed first,
+   * so a shrinking playlist does not leave stale chunks behind.
+   */
+  private boolean savePlaylistTracks(String playlistKey, Vector trackList) {
     try {
-      JSONObject data = new JSONObject();
-      data.put("playlistKey", playlistKey);
-      JSONArray tracks = new JSONArray();
+      removeCustomPlaylistTracks(playlistKey);
+      JSONArray chunk = new JSONArray();
+      int chunkBytes = 0;
+      int chunkIndex = 0;
+      boolean wrote = false;
       for (int i = 0; i < trackList.size(); i++) {
         Track track = (Track) trackList.elementAt(i);
-        if (track != null) {
-          tracks.add(track.toJSON());
+        if (track == null) {
+          continue;
         }
+        JSONObject trackJson = track.toJSON();
+        String encoded = trackJson.toString();
+        if (chunk.size() > 0 && chunkBytes + encoded.length() > MAX_CHUNK_BYTES) {
+          writeChunk(playlistKey, chunkIndex++, chunk);
+          wrote = true;
+          chunk = new JSONArray();
+          chunkBytes = 0;
+        }
+        chunk.add(trackJson);
+        chunkBytes += encoded.length() + 1;
       }
-      data.put("tracks", tracks);
-      if (recordId != -1) {
-        tracksStorage.setRecord(recordId, data.toString());
-      } else {
-        tracksStorage.addRecord(data.toString());
+      if (chunk.size() > 0 || !wrote) {
+        writeChunk(playlistKey, chunkIndex++, chunk);
       }
       return true;
-    } catch (RecordStoreException e) {
+    } catch (Exception e) {
       return false;
     }
   }
 
-  private void removeCustomPlaylistTracks(String playlistKey) {
-    TracksRecordEntry entry = findTracksRecordByKey(playlistKey);
-    if (entry != null) {
+  private void writeChunk(String playlistKey, int chunkIndex, JSONArray tracks)
+      throws RecordStoreException {
+    JSONObject data = new JSONObject();
+    data.put("playlistKey", playlistKey);
+    data.put("chunk", chunkIndex);
+    data.put("tracks", tracks);
+    tracksStorage.addRecord(data.toString());
+  }
+
+  private void removeCustomPlaylistTracks(final String playlistKey) {
+    Vector entries = findTracksRecordsByKey(playlistKey);
+    for (int i = 0; i < entries.size(); i++) {
       try {
-        tracksStorage.deleteRecord(entry.recordId);
+        tracksStorage.deleteRecord(((TracksRecordEntry) entries.elementAt(i)).recordId);
       } catch (RecordStoreException e) {
       }
     }
