@@ -417,6 +417,14 @@ public final class RedditApi {
 
   /** A single comment row rendered with indentation for its threading depth. */
   public static String commentLabel(String[] comment) {
+    return commentLabel(comment, null);
+  }
+
+  /**
+   * Same as {@link #commentLabel(String[])} but shows {@code bodyOverride} instead of the original
+   * body when it is not null, so callers can render a translated comment.
+   */
+  public static String commentLabel(String[] comment, String bodyOverride) {
     StringBuffer label = new StringBuffer();
     int depth = intValue(comment[COMMENT_DEPTH]);
     if (depth > 0) {
@@ -434,7 +442,13 @@ public final class RedditApi {
     if (score != null && score.length() > 0 && !"0".equals(score)) {
       label.append(" (").append(score).append(')');
     }
-    label.append('\n').append(singleLine(comment[COMMENT_BODY], 160));
+    label.append('\n')
+        .append(
+            singleLine(
+                bodyOverride != null && bodyOverride.length() > 0
+                    ? bodyOverride
+                    : comment[COMMENT_BODY],
+                160));
     return label.toString();
   }
 
