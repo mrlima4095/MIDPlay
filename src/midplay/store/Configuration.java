@@ -192,9 +192,9 @@ public class Configuration {
     githubIcon = Utils.resizeImageToFit(Image.createImage("/g.png"), 36, 36);
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();
-    wattpadIcon = createWattpadIcon();
-    pinterestIcon = createPinterestIcon();
-    redditIcon = createRedditIcon();
+    wattpadIcon = Utils.resizeImageToFit(Image.createImage("/wattpad.png"), 36, 36);
+    pinterestIcon = Utils.resizeImageToFit(Image.createImage("/pinterest.png"), 36, 36);
+    redditIcon = Utils.resizeImageToFit(Image.createImage("/reddit.png"), 36, 36);
     fileExplorerIcon = createFileExplorerIcon();
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
@@ -259,107 +259,6 @@ public class Configuration {
     graphics.fillRect(17, 21, 8, 2);
     graphics.fillRect(17, 28, 9, 2);
     return image;
-  }
-
-  private static Image createWattpadIcon() {
-    Image image = Image.createImage(36, 36);
-    Graphics graphics = image.getGraphics();
-    // Rounded orange tile with a soft top-down gradient.
-    for (int y = 3; y <= 32; y++) {
-      int left = 3;
-      int right = 32;
-      int cornerY = y < 11 ? 11 : (y > 24 ? 25 : -1);
-      if (cornerY != -1) {
-        double dy = y + 0.5 - cornerY;
-        if (dy >= 8) {
-          continue;
-        }
-        double half = Math.sqrt(64 - dy * dy);
-        left = (int) Math.ceil(10.5 - half);
-        right = (int) Math.floor(24.5 + half);
-      }
-      int t = y - 3;
-      int red = 255 - (23 * t) / 29;
-      int green = 108 - (42 * t) / 29;
-      int blue = 31 - (25 * t) / 29;
-      graphics.setColor((red << 16) | (green << 8) | blue);
-      graphics.drawLine(left, y, right, y);
-    }
-    graphics.setColor(0xD13D04);
-    graphics.drawRoundRect(3, 3, 30, 30, 8, 8);
-    // Bold white "W" with rounded strokes.
-    graphics.setColor(0xFFFFFF);
-    thickLine(graphics, 9, 10, 14, 25, 4);
-    thickLine(graphics, 14, 25, 18, 15, 4);
-    thickLine(graphics, 18, 15, 22, 25, 4);
-    thickLine(graphics, 22, 25, 27, 10, 4);
-    return image;
-  }
-
-  private static Image createPinterestIcon() {
-    Image image = Image.createImage(36, 36);
-    Graphics graphics = image.getGraphics();
-    // Pinterest red rounded badge.
-    graphics.setColor(0xB0001B);
-    graphics.fillRoundRect(2, 2, 33, 33, 9, 9);
-    graphics.setColor(0xE60023);
-    graphics.fillRoundRect(3, 3, 30, 30, 8, 8);
-    // White "P" drawn with thick strokes.
-    graphics.setColor(0xFFFFFF);
-    thickLine(graphics, 12, 8, 12, 28, 4);
-    thickLine(graphics, 12, 9, 21, 9, 4);
-    thickLine(graphics, 21, 9, 25, 13, 4);
-    thickLine(graphics, 25, 13, 24, 18, 4);
-    thickLine(graphics, 24, 18, 20, 21, 4);
-    thickLine(graphics, 20, 21, 12, 21, 4);
-    return image;
-  }
-
-  private static Image createRedditIcon() {
-    Image image = Image.createImage(36, 36);
-    Graphics graphics = image.getGraphics();
-    // Orange rounded badge.
-    graphics.setColor(0xC13A00);
-    graphics.fillRoundRect(2, 3, 32, 30, 9, 9);
-    graphics.setColor(0xFF4500);
-    graphics.fillRoundRect(3, 4, 30, 28, 8, 8);
-    // Antenna.
-    graphics.setColor(0xC13A00);
-    graphics.fillRect(17, 1, 2, 6);
-    graphics.fillArc(19, 0, 4, 4, 0, 360);
-    // Eyes, slightly angled for the Reddit face.
-    graphics.setColor(0xFFFFFF);
-    graphics.fillArc(10, 13, 6, 6, 0, 360);
-    graphics.fillArc(20, 13, 6, 6, 0, 360);
-    graphics.setColor(0x7A2300);
-    graphics.fillArc(12, 15, 3, 3, 0, 360);
-    graphics.fillArc(22, 15, 3, 3, 0, 360);
-    // Smile.
-    graphics.setColor(0xFFFFFF);
-    graphics.drawArc(11, 17, 14, 10, 200, 140);
-    // Ears.
-    graphics.fillArc(2, 12, 6, 6, 0, 360);
-    graphics.fillArc(28, 12, 6, 6, 0, 360);
-    return image;
-  }
-
-  /** Draws a line with the given width and rounded caps (MIDP has no stroke width). */
-  private static void thickLine(
-      Graphics graphics, int x1, int y1, int x2, int y2, int width) {
-    double dx = x2 - x1;
-    double dy = y2 - y1;
-    double len = Math.sqrt(dx * dx + dy * dy);
-    int ox = roundToInt(-dy * width / (2 * len));
-    int oy = roundToInt(dx * width / (2 * len));
-    graphics.fillTriangle(x1 + ox, y1 + oy, x2 + ox, y2 + oy, x1 - ox, y1 - oy);
-    graphics.fillTriangle(x2 + ox, y2 + oy, x2 - ox, y2 - oy, x1 - ox, y1 - oy);
-    int r = width / 2;
-    graphics.fillArc(x1 - r, y1 - r, width, width, 0, 360);
-    graphics.fillArc(x2 - r, y2 - r, width, width, 0, 360);
-  }
-
-  private static int roundToInt(double value) {
-    return (int) (value >= 0 ? value + 0.5 : value - 0.5);
   }
 
   private static Image createFileExplorerIcon() {    Image image = Image.createImage(36, 36);    Graphics graphics = image.getGraphics();

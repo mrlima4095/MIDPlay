@@ -33,3 +33,10 @@ JSR-135 RecordControl API stub
 Copyright 2019 Nikita Shakarun
 Source: https://github.com/nikita36078/J2ME-Loader
 Licensed under the Apache License, Version 2.0.
+
+Subapp brand icons
+The Reddit (Snoo) and Pinterest (P) marks are trademarks of their respective
+owners, sourced from their official site favicons. The Wattpad "W" logomark is a
+trademark of Wattpad Corp, derived from the Wikimedia Commons artwork
+"Wattpad Logomark Orange (RGB HR).png". They are used here only to identify the
+corresponding third-party services.
