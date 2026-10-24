@@ -77,8 +77,7 @@ public final class RedditFollowingScreen extends BaseList {
 
   private String label(String[] item) {
     boolean user = String.valueOf(TYPE_USER).equals(item[0]);
-    String prefix = Lang.tr(user ? "reddit.saved_users" : "reddit.saved_subreddits");
-    return prefix + ": " + (user ? "u/" : "r/") + item[1];
+    return (user ? "u/" : "r/") + item[1];
   }
 
   protected void handleSelection() {
