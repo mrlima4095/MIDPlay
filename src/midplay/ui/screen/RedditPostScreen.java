@@ -11,7 +11,9 @@ import midplay.net.BinaryImageLoadOperation;
 import midplay.net.HttpTextOperation;
 import midplay.net.RedditApi;
 import midplay.net.RedditImageDownloadOperation;
+import midplay.store.Configuration;
 import midplay.store.RedditFavoritesManager;
+import midplay.store.SettingsManager;
 import midplay.ui.BaseForm;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
@@ -33,7 +35,17 @@ public final class RedditPostScreen extends BaseForm {
   private final Command removeSavedCommand;
   private final Command shareCommand;
   private final Command downloadCommand;
+  private final Command translateCommand;
+  private final Command originalCommand;
+  private final Command followSubredditCommand;
+  private final Command unfollowSubredditCommand;
+  private final Command followUserCommand;
+  private final Command unfollowUserCommand;
   private boolean loading;
+  private boolean translated;
+  private boolean showOriginal;
+  private String translatedTitle = "";
+  private String translatedBody = "";
 
   public RedditPostScreen(Navigator navigator, String[] post) {
     super(Lang.tr("reddit.post"), navigator);
@@ -43,7 +55,9 @@ public final class RedditPostScreen extends BaseForm {
         this.post[i] = "";
       }
     }
-    append(imageItem);
+    if (imageUrl().length() > 0) {
+      append(imageItem);
+    }
     content.setText(RedditApi.postDetails(this.post));
     append(content);
     imageCommand = new Command(Lang.tr("reddit.view_image"), Command.SCREEN, 1);
@@ -54,6 +68,13 @@ public final class RedditPostScreen extends BaseForm {
     removeSavedCommand = new Command(Lang.tr("reddit.remove_saved"), Command.SCREEN, 5);
     shareCommand = new Command(Lang.tr("reddit.share"), Command.SCREEN, 6);
     downloadCommand = new Command(Lang.tr("reddit.download"), Command.SCREEN, 7);
+    translateCommand = new Command(Lang.tr("reddit.translate"), Command.SCREEN, 8);
+    originalCommand = new Command(Lang.tr("reddit.show_original"), Command.SCREEN, 8);
+    followSubredditCommand = new Command(Lang.tr("reddit.follow_subreddit"), Command.SCREEN, 9);
+    unfollowSubredditCommand =
+        new Command(Lang.tr("reddit.unfollow_subreddit"), Command.SCREEN, 9);
+    followUserCommand = new Command(Lang.tr("reddit.follow_user"), Command.SCREEN, 10);
+    unfollowUserCommand = new Command(Lang.tr("reddit.unfollow_user"), Command.SCREEN, 10);
     if (imageUrl().length() > 0) {
       addCommand(imageCommand);
       addCommand(downloadCommand);
@@ -70,7 +91,13 @@ public final class RedditPostScreen extends BaseForm {
       addCommand(authorCommand);
     }
     addCommand(Commands.playerNowPlaying());
+    updateFollowCommands();
+    updateTranslateCommands();
     loadImage();
+    if (SettingsManager.getInstance().getRedditAutoTranslate()
+        == Configuration.REDDIT_TRANSLATE_ON) {
+      translate(false);
+    }
   }
 
   protected void handleCommand(Command c, Displayable d) {
@@ -96,7 +123,164 @@ public final class RedditPostScreen extends BaseForm {
       Sharing.toMPGram(this, RedditApi.postLabel(post) + "\n" + RedditApi.postWebUrl(post));
     } else if (c == downloadCommand) {
       downloadPost();
+    } else if (c == translateCommand) {
+      if (translated) {
+        showOriginal = false;
+        updateContent();
+        updateTranslateCommands();
+      } else {
+        translate(true);
+      }
+    } else if (c == originalCommand) {
+      showOriginal = true;
+      updateContent();
+      updateTranslateCommands();
+    } else if (c == followSubredditCommand) {
+      RedditFavoritesManager.getInstance().saveSubreddit(post[RedditApi.POST_SUBREDDIT]);
+      updateFollowCommands();
+      navigator.showAlert(Lang.tr("reddit.followed"), AlertType.CONFIRMATION);
+    } else if (c == unfollowSubredditCommand) {
+      RedditFavoritesManager.getInstance().removeSubreddit(post[RedditApi.POST_SUBREDDIT]);
+      updateFollowCommands();
+      navigator.showAlert(Lang.tr("reddit.unfollowed"), AlertType.CONFIRMATION);
+    } else if (c == followUserCommand) {
+      RedditFavoritesManager.getInstance().saveUser(post[RedditApi.POST_AUTHOR]);
+      updateFollowCommands();
+      navigator.showAlert(Lang.tr("reddit.followed"), AlertType.CONFIRMATION);
+    } else if (c == unfollowUserCommand) {
+      RedditFavoritesManager.getInstance().removeUser(post[RedditApi.POST_AUTHOR]);
+      updateFollowCommands();
+      navigator.showAlert(Lang.tr("reddit.unfollowed"), AlertType.CONFIRMATION);
     }
+  }
+
+  private void updateFollowCommands() {
+    String subreddit = post[RedditApi.POST_SUBREDDIT];
+    if (subreddit.length() > 0) {
+      if (RedditFavoritesManager.getInstance().isSubredditSaved(subreddit)) {
+        removeCommand(followSubredditCommand);
+        addCommand(unfollowSubredditCommand);
+      } else {
+        removeCommand(unfollowSubredditCommand);
+        addCommand(followSubredditCommand);
+      }
+    }
+    String author = post[RedditApi.POST_AUTHOR];
+    if (author.length() > 0) {
+      if (RedditFavoritesManager.getInstance().isUserSaved(author)) {
+        removeCommand(followUserCommand);
+        addCommand(unfollowUserCommand);
+      } else {
+        removeCommand(unfollowUserCommand);
+        addCommand(followUserCommand);
+      }
+    }
+  }
+
+  private void updateTranslateCommands() {
+    if (translated && !showOriginal) {
+      removeCommand(translateCommand);
+      addCommand(originalCommand);
+    } else {
+      removeCommand(originalCommand);
+      addCommand(translateCommand);
+    }
+  }
+
+  private void updateContent() {
+    if (translated && !showOriginal) {
+      content.setText(
+          RedditApi.postDetails(post, translatedTitle, translatedBody));
+    } else {
+      content.setText(RedditApi.postDetails(post));
+    }
+  }
+
+  /** Translates the title and body of this post. */
+  private void translate(final boolean reportErrors) {
+    if (loading) {
+      return;
+    }
+    String title = post[RedditApi.POST_TITLE];
+    String body = post[RedditApi.POST_TEXT];
+    if (body.length() > 3000) {
+      body = body.substring(0, 3000) + "...";
+    }
+    String combined = title;
+    if (body.length() > 0) {
+      combined = combined + "\n" + body;
+    }
+    if (combined.trim().length() == 0) {
+      if (reportErrors) {
+        navigator.showAlert(Lang.tr("reddit.translate_error"), AlertType.ERROR);
+      }
+      return;
+    }
+    loading = true;
+    if (reportErrors) {
+      navigator.showLoadingAlert(
+          Lang.tr("reddit.translating"),
+          new Runnable() {
+            public void run() {
+              loading = false;
+            }
+          });
+    }
+    MIDPlay.startOperation(
+        new HttpTextOperation(
+            RedditApi.translateUrl(combined, RedditApi.translateTarget()),
+            new HttpTextOperation.Listener() {
+              public void onText(final String response) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        if (reportErrors) {
+                          navigator.dismissAlert();
+                        }
+                        String result = RedditApi.parseTranslation(response);
+                        if (result.length() == 0) {
+                          if (reportErrors) {
+                            navigator.showAlert(
+                                Lang.tr("reddit.translate_error"), AlertType.ERROR);
+                          }
+                          return;
+                        }
+                        int newline = result.indexOf('\n');
+                        if (newline >= 0) {
+                          translatedTitle = result.substring(0, newline);
+                          translatedBody = result.substring(newline + 1);
+                        } else if (post[RedditApi.POST_TEXT].length() > 0) {
+                          // The divider was lost; keep the original title and use the
+                          // whole result as the body.
+                          translatedTitle = post[RedditApi.POST_TITLE];
+                          translatedBody = result;
+                        } else {
+                          translatedTitle = result;
+                          translatedBody = "";
+                        }
+                        translated = true;
+                        showOriginal = false;
+                        updateContent();
+                        updateTranslateCommands();
+                      }
+                    });
+              }
+
+              public void onError(final Exception e) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        if (reportErrors) {
+                          navigator.dismissAlert();
+                          navigator.showAlert(
+                              Lang.tr("reddit.translate_error"), AlertType.ERROR);
+                        }
+                      }
+                    });
+              }
+            }));
   }
 
   private void updateSaveCommands() {
@@ -308,8 +492,24 @@ public final class RedditPostScreen extends BaseForm {
               }
 
               public void onImageLoadError(Exception e) {
-                // The text details are still useful when the image server is unavailable.
+                // Drop the empty image slot so it does not leave a blank item on screen.
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        removeImageItem();
+                      }
+                    });
               }
             }));
+  }
+
+  /** Removes the image slot when there is no picture to show. */
+  private void removeImageItem() {
+    try {
+      if (size() > 0 && get(0) == imageItem) {
+        delete(0);
+      }
+    } catch (Exception e) {
+    }
   }
 }

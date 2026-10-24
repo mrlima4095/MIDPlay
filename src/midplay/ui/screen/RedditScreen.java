@@ -30,6 +30,7 @@ public final class RedditScreen extends BaseForm {
   private final ChoiceGroup searchTypeGroup;
   private final ChoiceGroup history;
   private final Command favoritesCommand;
+  private final Command followingCommand;
   private final Command settingsCommand;
   private final Command useHistory;
   private final Command clearHistory;
@@ -56,11 +57,13 @@ public final class RedditScreen extends BaseForm {
     append(history);
 
     favoritesCommand = new Command(Lang.tr("reddit.favorites"), Command.SCREEN, 4);
+    followingCommand = new Command(Lang.tr("reddit.following"), Command.SCREEN, 4);
     settingsCommand = new Command(Lang.tr("reddit.settings_title"), Command.SCREEN, 5);
     useHistory = new Command(Lang.tr("open_uri.use"), Command.SCREEN, 6);
     clearHistory = new Command(Lang.tr("open_uri.clear"), Command.SCREEN, 7);
     addCommand(Commands.ok());
     addCommand(favoritesCommand);
+    addCommand(followingCommand);
     addCommand(settingsCommand);
     addCommand(useHistory);
     addCommand(clearHistory);
@@ -74,6 +77,8 @@ public final class RedditScreen extends BaseForm {
       search();
     } else if (c == favoritesCommand) {
       navigator.forward(new RedditFavoritesScreen(navigator));
+    } else if (c == followingCommand) {
+      navigator.forward(new RedditFollowingScreen(navigator));
     } else if (c == settingsCommand) {
       navigator.forward(new RedditSettingsScreen(navigator));
     } else if (c == useHistory) {

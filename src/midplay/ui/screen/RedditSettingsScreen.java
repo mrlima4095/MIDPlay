@@ -1,6 +1,7 @@
 package midplay.ui.screen;
 
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.TextField;
@@ -20,11 +21,13 @@ public final class RedditSettingsScreen extends BaseForm {
   private final TextField imageProxyField;
   private final TextField postsField;
   private final TextField pathField;
+  private final ChoiceGroup autoTranslateGroup;
 
   private final String savedApiUrl;
   private final String savedImageProxy;
   private final int savedPosts;
   private final String savedPath;
+  private final int savedAutoTranslate;
 
   public RedditSettingsScreen(Navigator navigator) {
     super(Lang.tr("reddit.settings_title"), navigator);
@@ -32,6 +35,7 @@ public final class RedditSettingsScreen extends BaseForm {
     savedImageProxy = settings.getRedditImageProxy();
     savedPosts = settings.getRedditPostsPerPage();
     savedPath = settings.getRedditPath();
+    savedAutoTranslate = settings.getRedditAutoTranslate();
 
     apiUrlField =
         new TextField(Lang.tr("reddit.settings_api_url"), savedApiUrl, 256, TextField.URL);
@@ -53,6 +57,11 @@ public final class RedditSettingsScreen extends BaseForm {
     pathField =
         new TextField(Lang.tr("reddit.settings_path"), savedPath, 256, TextField.URL);
     append(pathField);
+
+    autoTranslateGroup = new ChoiceGroup(Lang.tr("settings.options"), ChoiceGroup.MULTIPLE);
+    autoTranslateGroup.append(Lang.tr("reddit.settings_auto_translate"), null);
+    autoTranslateGroup.setSelectedIndex(0, savedAutoTranslate == Configuration.REDDIT_TRANSLATE_ON);
+    append(autoTranslateGroup);
 
     addCommand(Commands.formSave());
     addCommand(Commands.playerNowPlaying());
@@ -85,7 +94,14 @@ public final class RedditSettingsScreen extends BaseForm {
     return !savedApiUrl.equals(apiUrlField.getString().trim())
         || !savedImageProxy.equals(imageProxyField.getString().trim())
         || savedPosts != parsePosts(postsField.getString())
-        || !savedPath.equals(pathField.getString().trim());
+        || !savedPath.equals(pathField.getString().trim())
+        || savedAutoTranslate != currentAutoTranslate();
+  }
+
+  private int currentAutoTranslate() {
+    return autoTranslateGroup.isSelected(0)
+        ? Configuration.REDDIT_TRANSLATE_ON
+        : Configuration.REDDIT_TRANSLATE_OFF;
   }
 
   private void save() {
@@ -105,6 +121,9 @@ public final class RedditSettingsScreen extends BaseForm {
       }
       if (!path.equals(savedPath)) {
         settings.saveRedditPath(path);
+      }
+      if (currentAutoTranslate() != savedAutoTranslate) {
+        settings.saveRedditAutoTranslate(currentAutoTranslate());
       }
       navigator.back();
     } catch (RecordStoreException e) {

@@ -144,6 +144,21 @@ public final class RedditApi {
     return apiQuery("op=comments&id=" + Utils.urlEncode(id) + "&n=50");
   }
 
+  /** Translates {@code text} into {@code target} through the proxy. */
+  public static String translateUrl(String text, String target) {
+    return apiQuery(
+        "op=translate&tl=" + Utils.urlEncode(target) + "&q=" + Utils.urlEncode(text));
+  }
+
+  /** Target language for translation: the language the app is currently using. */
+  public static String translateTarget() {
+    String lang = Lang.getCurrentLang();
+    if (lang == null || lang.length() == 0) {
+      return "en";
+    }
+    return lang;
+  }
+
   /** Routes a reddit thumbnail/link URL through the configured image proxy. */
   public static String imageUrl(String source) {
     if (source == null || source.length() == 0) {
@@ -303,6 +318,16 @@ public final class RedditApi {
     }
   }
 
+  /** Translated text returned by the {@code translate} op, or an empty string on failure. */
+  public static String parseTranslation(String json) {
+    try {
+      String text = JSON.getObject(json).getString("t", "");
+      return text == null ? "" : text;
+    } catch (Exception e) {
+      return "";
+    }
+  }
+
   /** Error message returned by the proxy, or an empty string when the response is valid. */
   public static String parseError(String json) {
     try {
@@ -327,7 +352,12 @@ public final class RedditApi {
   }
 
   public static String postLabel(String[] post) {
-    String title = post[POST_TITLE];
+    return postLabel(post, null);
+  }
+
+  /** Post label with an optional translated title while the subreddit/author stay original. */
+  public static String postLabel(String[] post, String titleOverride) {
+    String title = titleOverride == null ? post[POST_TITLE] : titleOverride;
     if (title == null || title.length() == 0) {
       title = Lang.tr("reddit.post");
     }
@@ -396,8 +426,16 @@ public final class RedditApi {
   }
 
   public static String postDetails(String[] post) {
+    return postDetails(post, null, null);
+  }
+
+  /**
+   * Post details, optionally with a translated title/body while the author, score, flair and
+   * link keep their original (untranslated) values.
+   */
+  public static String postDetails(String[] post, String titleOverride, String textOverride) {
     StringBuffer sb = new StringBuffer();
-    String title = post[POST_TITLE];
+    String title = titleOverride == null ? post[POST_TITLE] : titleOverride;
     if (title != null && title.length() > 0) {
       sb.append(title).append('\n');
     }
@@ -409,7 +447,7 @@ public final class RedditApi {
       appendLine(sb, Lang.tr("reddit.nsfw"), "18+");
     }
     appendLine(sb, Lang.tr("reddit.flair"), post[POST_FLAIR]);
-    String text = post[POST_TEXT];
+    String text = textOverride == null ? post[POST_TEXT] : textOverride;
     if (text != null && text.length() > 0) {
       sb.append('\n').append(text).append('\n');
     }

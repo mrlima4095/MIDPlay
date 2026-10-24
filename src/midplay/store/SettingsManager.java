@@ -44,6 +44,7 @@ public class SettingsManager {
   private static String currentRedditImageProxy;
   private static int currentRedditPostsPerPage;
   private static String currentRedditPath;
+  private static int currentRedditAutoTranslate;
   private static int currentEconomyMode;
 
   public static SettingsManager getInstance() {
@@ -166,6 +167,8 @@ public class SettingsManager {
         settings.getInt("redditPostsPerPage", Configuration.DEFAULT_REDDIT_POSTS_PER_PAGE);
     currentRedditPath =
         settings.getString("redditPath", Configuration.DEFAULT_REDDIT_PATH);
+    currentRedditAutoTranslate =
+        settings.getInt("redditAutoTranslate", Configuration.DEFAULT_REDDIT_AUTO_TRANSLATE);
     currentEconomyMode = settings.getInt("economyMode", Configuration.ECONOMY_MODE_OFF);
   }
 
@@ -210,6 +213,7 @@ public class SettingsManager {
     settings.put("redditImageProxy", Configuration.DEFAULT_REDDIT_IMAGE_PROXY);
     settings.put("redditPostsPerPage", Configuration.DEFAULT_REDDIT_POSTS_PER_PAGE);
     settings.put("redditPath", Configuration.DEFAULT_REDDIT_PATH);
+    settings.put("redditAutoTranslate", Configuration.DEFAULT_REDDIT_AUTO_TRANSLATE);
     settings.put("economyMode", Configuration.ECONOMY_MODE_OFF);
     settings.put("vaultPasswordHash", "");
     return settings;
@@ -546,6 +550,22 @@ public class SettingsManager {
     }
     saveSetting("redditPath", value);
     currentRedditPath = value;
+  }
+
+  /** When on, Reddit post titles and bodies are translated automatically. */
+  public int getRedditAutoTranslate() {
+    return currentRedditAutoTranslate == Configuration.REDDIT_TRANSLATE_ON
+        ? Configuration.REDDIT_TRANSLATE_ON
+        : Configuration.REDDIT_TRANSLATE_OFF;
+  }
+
+  public void saveRedditAutoTranslate(int mode) throws RecordStoreException {
+    int value =
+        mode == Configuration.REDDIT_TRANSLATE_ON
+            ? Configuration.REDDIT_TRANSLATE_ON
+            : Configuration.REDDIT_TRANSLATE_OFF;
+    saveSetting("redditAutoTranslate", value);
+    currentRedditAutoTranslate = value;
   }
 
   public int getEconomyMode() {

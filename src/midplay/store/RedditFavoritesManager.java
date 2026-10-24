@@ -26,7 +26,11 @@ public final class RedditFavoritesManager {
   }
 
   private final JsonRecordStore storage = new JsonRecordStore("reddit_fav_posts", 1, "[]");
+  private final JsonRecordStore storageSubs = new JsonRecordStore("reddit_fav_subs", 1, "[]");
+  private final JsonRecordStore storageUsers = new JsonRecordStore("reddit_fav_users", 1, "[]");
   private JSONArray posts;
+  private JSONArray subs;
+  private JSONArray users;
 
   private RedditFavoritesManager() {}
 
@@ -97,6 +101,92 @@ public final class RedditFavoritesManager {
     save(new JSONArray());
   }
 
+  /** Subreddits the user follows, most recently added first. */
+  public Vector getSubreddits() {
+    Vector result = new Vector();
+    JSONArray items = subs();
+    for (int i = 0; i < items.size(); i++) {
+      String name = items.getObject(i).getString("n", "");
+      if (name != null && name.length() > 0) {
+        result.addElement(name);
+      }
+    }
+    return result;
+  }
+
+  public boolean isSubredditSaved(String name) {
+    return name != null && indexOfName(subs(), name) >= 0;
+  }
+
+  public int saveSubreddit(String name) {
+    if (name == null || name.length() == 0) {
+      return FAILED;
+    }
+    if (isSubredditSaved(name)) {
+      return ALREADY_EXISTS;
+    }
+    subs = prependName(subs(), name);
+    storageSubs.saveAsync(subs.toString());
+    return SUCCESS;
+  }
+
+  public boolean removeSubreddit(String name) {
+    if (name == null) {
+      return false;
+    }
+    JSONArray current = subs();
+    JSONArray next = removeName(current, name);
+    if (next.size() == current.size()) {
+      return false;
+    }
+    subs = next;
+    storageSubs.saveAsync(next.toString());
+    return true;
+  }
+
+  /** Users the user follows, most recently added first. */
+  public Vector getUsers() {
+    Vector result = new Vector();
+    JSONArray items = users();
+    for (int i = 0; i < items.size(); i++) {
+      String name = items.getObject(i).getString("n", "");
+      if (name != null && name.length() > 0) {
+        result.addElement(name);
+      }
+    }
+    return result;
+  }
+
+  public boolean isUserSaved(String name) {
+    return name != null && indexOfName(users(), name) >= 0;
+  }
+
+  public int saveUser(String name) {
+    if (name == null || name.length() == 0) {
+      return FAILED;
+    }
+    if (isUserSaved(name)) {
+      return ALREADY_EXISTS;
+    }
+    users = prependName(users(), name);
+    storageUsers.saveAsync(users.toString());
+    return SUCCESS;
+  }
+
+  public boolean removeUser(String name) {
+    if (name == null) {
+      return false;
+    }
+    JSONArray current = users();
+    JSONArray next = removeName(current, name);
+    if (next.size() == current.size()) {
+      return false;
+    }
+    users = next;
+    storageUsers.saveAsync(next.toString());
+    return true;
+  }
+
   private static JSONObject writePost(String[] post) {
     JSONObject item = new JSONObject();
     item.put("id", post[RedditApi.POST_ID]);
@@ -163,6 +253,42 @@ public final class RedditFavoritesManager {
     return -1;
   }
 
+  private static int indexOfName(JSONArray items, String name) {
+    for (int i = 0; i < items.size(); i++) {
+      try {
+        if (name.equals(items.getObject(i).getString("n", ""))) {
+          return i;
+        }
+      } catch (Exception e) {
+      }
+    }
+    return -1;
+  }
+
+  private static JSONArray prependName(JSONArray current, String name) {
+    JSONArray next = new JSONArray();
+    JSONObject item = new JSONObject();
+    item.put("n", name);
+    next.add(item);
+    for (int i = 0; i < current.size(); i++) {
+      next.add(current.getObject(i));
+    }
+    return next;
+  }
+
+  private static JSONArray removeName(JSONArray current, String name) {
+    JSONArray next = new JSONArray();
+    for (int i = 0; i < current.size(); i++) {
+      try {
+        if (!name.equals(current.getObject(i).getString("n", ""))) {
+          next.add(current.getObject(i));
+        }
+      } catch (Exception e) {
+      }
+    }
+    return next;
+  }
+
   private JSONArray posts() {
     if (posts == null) {
       try {
@@ -172,6 +298,28 @@ public final class RedditFavoritesManager {
       }
     }
     return posts;
+  }
+
+  private JSONArray subs() {
+    if (subs == null) {
+      try {
+        subs = JSON.getArray(storageSubs.load());
+      } catch (Exception e) {
+        subs = new JSONArray();
+      }
+    }
+    return subs;
+  }
+
+  private JSONArray users() {
+    if (users == null) {
+      try {
+        users = JSON.getArray(storageUsers.load());
+      } catch (Exception e) {
+        users = new JSONArray();
+      }
+    }
+    return users;
   }
 
   // The in-memory array is the source of truth for the session; the whole JSON document is written

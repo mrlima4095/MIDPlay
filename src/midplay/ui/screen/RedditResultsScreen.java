@@ -50,6 +50,14 @@ public final class RedditResultsScreen extends BaseList {
   private boolean thumbsInFlight;
   private int thumbToken;
   private RedditThumbnailOperation thumbOperation;
+  private final Command translateCommand;
+  private final Command originalCommand;
+  private final Command followCommand;
+  private final Command unfollowCommand;
+  private final Hashtable translatedTitles = new Hashtable();
+  private boolean translating;
+  private boolean titlesTranslated;
+  private boolean showOriginal;
 
   public RedditResultsScreen(
       Navigator navigator,
@@ -74,6 +82,10 @@ public final class RedditResultsScreen extends BaseList {
     downloadCommand = new Command(Lang.tr("reddit.download"), Command.SCREEN, 4);
     newCommand = new Command(Lang.tr("reddit.sort_new"), Command.SCREEN, 5);
     topCommand = new Command(Lang.tr("reddit.sort_top"), Command.SCREEN, 6);
+    translateCommand = new Command(Lang.tr("reddit.translate"), Command.SCREEN, 8);
+    originalCommand = new Command(Lang.tr("reddit.show_original"), Command.SCREEN, 8);
+    followCommand = new Command(Lang.tr("reddit.follow"), Command.SCREEN, 9);
+    unfollowCommand = new Command(Lang.tr("reddit.unfollow"), Command.SCREEN, 9);
     for (int i = 0; i < this.items.size(); i++) {
       String id = idOf((String[]) this.items.elementAt(i));
       ids.put(id, id);
@@ -92,8 +104,20 @@ public final class RedditResultsScreen extends BaseList {
     if (hasMore) {
       addCommand(moreCommand);
     }
+    if (isPosts() && this.items.size() > 0) {
+      updateTranslateCommands();
+    }
+    if (isSubreddits() || isUsers()) {
+      addCommand(followCommand);
+      addCommand(unfollowCommand);
+    }
     refresh();
     loadThumbnails();
+    if (isPosts()
+        && SettingsManager.getInstance().getRedditAutoTranslate()
+            == Configuration.REDDIT_TRANSLATE_ON) {
+      translateTitles(false);
+    }
   }
 
   protected void populateItems() {
@@ -110,6 +134,12 @@ public final class RedditResultsScreen extends BaseList {
 
   private String label(String[] item) {
     if (isPosts()) {
+      if (!showOriginal) {
+        String translated = (String) translatedTitles.get(item[RedditApi.POST_ID]);
+        if (translated != null) {
+          return RedditApi.postLabel(item, translated);
+        }
+      }
       return RedditApi.postLabel(item);
     }
     if (isUsers()) {
@@ -146,7 +176,175 @@ public final class RedditResultsScreen extends BaseList {
       reloadSub("new");
     } else if (c == topCommand) {
       reloadSub("top");
+    } else if (c == translateCommand) {
+      if (titlesTranslated) {
+        showOriginal = false;
+        refresh();
+        updateTranslateCommands();
+      } else {
+        translateTitles(true);
+      }
+    } else if (c == originalCommand) {
+      showOriginal = true;
+      refresh();
+      updateTranslateCommands();
+    } else if (c == followCommand || c == unfollowCommand) {
+      toggleFollow(c == followCommand);
     }
+  }
+
+  private boolean isSubreddits() {
+    return source == SOURCE_SEARCH_SUBREDDITS;
+  }
+
+  private void updateTranslateCommands() {
+    if (!isPosts() || items.size() == 0) {
+      return;
+    }
+    if (titlesTranslated && !showOriginal) {
+      removeCommand(translateCommand);
+      addCommand(originalCommand);
+    } else {
+      removeCommand(originalCommand);
+      addCommand(translateCommand);
+    }
+  }
+
+  private void toggleFollow(boolean follow) {
+    String[] item = selectedItem();
+    if (item == null) {
+      return;
+    }
+    if (isUsers()) {
+      String name = item[RedditApi.USER_NAME];
+      if (follow) {
+        RedditFavoritesManager.getInstance().saveUser(name);
+      } else {
+        RedditFavoritesManager.getInstance().removeUser(name);
+      }
+    } else if (isSubreddits()) {
+      String name = item[RedditApi.SUB_NAME];
+      if (follow) {
+        RedditFavoritesManager.getInstance().saveSubreddit(name);
+      } else {
+        RedditFavoritesManager.getInstance().removeSubreddit(name);
+      }
+    } else {
+      return;
+    }
+    navigator.showAlert(
+        Lang.tr(follow ? "reddit.followed" : "reddit.unfollowed"), AlertType.CONFIRMATION);
+  }
+
+  /** Translates every visible post title in one proxy call (line breaks keep the order). */
+  private void translateTitles(final boolean reportErrors) {
+    if (translating || !isPosts() || items.size() == 0) {
+      return;
+    }
+    StringBuffer combined = new StringBuffer();
+    for (int i = 0; i < items.size(); i++) {
+      String[] item = (String[]) items.elementAt(i);
+      if (i > 0) {
+        combined.append('\n');
+      }
+      String title = item[RedditApi.POST_TITLE];
+      combined.append(title == null ? "" : title);
+    }
+    translating = true;
+    if (reportErrors) {
+      navigator.showLoadingAlert(
+          Lang.tr("reddit.translating"),
+          new Runnable() {
+            public void run() {
+              translating = false;
+            }
+          });
+    }
+    MIDPlay.startOperation(
+        new HttpTextOperation(
+            RedditApi.translateUrl(combined.toString(), RedditApi.translateTarget()),
+            new HttpTextOperation.Listener() {
+              public void onText(final String response) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        translating = false;
+                        if (reportErrors) {
+                          navigator.dismissAlert();
+                        }
+                        String result = RedditApi.parseTranslation(response);
+                        if (result.length() == 0) {
+                          if (reportErrors) {
+                            navigator.showAlert(
+                                Lang.tr("reddit.translate_error"), AlertType.ERROR);
+                          }
+                          return;
+                        }
+                        String[] lines = splitLines(result);
+                        if (lines.length != items.size()) {
+                          // Line alignment was lost; never risk showing a title on the
+                          // wrong row.
+                          if (reportErrors) {
+                            navigator.showAlert(
+                                Lang.tr("reddit.translate_error"), AlertType.ERROR);
+                          }
+                          return;
+                        }
+                        for (int i = 0; i < lines.length; i++) {
+                          String[] item = (String[]) items.elementAt(i);
+                          translatedTitles.put(item[RedditApi.POST_ID], lines[i]);
+                        }
+                        titlesTranslated = true;
+                        showOriginal = false;
+                        refresh();
+                        updateTranslateCommands();
+                      }
+                    });
+              }
+
+              public void onError(final Exception e) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        translating = false;
+                        if (reportErrors) {
+                          navigator.dismissAlert();
+                          navigator.showAlert(
+                              Lang.tr("reddit.translate_error"), AlertType.ERROR);
+                        }
+                      }
+                    });
+              }
+            }));
+  }
+
+  private static String[] splitLines(String text) {
+    String value = text;
+    while (value.endsWith("\n")) {
+      value = value.substring(0, value.length() - 1);
+    }
+    Vector lines = new Vector();
+    int start = 0;
+    for (int i = 0; i < value.length(); i++) {
+      if (value.charAt(i) == '\n') {
+        String line = value.substring(start, i);
+        if (line.endsWith("\r")) {
+          line = line.substring(0, line.length() - 1);
+        }
+        lines.addElement(line);
+        start = i + 1;
+      }
+    }
+    String last = value.substring(start);
+    if (last.endsWith("\r")) {
+      last = last.substring(0, last.length() - 1);
+    }
+    lines.addElement(last);
+    String[] result = new String[lines.size()];
+    for (int i = 0; i < result.length; i++) {
+      result[i] = (String) lines.elementAt(i);
+    }
+    return result;
   }
 
   private boolean isPosts() {
@@ -427,6 +625,13 @@ public final class RedditResultsScreen extends BaseList {
     if (added > 0) {
       refresh();
       loadThumbnails();
+      if (isPosts()
+          && (titlesTranslated
+              || SettingsManager.getInstance().getRedditAutoTranslate()
+                  == Configuration.REDDIT_TRANSLATE_ON)) {
+        translatedTitles.clear();
+        translateTitles(false);
+      }
     }
     if (end) {
       navigator.showAlert(Lang.tr("reddit.end"), AlertType.INFO);
