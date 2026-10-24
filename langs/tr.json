@@ -627,7 +627,14 @@
     "follow_user": "Kullanıcıyı takip et",
     "unfollow_user": "Kullanıcı takibini bırak",
     "saved_subreddits": "Takip edilen subredditler",
-    "saved_users": "Takip edilen kullanıcılar"
+    "saved_users": "Takip edilen kullanıcılar",
+    "select": "Seç",
+    "select_all": "Tümünü seç",
+    "deselect_all": "Seçimi kaldır",
+    "remove_selected": "Seçilenleri kaldır",
+    "remove_selected_confirm": "Seçilen {0} gönderi kaydedilenlerden kaldırılsın mı?",
+    "removed_many": "Kaldırıldı: {0}",
+    "link_error": "Bu Reddit bağlantısı açılamadı"
   },
   "wattpad": {
     "title": "Wattpad",

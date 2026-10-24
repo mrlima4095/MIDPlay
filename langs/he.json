@@ -627,7 +627,14 @@
     "follow_user": "עקוב אחרי משתמש",
     "unfollow_user": "הפסק לעקוב אחרי משתמש",
     "saved_subreddits": "סאברדיטים במעקב",
-    "saved_users": "משתמשים במעקב"
+    "saved_users": "משתמשים במעקב",
+    "select": "בחר",
+    "select_all": "בחר הכל",
+    "deselect_all": "בטל בחירה",
+    "remove_selected": "הסר נבחרים",
+    "remove_selected_confirm": "להסיר {0} פוסטים נבחרים מהשמורים?",
+    "removed_many": "הוסרו: {0}",
+    "link_error": "לא ניתן לפתוח קישור Reddit זה"
   },
   "wattpad": {
     "title": "Wattpad",

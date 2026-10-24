@@ -627,7 +627,14 @@
     "follow_user": "Seguir usuário",
     "unfollow_user": "Deixar de seguir usuário",
     "saved_subreddits": "Subreddits seguidos",
-    "saved_users": "Usuários seguidos"
+    "saved_users": "Usuários seguidos",
+    "select": "Selecionar",
+    "select_all": "Selecionar tudo",
+    "deselect_all": "Desmarcar tudo",
+    "remove_selected": "Remover selecionados",
+    "remove_selected_confirm": "Remover {0} posts selecionados dos salvos?",
+    "removed_many": "Removidos: {0}",
+    "link_error": "Não foi possível abrir este link do Reddit"
   },
   "wattpad": {
     "title": "Wattpad",

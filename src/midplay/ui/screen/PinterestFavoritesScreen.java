@@ -118,7 +118,7 @@ public final class PinterestFavoritesScreen extends BaseList {
       } else if (PinterestMultiSelectScreen.TYPE_BOARD.equals(type)) {
         append(Lang.tr("pinterest.saved_boards") + ": " + PinterestApi.boardLabel(item), null);
       } else {
-        append(Lang.tr("pinterest.saved_pins") + ": " + PinterestApi.pinLabel(item), null);
+        append(PinterestApi.pinLabel(item), null);
       }
     }
   }

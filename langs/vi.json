@@ -627,7 +627,14 @@
     "follow_user": "Theo dõi người dùng",
     "unfollow_user": "Bỏ theo dõi người dùng",
     "saved_subreddits": "Subreddit đã theo dõi",
-    "saved_users": "Người dùng đã theo dõi"
+    "saved_users": "Người dùng đã theo dõi",
+    "select": "Chọn",
+    "select_all": "Chọn tất cả",
+    "deselect_all": "Bỏ chọn tất cả",
+    "remove_selected": "Xóa mục đã chọn",
+    "remove_selected_confirm": "Xóa {0} bài đã lưu đã chọn?",
+    "removed_many": "Đã xóa: {0}",
+    "link_error": "Không thể mở liên kết Reddit này"
   },
   "wattpad": {
     "title": "Wattpad",

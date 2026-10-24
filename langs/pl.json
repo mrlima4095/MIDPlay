@@ -627,7 +627,14 @@
     "follow_user": "Obserwuj użytkownika",
     "unfollow_user": "Przestań obserwować użytkownika",
     "saved_subreddits": "Obserwowane subreddity",
-    "saved_users": "Obserwowani użytkownicy"
+    "saved_users": "Obserwowani użytkownicy",
+    "select": "Wybierz",
+    "select_all": "Zaznacz wszystko",
+    "deselect_all": "Odznacz wszystko",
+    "remove_selected": "Usuń zaznaczone",
+    "remove_selected_confirm": "Usunąć {0} zaznaczonych postów z zapisanych?",
+    "removed_many": "Usunięto: {0}",
+    "link_error": "Nie udało się otworzyć tego linku Reddita"
   },
   "wattpad": {
     "title": "Wattpad",

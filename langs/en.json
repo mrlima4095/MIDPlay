@@ -627,7 +627,14 @@
     "follow_user": "Follow user",
     "unfollow_user": "Unfollow user",
     "saved_subreddits": "Saved subreddits",
-    "saved_users": "Saved users"
+    "saved_users": "Saved users",
+    "select": "Select",
+    "select_all": "Select all",
+    "deselect_all": "Deselect all",
+    "remove_selected": "Remove selected",
+    "remove_selected_confirm": "Remove {0} selected posts from saved?",
+    "removed_many": "Removed: {0}",
+    "link_error": "Could not open this Reddit link"
   },
   "wattpad": {
     "title": "Wattpad",
