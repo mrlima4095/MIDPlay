@@ -643,7 +643,19 @@
     "loading": "Sözler yükleniyor...",
     "not_found": "Sözler bulunamadı",
     "error": "Sözler yüklenemedi",
-    "no_track": "Çalan bir şey yok"
+    "no_track": "Çalan bir şey yok",
+    "save_note": "Not kaydet",
+    "note_saved": "Sözler notlara kaydedildi",
+    "note_error": "Not kaydedilemedi",
+    "search": "Ara",
+    "search_title": "Söz ara",
+    "search_placeholder": "Şarkı veya sanatçı",
+    "search_empty": "Şarkı adını yazın",
+    "searching": "Sözler aranıyor...",
+    "results": "Sonuçlar",
+    "not_found_hint": "Sözler bulunamadı. Şarkı veya sanatçı ile arayın.",
+    "no_results": "Söz bulunamadı",
+    "search_error": "Arama yapılamadı"
   },
   "wattpad": {
     "title": "Wattpad",

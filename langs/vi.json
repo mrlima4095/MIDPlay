@@ -643,7 +643,19 @@
     "loading": "Đang tải lời bài hát...",
     "not_found": "Không tìm thấy lời bài hát",
     "error": "Không thể tải lời bài hát",
-    "no_track": "Không có bài nào đang phát"
+    "no_track": "Không có bài nào đang phát",
+    "save_note": "Lưu ghi chú",
+    "note_saved": "Đã lưu lời vào ghi chú",
+    "note_error": "Không thể lưu ghi chú",
+    "search": "Tìm kiếm",
+    "search_title": "Tìm lời bài hát",
+    "search_placeholder": "Bài hát hoặc ca sĩ",
+    "search_empty": "Nhập tên bài hát",
+    "searching": "Đang tìm lời...",
+    "results": "Kết quả",
+    "not_found_hint": "Không tìm thấy lời bài hát. Hãy tìm theo bài hát hoặc ca sĩ.",
+    "no_results": "Không tìm thấy lời bài hát",
+    "search_error": "Không thể tìm kiếm"
   },
   "wattpad": {
     "title": "Wattpad",

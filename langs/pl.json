@@ -643,7 +643,19 @@
     "loading": "Ładowanie tekstu...",
     "not_found": "Nie znaleziono tekstu",
     "error": "Nie udało się wczytać tekstu",
-    "no_track": "Nic nie jest odtwarzane"
+    "no_track": "Nic nie jest odtwarzane",
+    "save_note": "Zapisz notatkę",
+    "note_saved": "Tekst zapisany w notatkach",
+    "note_error": "Nie udało się zapisać notatki",
+    "search": "Szukaj",
+    "search_title": "Szukaj tekstu",
+    "search_placeholder": "Piosenka lub wykonawca",
+    "search_empty": "Wpisz nazwę piosenki",
+    "searching": "Szukanie tekstu...",
+    "results": "Wyniki",
+    "not_found_hint": "Nie znaleziono tekstu. Szukaj po piosence lub wykonawcy.",
+    "no_results": "Nie znaleziono tekstu",
+    "search_error": "Nie udało się wyszukać"
   },
   "wattpad": {
     "title": "Wattpad",

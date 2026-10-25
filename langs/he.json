@@ -643,7 +643,19 @@
     "loading": "טוען מילים...",
     "not_found": "המילים לא נמצאו",
     "error": "לא ניתן היה לטעון את המילים",
-    "no_track": "לא מתנגן דבר"
+    "no_track": "לא מתנגן דבר",
+    "save_note": "שמור פתק",
+    "note_saved": "המילים נשמרו בפתקים",
+    "note_error": "לא ניתן היה לשמור את הפתק",
+    "search": "חיפוש",
+    "search_title": "חיפוש מילים",
+    "search_placeholder": "שיר או אמן",
+    "search_empty": "הקלד את שם השיר",
+    "searching": "מחפש מילים...",
+    "results": "תוצאות",
+    "not_found_hint": "המילים לא נמצאו. חפש לפי שיר או אמן.",
+    "no_results": "לא נמצאו מילים",
+    "search_error": "לא ניתן היה לחפש"
   },
   "wattpad": {
     "title": "Wattpad",

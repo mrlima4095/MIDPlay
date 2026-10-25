@@ -29,7 +29,7 @@ public final class NoteEditorScreen extends TextBox implements CommandListener {
   }
 
   public NoteEditorScreen(Note note, Navigator navigator, Runnable onClose, boolean vault) {
-    super(note == null ? Lang.tr("note.new") : note.title, note == null ? "" : note.text, 4096, TextField.ANY);
+    super(note == null ? Lang.tr("note.new") : note.title, note == null ? "" : note.text, 10000, TextField.ANY);
     this.navigator = navigator;
     this.onClose = onClose;
     this.vault = vault;

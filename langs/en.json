@@ -643,7 +643,19 @@
     "loading": "Loading lyrics...",
     "not_found": "Lyrics not found",
     "error": "Could not load the lyrics",
-    "no_track": "Nothing is playing"
+    "no_track": "Nothing is playing",
+    "save_note": "Save note",
+    "note_saved": "Lyrics saved to notes",
+    "note_error": "Could not save the note",
+    "search": "Search",
+    "search_title": "Search lyrics",
+    "search_placeholder": "Song or artist",
+    "search_empty": "Type the song name",
+    "searching": "Searching lyrics...",
+    "results": "Results",
+    "not_found_hint": "Lyrics not found. Search by song or artist.",
+    "no_results": "No lyrics found",
+    "search_error": "Could not search"
   },
   "wattpad": {
     "title": "Wattpad",

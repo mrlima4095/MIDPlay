@@ -643,7 +643,19 @@
     "loading": "Buscando letra...",
     "not_found": "Letra não encontrada",
     "error": "Não foi possível carregar a letra",
-    "no_track": "Nada está tocando"
+    "no_track": "Nada está tocando",
+    "save_note": "Salvar nota",
+    "note_saved": "Letra salva nas notas",
+    "note_error": "Não foi possível salvar a nota",
+    "search": "Pesquisar",
+    "search_title": "Pesquisar letra",
+    "search_placeholder": "Música ou artista",
+    "search_empty": "Digite o nome da música",
+    "searching": "Pesquisando letra...",
+    "results": "Resultados",
+    "not_found_hint": "Letra não encontrada. Pesquise pelo nome ou pelo artista.",
+    "no_results": "Nenhuma letra encontrada",
+    "search_error": "Não foi possível pesquisar"
   },
   "wattpad": {
     "title": "Wattpad",
