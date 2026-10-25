@@ -786,6 +786,7 @@
     "error": "Test prędkości nie powiódł się",
     "run": "Testuj ponownie",
     "waiting": "—",
-    "start": "Rozpocznij test"
+    "start": "Rozpocznij test",
+    "last": "Ostatni test w tej sesji"
   }
 }

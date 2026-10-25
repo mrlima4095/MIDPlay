@@ -786,6 +786,7 @@
     "error": "Falha no teste de velocidade",
     "run": "Testar novamente",
     "waiting": "—",
-    "start": "Iniciar teste"
+    "start": "Iniciar teste",
+    "last": "Último teste desta sessão"
   }
 }

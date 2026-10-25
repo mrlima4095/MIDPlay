@@ -786,6 +786,7 @@
     "error": "Kiểm tra tốc độ thất bại",
     "run": "Kiểm tra lại",
     "waiting": "—",
-    "start": "Bắt đầu kiểm tra"
+    "start": "Bắt đầu kiểm tra",
+    "last": "Lần kiểm tra gần nhất trong phiên này"
   }
 }

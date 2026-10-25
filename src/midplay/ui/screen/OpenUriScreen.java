@@ -69,7 +69,10 @@ public final class OpenUriScreen extends BaseForm {
       return;
     }
     if (uri.equalsIgnoreCase("speedtest")) {
-      // Hidden network tool; do not add it to the URI history.
+      // Hidden network tool. It stays in the history so it can be reopened
+      // without typing the keyword again.
+      UriHistoryManager.getInstance().record("speedtest");
+      refreshHistory();
       navigator.forward(new SpeedTestScreen(navigator));
       return;
     }

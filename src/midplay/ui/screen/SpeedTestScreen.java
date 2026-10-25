@@ -14,6 +14,13 @@ import midplay.util.Lang;
 
 /** Hidden network speed test, reachable only by typing {@code speedtest} in the Open... screen. */
 public final class SpeedTestScreen extends BaseForm {
+  /** Last successful result, kept in memory for the current application session. */
+  private static boolean hasLastResult;
+
+  private static long lastPingMs;
+  private static long lastDownloadBps;
+  private static long lastUploadBps;
+
   private final StringItem statusItem;
   private final StringItem pingItem;
   private final StringItem downloadItem;
@@ -21,7 +28,6 @@ public final class SpeedTestScreen extends BaseForm {
   private final Command startCommand;
   private final Command runCommand;
   private boolean running;
-  private boolean started;
   private int token;
 
   public SpeedTestScreen(Navigator navigator) {
@@ -37,15 +43,15 @@ public final class SpeedTestScreen extends BaseForm {
     append(uploadItem);
     startCommand = new Command(Lang.tr("speedtest.start"), Command.SCREEN, 1);
     runCommand = new Command(Lang.tr("speedtest.run"), Command.SCREEN, 1);
-    addCommand(startCommand);
+    addCommand(hasLastResult ? runCommand : startCommand);
     addCommand(Commands.playerNowPlaying());
-    // Run right away: some MIDP runtimes used with MIDPlay do not deliver
-    // Displayable.showNotify() when the screen is pushed.
-    start();
-  }
-
-  protected void showNotify() {
-    if (!started) {
+    if (hasLastResult) {
+      // Reopening the screen shows the last result of this session instead of
+      // running the test again.
+      showLastResult(Lang.tr("speedtest.last"));
+    } else {
+      // Some MIDP runtimes used with MIDPlay do not deliver
+      // Displayable.showNotify(), so the first test starts right here.
       start();
     }
   }
@@ -68,18 +74,12 @@ public final class SpeedTestScreen extends BaseForm {
   }
 
   private void start() {
-    if (running) {
-      return;
-    }
-    started = true;
-    running = true;
     final int myToken = ++token;
+    running = true;
     removeCommand(startCommand);
-    removeCommand(runCommand);
+    addCommand(runCommand);
     statusItem.setText(Lang.tr("speedtest.phase_ping"));
-    pingItem.setText(value("speedtest.ping", Lang.tr("speedtest.waiting")));
-    downloadItem.setText(value("speedtest.download", Lang.tr("speedtest.waiting")));
-    uploadItem.setText(value("speedtest.upload", Lang.tr("speedtest.waiting")));
+    resetValues();
     MIDPlay.startOperation(
         new SpeedTestOperation(
             new SpeedTestOperation.Listener() {
@@ -109,12 +109,11 @@ public final class SpeedTestScreen extends BaseForm {
                           return;
                         }
                         running = false;
-                        pingItem.setText(value("speedtest.ping", pingMs + " ms"));
-                        downloadItem.setText(
-                            value("speedtest.download", format(downloadBps)));
-                        uploadItem.setText(value("speedtest.upload", format(uploadBps)));
-                        statusItem.setText(Lang.tr("speedtest.done"));
-                        addCommand(runCommand);
+                        lastPingMs = pingMs;
+                        lastDownloadBps = downloadBps;
+                        lastUploadBps = uploadBps;
+                        hasLastResult = true;
+                        showLastResult(Lang.tr("speedtest.done"));
                       }
                     });
               }
@@ -127,13 +126,26 @@ public final class SpeedTestScreen extends BaseForm {
                           return;
                         }
                         running = false;
+                        resetValues();
                         statusItem.setText(Lang.tr("speedtest.error"));
-                        addCommand(runCommand);
                         navigator.showAlert(Lang.tr("speedtest.error"), AlertType.ERROR);
                       }
                     });
               }
             }));
+  }
+
+  private void resetValues() {
+    pingItem.setText(value("speedtest.ping", Lang.tr("speedtest.waiting")));
+    downloadItem.setText(value("speedtest.download", Lang.tr("speedtest.waiting")));
+    uploadItem.setText(value("speedtest.upload", Lang.tr("speedtest.waiting")));
+  }
+
+  private void showLastResult(String status) {
+    pingItem.setText(value("speedtest.ping", lastPingMs + " ms"));
+    downloadItem.setText(value("speedtest.download", format(lastDownloadBps)));
+    uploadItem.setText(value("speedtest.upload", format(lastUploadBps)));
+    statusItem.setText(status);
   }
 
   private static long rate(long bytes, long elapsedMs) {

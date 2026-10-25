@@ -786,6 +786,7 @@
     "error": "Hız testi başarısız",
     "run": "Tekrar test et",
     "waiting": "—",
-    "start": "Testi başlat"
+    "start": "Testi başlat",
+    "last": "Bu oturumdaki son test"
   }
 }

@@ -786,6 +786,7 @@
     "error": "Speed test failed",
     "run": "Test again",
     "waiting": "—",
-    "start": "Start test"
+    "start": "Start test",
+    "last": "Last test this session"
   }
 }
