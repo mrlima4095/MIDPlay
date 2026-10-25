@@ -34,8 +34,11 @@ public final class AppVaultScreen extends BaseList {
         navigator,
         new Runnable() {
           public void run() {
-            navigator.forward(new AppVaultScreen(navigator));
-            navigator.showAlert(Lang.tr("vault.apps_instructions"), AlertType.INFO);
+            AppVaultScreen screen = new AppVaultScreen(navigator);
+            navigator.forward(screen);
+            // Anchor the alert on the vault screen itself: capturing the current view here can
+            // send the user back to the previous screen when setCurrent is asynchronous.
+            navigator.showAlert(Lang.tr("vault.apps_instructions"), AlertType.INFO, screen);
           }
         });
   }
