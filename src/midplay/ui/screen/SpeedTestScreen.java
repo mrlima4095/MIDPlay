@@ -76,8 +76,6 @@ public final class SpeedTestScreen extends BaseForm {
   private void start() {
     final int myToken = ++token;
     running = true;
-    removeCommand(startCommand);
-    addCommand(runCommand);
     statusItem.setText(Lang.tr("speedtest.phase_ping"));
     resetValues();
     MIDPlay.startOperation(
@@ -114,6 +112,8 @@ public final class SpeedTestScreen extends BaseForm {
                         lastUploadBps = uploadBps;
                         hasLastResult = true;
                         showLastResult(Lang.tr("speedtest.done"));
+                        removeCommand(startCommand);
+                        addCommand(runCommand);
                       }
                     });
               }
@@ -128,6 +128,8 @@ public final class SpeedTestScreen extends BaseForm {
                         running = false;
                         resetValues();
                         statusItem.setText(Lang.tr("speedtest.error"));
+                        removeCommand(startCommand);
+                        addCommand(runCommand);
                         navigator.showAlert(Lang.tr("speedtest.error"), AlertType.ERROR);
                       }
                     });
