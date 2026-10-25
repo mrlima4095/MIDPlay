@@ -785,6 +785,7 @@
     "done": "Teste concluído",
     "error": "Falha no teste de velocidade",
     "run": "Testar novamente",
-    "waiting": "—"
+    "waiting": "—",
+    "start": "Iniciar teste"
   }
 }

@@ -18,6 +18,7 @@ public final class SpeedTestScreen extends BaseForm {
   private final StringItem pingItem;
   private final StringItem downloadItem;
   private final StringItem uploadItem;
+  private final Command startCommand;
   private final Command runCommand;
   private boolean running;
   private boolean started;
@@ -34,19 +35,23 @@ public final class SpeedTestScreen extends BaseForm {
     append(pingItem);
     append(downloadItem);
     append(uploadItem);
+    startCommand = new Command(Lang.tr("speedtest.start"), Command.SCREEN, 1);
     runCommand = new Command(Lang.tr("speedtest.run"), Command.SCREEN, 1);
+    addCommand(startCommand);
     addCommand(Commands.playerNowPlaying());
+    // Run right away: some MIDP runtimes used with MIDPlay do not deliver
+    // Displayable.showNotify() when the screen is pushed.
+    start();
   }
 
   protected void showNotify() {
     if (!started) {
-      started = true;
       start();
     }
   }
 
   protected void handleCommand(Command c, Displayable d) {
-    if (c == runCommand) {
+    if (c == startCommand || c == runCommand) {
       start();
     } else if (c == Commands.playerNowPlaying()) {
       PlayerNavHelper.showNowPlaying(navigator);
@@ -66,8 +71,10 @@ public final class SpeedTestScreen extends BaseForm {
     if (running) {
       return;
     }
+    started = true;
     running = true;
     final int myToken = ++token;
+    removeCommand(startCommand);
     removeCommand(runCommand);
     statusItem.setText(Lang.tr("speedtest.phase_ping"));
     pingItem.setText(value("speedtest.ping", Lang.tr("speedtest.waiting")));

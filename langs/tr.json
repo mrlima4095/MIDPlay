@@ -785,6 +785,7 @@
     "done": "Test tamamlandı",
     "error": "Hız testi başarısız",
     "run": "Tekrar test et",
-    "waiting": "—"
+    "waiting": "—",
+    "start": "Testi başlat"
   }
 }

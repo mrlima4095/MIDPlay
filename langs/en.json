@@ -785,6 +785,7 @@
     "done": "Test complete",
     "error": "Speed test failed",
     "run": "Test again",
-    "waiting": "—"
+    "waiting": "—",
+    "start": "Start test"
   }
 }

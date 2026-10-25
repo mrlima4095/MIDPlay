@@ -785,6 +785,7 @@
     "done": "Kiểm tra xong",
     "error": "Kiểm tra tốc độ thất bại",
     "run": "Kiểm tra lại",
-    "waiting": "—"
+    "waiting": "—",
+    "start": "Bắt đầu kiểm tra"
   }
 }

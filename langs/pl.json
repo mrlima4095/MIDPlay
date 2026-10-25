@@ -785,6 +785,7 @@
     "done": "Test zakończony",
     "error": "Test prędkości nie powiódł się",
     "run": "Testuj ponownie",
-    "waiting": "—"
+    "waiting": "—",
+    "start": "Rozpocznij test"
   }
 }
