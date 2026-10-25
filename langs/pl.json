@@ -666,7 +666,11 @@
     "results": "Wyniki",
     "not_found_hint": "Nie znaleziono tekstu. Szukaj po piosence lub wykonawcy.",
     "no_results": "Nie znaleziono tekstu",
-    "search_error": "Nie udało się wyszukać"
+    "search_error": "Nie udało się wyszukać",
+    "page": "Strona",
+    "prev_page": "Poprzednia strona",
+    "next_page": "Następna strona",
+    "empty": "Pusty tekst"
   },
   "wattpad": {
     "title": "Wattpad",

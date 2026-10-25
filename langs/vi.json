@@ -666,7 +666,11 @@
     "results": "Kết quả",
     "not_found_hint": "Không tìm thấy lời bài hát. Hãy tìm theo bài hát hoặc ca sĩ.",
     "no_results": "Không tìm thấy lời bài hát",
-    "search_error": "Không thể tìm kiếm"
+    "search_error": "Không thể tìm kiếm",
+    "page": "Trang",
+    "prev_page": "Trang trước",
+    "next_page": "Trang sau",
+    "empty": "Lời bài hát trống"
   },
   "wattpad": {
     "title": "Wattpad",

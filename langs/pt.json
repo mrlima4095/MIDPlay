@@ -666,7 +666,11 @@
     "results": "Resultados",
     "not_found_hint": "Letra não encontrada. Pesquise pelo nome ou pelo artista.",
     "no_results": "Nenhuma letra encontrada",
-    "search_error": "Não foi possível pesquisar"
+    "search_error": "Não foi possível pesquisar",
+    "page": "Página",
+    "prev_page": "Página anterior",
+    "next_page": "Próxima página",
+    "empty": "Letra vazia"
   },
   "wattpad": {
     "title": "Wattpad",

@@ -666,7 +666,11 @@
     "results": "Sonuçlar",
     "not_found_hint": "Sözler bulunamadı. Şarkı veya sanatçı ile arayın.",
     "no_results": "Söz bulunamadı",
-    "search_error": "Arama yapılamadı"
+    "search_error": "Arama yapılamadı",
+    "page": "Sayfa",
+    "prev_page": "Önceki sayfa",
+    "next_page": "Sonraki sayfa",
+    "empty": "Şarkı sözü boş"
   },
   "wattpad": {
     "title": "Wattpad",

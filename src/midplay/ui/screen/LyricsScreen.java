@@ -10,22 +10,36 @@ import midplay.net.HttpTextOperation;
 import midplay.net.LyricsApi;
 import midplay.store.NotesManager;
 import midplay.store.NotesManager.Note;
+import midplay.store.SettingsManager;
 import midplay.ui.BaseForm;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
+import midplay.util.Pager;
 
-/** Lyrics of the current or selected song, fetched through the lyrics proxy. */
+/**
+ * Lyrics of the current or selected song, fetched through the lyrics proxy and paginated like the
+ * Wattpad reader. Each page is rendered as one or more StringItems so a very long line never upsets
+ * small devices.
+ */
 public final class LyricsScreen extends BaseForm {
-  /** Lyrics are split so one very long StringItem does not upset small devices. */
+  /** Longest StringItem used per page. */
   private static final int TEXT_CHUNK = 1200;
 
   private final String artist;
   private final String title;
   private final String lyrics;
+  private final String[] pages;
+  private int page;
   private final Command saveNoteCommand =
       new Command(Lang.tr("lyrics.save_note"), Command.SCREEN, 1);
   private final Command searchCommand = new Command(Lang.tr("lyrics.search"), Command.SCREEN, 2);
+  private final Command prevPageCommand =
+      new Command(Lang.tr("lyrics.prev_page"), Command.SCREEN, 3);
+  private final Command nextPageCommand =
+      new Command(Lang.tr("lyrics.next_page"), Command.SCREEN, 4);
+  private boolean prevAdded;
+  private boolean nextAdded;
 
   private LyricsScreen(Navigator navigator, String artist, String title, String lyrics) {
     super(Lang.tr("lyrics.title"), navigator);
@@ -36,14 +50,12 @@ public final class LyricsScreen extends BaseForm {
     addCommand(saveNoteCommand);
     addCommand(searchCommand);
 
-    String heading = this.title;
-    if (this.artist.length() > 0) {
-      heading = heading.length() > 0 ? heading + "\n" + this.artist : this.artist;
+    String text = this.lyrics;
+    if (text.length() == 0) {
+      text = Lang.tr("lyrics.empty");
     }
-    if (heading.length() > 0) {
-      append(new StringItem(null, heading + "\n"));
-    }
-    appendLyrics(this.lyrics);
+    pages = Pager.paginate(text, SettingsManager.getInstance().getWattpadPageChars());
+    showPage(0);
   }
 
   /** Opens the lyrics of a track, warning when there is nothing playing. */
@@ -170,7 +182,32 @@ public final class LyricsScreen extends BaseForm {
     navigator.forward(new LyricsSearchScreen(navigator, artist, title, true, originKey));
   }
 
-  private void appendLyrics(String text) {
+  /** Rebuilds the form with a single page, split into small StringItems. */
+  private void showPage(int target) {
+    if (target < 0 || target >= pages.length) {
+      return;
+    }
+    page = target;
+    deleteAll();
+
+    String heading = title;
+    if (artist.length() > 0) {
+      heading = heading.length() > 0 ? heading + "\n" + artist : artist;
+    }
+    if (heading.length() > 0) {
+      append(new StringItem(null, heading + "\n"));
+    }
+    if (pages.length > 1) {
+      append(
+          new StringItem(
+              null,
+              Lang.tr("lyrics.page") + " " + (page + 1) + "/" + pages.length + "\n\n"));
+    }
+    appendChunks(pages[page]);
+    updateNavCommands();
+  }
+
+  private void appendChunks(String text) {
     if (text == null) {
       return;
     }
@@ -185,6 +222,25 @@ public final class LyricsScreen extends BaseForm {
       }
       append(new StringItem(null, text.substring(start, end)));
       start = end;
+    }
+  }
+
+  private void updateNavCommands() {
+    boolean wantPrev = page > 0;
+    boolean wantNext = page < pages.length - 1;
+    if (wantPrev && !prevAdded) {
+      addCommand(prevPageCommand);
+      prevAdded = true;
+    } else if (!wantPrev && prevAdded) {
+      removeCommand(prevPageCommand);
+      prevAdded = false;
+    }
+    if (wantNext && !nextAdded) {
+      addCommand(nextPageCommand);
+      nextAdded = true;
+    } else if (!wantNext && nextAdded) {
+      removeCommand(nextPageCommand);
+      nextAdded = false;
     }
   }
 
@@ -214,6 +270,10 @@ public final class LyricsScreen extends BaseForm {
       navigator.forward(
           new LyricsSearchScreen(
               navigator, artist, title, false, LyricsApi.cacheKey(artist, title)));
+    } else if (c == prevPageCommand) {
+      showPage(page - 1);
+    } else if (c == nextPageCommand) {
+      showPage(page + 1);
     }
   }
 }

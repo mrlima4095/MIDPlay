@@ -666,7 +666,11 @@
     "results": "Results",
     "not_found_hint": "Lyrics not found. Search by song or artist.",
     "no_results": "No lyrics found",
-    "search_error": "Could not search"
+    "search_error": "Could not search",
+    "page": "Page",
+    "prev_page": "Previous page",
+    "next_page": "Next page",
+    "empty": "Empty lyrics"
   },
   "wattpad": {
     "title": "Wattpad",

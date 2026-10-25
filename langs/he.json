@@ -666,7 +666,11 @@
     "results": "תוצאות",
     "not_found_hint": "המילים לא נמצאו. חפש לפי שיר או אמן.",
     "no_results": "לא נמצאו מילים",
-    "search_error": "לא ניתן היה לחפש"
+    "search_error": "לא ניתן היה לחפש",
+    "page": "עמוד",
+    "prev_page": "העמוד הקודם",
+    "next_page": "העמוד הבא",
+    "empty": "מילים ריקות"
   },
   "wattpad": {
     "title": "Wattpad",
