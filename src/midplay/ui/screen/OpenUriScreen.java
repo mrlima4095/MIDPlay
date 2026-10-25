@@ -68,6 +68,11 @@ public final class OpenUriScreen extends BaseForm {
       navigator.forward(new TaskViewerScreen(navigator));
       return;
     }
+    if (uri.equalsIgnoreCase("speedtest")) {
+      // Hidden network tool; do not add it to the URI history.
+      navigator.forward(new SpeedTestScreen(navigator));
+      return;
+    }
     if (MIDPlay.getInstance().openInternalUri(uri)) {
       UriHistoryManager.getInstance().record(uri);
       refreshHistory();

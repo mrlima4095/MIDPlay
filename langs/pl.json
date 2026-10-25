@@ -773,5 +773,18 @@
     "remove_download_confirm": "Usunąć pobrane rozdziały {0}?",
     "download_removed": "Pobrane usunięto",
     "offline": "offline"
+  },
+  "speedtest": {
+    "title": "Test prędkości sieci",
+    "ping": "Opóźnienie",
+    "download": "Pobieranie",
+    "upload": "Wysyłanie",
+    "phase_ping": "Pomiar opóźnienia...",
+    "phase_download": "Pomiar pobierania...",
+    "phase_upload": "Pomiar wysyłania...",
+    "done": "Test zakończony",
+    "error": "Test prędkości nie powiódł się",
+    "run": "Testuj ponownie",
+    "waiting": "—"
   }
 }

@@ -773,5 +773,18 @@
     "remove_download_confirm": "Remover os capítulos baixados de {0}?",
     "download_removed": "Download removido",
     "offline": "offline"
+  },
+  "speedtest": {
+    "title": "Teste de velocidade",
+    "ping": "Latência",
+    "download": "Download",
+    "upload": "Upload",
+    "phase_ping": "Medindo latência...",
+    "phase_download": "Medindo download...",
+    "phase_upload": "Medindo upload...",
+    "done": "Teste concluído",
+    "error": "Falha no teste de velocidade",
+    "run": "Testar novamente",
+    "waiting": "—"
   }
 }

@@ -773,5 +773,18 @@
     "remove_download_confirm": "להסיר את הפרקים שהורדו של {0}?",
     "download_removed": "ההורדה הוסרה",
     "offline": "לא מקוון"
+  },
+  "speedtest": {
+    "title": "בדיקת מהירות רשת",
+    "ping": "השהיה",
+    "download": "הורדה",
+    "upload": "העלאה",
+    "phase_ping": "מודד השהיה...",
+    "phase_download": "מודד הורדה...",
+    "phase_upload": "מודד העלאה...",
+    "done": "הבדיקה הושלמה",
+    "error": "בדיקת המהירות נכשלה",
+    "run": "בדוק שוב",
+    "waiting": "—"
   }
 }

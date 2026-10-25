@@ -773,5 +773,18 @@
     "remove_download_confirm": "Xóa các chương đã tải của {0}?",
     "download_removed": "Đã xóa bản tải",
     "offline": "ngoại tuyến"
+  },
+  "speedtest": {
+    "title": "Kiểm tra tốc độ mạng",
+    "ping": "Độ trễ",
+    "download": "Tải xuống",
+    "upload": "Tải lên",
+    "phase_ping": "Đang đo độ trễ...",
+    "phase_download": "Đang đo tải xuống...",
+    "phase_upload": "Đang đo tải lên...",
+    "done": "Kiểm tra xong",
+    "error": "Kiểm tra tốc độ thất bại",
+    "run": "Kiểm tra lại",
+    "waiting": "—"
   }
 }

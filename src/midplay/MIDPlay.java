@@ -277,8 +277,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
    * false} when the text is not a known shortcut, so the caller can treat it as a real URI.
    *
    * <p>Accepted shortcuts: {@code wattpad}, {@code pinterest}, {@code reddit}, {@code mpgram},
-   * {@code notes}, {@code tasks} and {@code playing}. The {@code htop} diagnostic is handled by the
-   * Open URI screen itself.
+   * {@code notes}, {@code tasks} and {@code playing}. The {@code htop} diagnostic and the
+   * {@code speedtest} tool are handled by the Open URI screen itself.
    */
   public boolean openInternalUri(String uri) {
     String key = internalUriKey(uri);

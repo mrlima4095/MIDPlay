@@ -63,6 +63,7 @@ public class Configuration {
 
   public static final String DEFAULT_LYRICS_API_URL = "http://opentty.fun/lyrics.php";
   public static final String DEFAULT_TRANSLATE_URL = "http://opentty.fun/translate.php";
+  public static final String DEFAULT_SPEEDTEST_URL = "http://opentty.fun/speedtest.php";
 
   /**
    * Hosts whose song pages are recognized by the Open... screen and by links shared in subapps.

@@ -773,5 +773,18 @@
     "remove_download_confirm": "Remove the downloaded chapters of {0}?",
     "download_removed": "Download removed",
     "offline": "offline"
+  },
+  "speedtest": {
+    "title": "Network speed test",
+    "ping": "Latency",
+    "download": "Download",
+    "upload": "Upload",
+    "phase_ping": "Measuring latency...",
+    "phase_download": "Measuring download...",
+    "phase_upload": "Measuring upload...",
+    "done": "Test complete",
+    "error": "Speed test failed",
+    "run": "Test again",
+    "waiting": "—"
   }
 }

@@ -773,5 +773,18 @@
     "remove_download_confirm": "{0} hikayesinin indirilen bölümleri kaldırılsın mı?",
     "download_removed": "İndirme kaldırıldı",
     "offline": "çevrimdışı"
+  },
+  "speedtest": {
+    "title": "Ağ hız testi",
+    "ping": "Gecikme",
+    "download": "İndirme",
+    "upload": "Yükleme",
+    "phase_ping": "Gecikme ölçülüyor...",
+    "phase_download": "İndirme ölçülüyor...",
+    "phase_upload": "Yükleme ölçülüyor...",
+    "done": "Test tamamlandı",
+    "error": "Hız testi başarısız",
+    "run": "Tekrar test et",
+    "waiting": "—"
   }
 }
