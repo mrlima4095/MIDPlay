@@ -34,6 +34,13 @@ public abstract class BaseForm extends Form implements CommandListener {
     }
   }
 
+  /**
+   * Called by the runtime when the screen becomes visible. The MIDP stub used by the build does
+   * not declare it, so it lives here (like BaseList does for lists) and subclasses can refresh
+   * their state with {@code super.showNotify()}.
+   */
+  protected void showNotify() {}
+
   protected boolean onBackPressed() {
     return false;
   }

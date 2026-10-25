@@ -107,6 +107,12 @@ public final class RedditProfileScreen extends BaseForm {
             }));
   }
 
+  protected void showNotify() {
+    super.showNotify();
+    // Follow state can change from the posts screen, so re-read it on the way back.
+    updateFollowCommands();
+  }
+
   private String detailsText() {
     StringBuffer sb = new StringBuffer();
     String display = profile[RedditApi.PROFILE_DISPLAY_NAME].trim();
