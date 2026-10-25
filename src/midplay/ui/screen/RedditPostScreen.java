@@ -110,9 +110,9 @@ public final class RedditPostScreen extends BaseForm {
           new RedditCommentsScreen(
               navigator, post[RedditApi.POST_ID], post[RedditApi.POST_TITLE]));
     } else if (c == subredditCommand) {
-      openSubreddit();
+      RedditProfileScreen.open(navigator, false, post[RedditApi.POST_SUBREDDIT]);
     } else if (c == authorCommand) {
-      openUser();
+      RedditProfileScreen.open(navigator, true, post[RedditApi.POST_AUTHOR]);
     } else if (c == saveCommand) {
       save();
     } else if (c == removeSavedCommand) {
@@ -302,118 +302,6 @@ public final class RedditPostScreen extends BaseForm {
     } else {
       navigator.showAlert(Lang.tr("reddit.save_error"), AlertType.ERROR);
     }
-  }
-
-  private void openSubreddit() {
-    final String subreddit = post[RedditApi.POST_SUBREDDIT];
-    if (loading || subreddit.length() == 0) {
-      return;
-    }
-    loading = true;
-    navigator.showLoadingAlert(
-        Lang.tr("reddit.loading"),
-        new Runnable() {
-          public void run() {
-            loading = false;
-          }
-        });
-    MIDPlay.startOperation(
-        new HttpTextOperation(
-            RedditApi.subPostsUrl(subreddit, "new", ""),
-            new HttpTextOperation.Listener() {
-              public void onText(final String response) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        loading = false;
-                        showPosts(
-                            response,
-                            RedditResultsScreen.SOURCE_SUBPOSTS,
-                            subreddit,
-                            "",
-                            "new",
-                            Lang.tr("reddit.results_posts", "r/" + subreddit));
-                      }
-                    });
-              }
-
-              public void onError(final Exception e) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        loading = false;
-                        navigator.showAlert(e.toString(), AlertType.ERROR);
-                      }
-                    });
-              }
-            }));
-  }
-
-  private void openUser() {
-    final String author = post[RedditApi.POST_AUTHOR];
-    if (loading || author.length() == 0) {
-      return;
-    }
-    loading = true;
-    navigator.showLoadingAlert(
-        Lang.tr("reddit.loading"),
-        new Runnable() {
-          public void run() {
-            loading = false;
-          }
-        });
-    MIDPlay.startOperation(
-        new HttpTextOperation(
-            RedditApi.userPostsUrl(author, ""),
-            new HttpTextOperation.Listener() {
-              public void onText(final String response) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        loading = false;
-                        showPosts(
-                            response,
-                            RedditResultsScreen.SOURCE_USER_POSTS,
-                            author,
-                            "",
-                            "",
-                            Lang.tr("reddit.results_user_posts", author));
-                      }
-                    });
-              }
-
-              public void onError(final Exception e) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        loading = false;
-                        navigator.showAlert(e.toString(), AlertType.ERROR);
-                      }
-                    });
-              }
-            }));
-  }
-
-  private void showPosts(
-      String response,
-      int source,
-      String id,
-      String query,
-      String sort,
-      String title) {
-    String error = RedditApi.parseError(response);
-    if (error.length() > 0) {
-      navigator.showAlert(error, AlertType.ERROR);
-      return;
-    }
-    java.util.Vector posts = RedditApi.parsePosts(response);
-    if (posts.size() == 0) {
-      navigator.showAlert(Lang.tr("reddit.empty"), AlertType.INFO);
-      return;
-    }
-    navigator.forward(
-        new RedditResultsScreen(
-            navigator, source, id, query, sort, title, posts, RedditApi.parseBookmark(response)));
   }
 
   private void downloadPost() {

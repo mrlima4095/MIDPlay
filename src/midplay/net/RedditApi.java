@@ -51,6 +51,22 @@ public final class RedditApi {
   public static final int USER_COMMENTS = 3;
   public static final int USER_SIZE = 4;
 
+  /** Profile fields (subreddits and users share them; the user extra fields stay 0 otherwise). */
+  public static final int PROFILE_NAME = 0;
+  public static final int PROFILE_DISPLAY_NAME = 1;
+  public static final int PROFILE_BIO = 2;
+  public static final int PROFILE_ICON = 3;
+  public static final int PROFILE_BANNER = 4;
+  public static final int PROFILE_SUBSCRIBERS = 5;
+  public static final int PROFILE_CREATED = 6;
+  public static final int PROFILE_NSFW = 7;
+  public static final int PROFILE_KARMA = 8;
+  public static final int PROFILE_POSTS = 9;
+  public static final int PROFILE_COMMENTS = 10;
+  public static final int PROFILE_FIRST_ACTIVITY = 11;
+  public static final int PROFILE_LAST_ACTIVITY = 12;
+  public static final int PROFILE_SIZE = 13;
+
   /** Compact threaded-comment row indexes. */
   public static final int COMMENT_BODY = 0;
   public static final int COMMENT_AUTHOR = 1;
@@ -134,6 +150,14 @@ public final class RedditApi {
             apiQuery("op=userposts&n=" + pageSize() + "&u=" + Utils.urlEncode(username)));
     appendBookmark(url, bookmark);
     return url.toString();
+  }
+
+  public static String subredditProfileUrl(String subreddit) {
+    return apiQuery("op=subreddit&s=" + Utils.urlEncode(subreddit));
+  }
+
+  public static String userProfileUrl(String username) {
+    return apiQuery("op=user&u=" + Utils.urlEncode(username));
   }
 
   public static String postUrl(String id) {
@@ -230,6 +254,37 @@ public final class RedditApi {
     } catch (Exception e) {
     }
     return result;
+  }
+
+  /** Parses a profile reply, or returns null when it could not be loaded. */
+  public static String[] parseProfile(String json) {
+    try {
+      JSONObject root = JSON.getObject(json);
+      if (root.getInt("ok", 0) == 0) {
+        return null;
+      }
+      JSONObject item = root.getObject("p");
+      if (item == null) {
+        return null;
+      }
+      String[] row = new String[PROFILE_SIZE];
+      row[PROFILE_NAME] = item.getString("n", "");
+      row[PROFILE_DISPLAY_NAME] = item.getString("ti", "");
+      row[PROFILE_BIO] = item.getString("pd", "");
+      row[PROFILE_ICON] = item.getString("ic", "");
+      row[PROFILE_BANNER] = item.getString("bn", "");
+      row[PROFILE_SUBSCRIBERS] = integerString(item, "sc");
+      row[PROFILE_CREATED] = integerString(item, "ct");
+      row[PROFILE_NSFW] = integerString(item, "ns");
+      row[PROFILE_KARMA] = integerString(item, "ka");
+      row[PROFILE_POSTS] = integerString(item, "pc");
+      row[PROFILE_COMMENTS] = integerString(item, "cc");
+      row[PROFILE_FIRST_ACTIVITY] = integerString(item, "fa");
+      row[PROFILE_LAST_ACTIVITY] = integerString(item, "la");
+      return row;
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   public static Vector parseSubreddits(String json) {

@@ -4,9 +4,6 @@ import java.util.Vector;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
-import midplay.MIDPlay;
-import midplay.net.HttpTextOperation;
-import midplay.net.RedditApi;
 import midplay.store.RedditFavoritesManager;
 import midplay.ui.BaseList;
 import midplay.ui.Navigator;
@@ -23,7 +20,6 @@ public final class RedditFollowingScreen extends BaseList {
   private final Command openCommand;
   private final Command removeCommand;
   private final Vector items = new Vector();
-  private boolean loading;
 
   public RedditFollowingScreen(Navigator navigator) {
     super(Lang.tr("reddit.following"), navigator);
@@ -102,7 +98,7 @@ public final class RedditFollowingScreen extends BaseList {
 
   private void openSelected() {
     String[] item = selectedItem();
-    if (item == null || loading) {
+    if (item == null) {
       return;
     }
     if (String.valueOf(TYPE_USER).equals(item[0])) {
@@ -126,89 +122,17 @@ public final class RedditFollowingScreen extends BaseList {
     navigator.showAlert(Lang.tr("reddit.unfollowed"), AlertType.CONFIRMATION);
   }
 
-  private void openSubreddit(final String subreddit) {
+  private void openSubreddit(String subreddit) {
     if (subreddit == null || subreddit.length() == 0) {
       return;
     }
-    load(
-        RedditApi.subPostsUrl(subreddit, "new", ""),
-        RedditResultsScreen.SOURCE_SUBPOSTS,
-        subreddit,
-        "",
-        "new",
-        Lang.tr("reddit.results_posts", "r/" + subreddit));
+    RedditProfileScreen.open(navigator, false, subreddit);
   }
 
-  private void openUser(final String username) {
+  private void openUser(String username) {
     if (username == null || username.length() == 0) {
       return;
     }
-    load(
-        RedditApi.userPostsUrl(username, ""),
-        RedditResultsScreen.SOURCE_USER_POSTS,
-        username,
-        "",
-        "",
-        Lang.tr("reddit.results_user_posts", username));
-  }
-
-  private void load(
-      final String url,
-      final int source,
-      final String id,
-      final String query,
-      final String sort,
-      final String title) {
-    loading = true;
-    navigator.showLoadingAlert(
-        Lang.tr("reddit.loading"),
-        new Runnable() {
-          public void run() {
-            loading = false;
-          }
-        });
-    MIDPlay.startOperation(
-        new HttpTextOperation(
-            url,
-            new HttpTextOperation.Listener() {
-              public void onText(final String response) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        loading = false;
-                        String error = RedditApi.parseError(response);
-                        if (error.length() > 0) {
-                          navigator.showAlert(error, AlertType.ERROR);
-                          return;
-                        }
-                        Vector posts = RedditApi.parsePosts(response);
-                        if (posts.size() == 0) {
-                          navigator.showAlert(Lang.tr("reddit.empty"), AlertType.INFO);
-                          return;
-                        }
-                        navigator.forward(
-                            new RedditResultsScreen(
-                                navigator,
-                                source,
-                                id,
-                                query,
-                                sort,
-                                title,
-                                posts,
-                                RedditApi.parseBookmark(response)));
-                      }
-                    });
-              }
-
-              public void onError(final Exception e) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        loading = false;
-                        navigator.showAlert(e.toString(), AlertType.ERROR);
-                      }
-                    });
-              }
-            }));
+    RedditProfileScreen.open(navigator, true, username);
   }
 }

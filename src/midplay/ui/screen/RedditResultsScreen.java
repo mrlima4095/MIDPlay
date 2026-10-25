@@ -152,9 +152,9 @@ public final class RedditResultsScreen extends BaseList {
     if (isPosts()) {
       navigator.forward(new RedditPostScreen(navigator, item));
     } else if (isUsers()) {
-      openUser(item[RedditApi.USER_NAME]);
+      RedditProfileScreen.open(navigator, true, item[RedditApi.USER_NAME]);
     } else {
-      openSubreddit(item[RedditApi.SUB_NAME]);
+      RedditProfileScreen.open(navigator, false, item[RedditApi.SUB_NAME]);
     }
   }
 
@@ -359,22 +359,6 @@ public final class RedditResultsScreen extends BaseList {
       return null;
     }
     return (String[]) items.elementAt(index);
-  }
-
-  private void openSubreddit(String subreddit) {
-    if (loading || subreddit.length() == 0) {
-      return;
-    }
-    loadPosts(RedditApi.subPostsUrl(subreddit, "new", ""), SOURCE_SUBPOSTS, subreddit, "", "new",
-        Lang.tr("reddit.results_posts", "r/" + subreddit));
-  }
-
-  private void openUser(String username) {
-    if (loading || username.length() == 0) {
-      return;
-    }
-    loadPosts(RedditApi.userPostsUrl(username, ""), SOURCE_USER_POSTS, username, "", "",
-        Lang.tr("reddit.results_user_posts", username));
   }
 
   private void reloadSub(String sort) {

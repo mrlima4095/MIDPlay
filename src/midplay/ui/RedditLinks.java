@@ -6,7 +6,7 @@ import midplay.MIDPlay;
 import midplay.net.HttpTextOperation;
 import midplay.net.RedditApi;
 import midplay.ui.screen.RedditPostScreen;
-import midplay.ui.screen.RedditResultsScreen;
+import midplay.ui.screen.RedditProfileScreen;
 import midplay.ui.screen.RedditScreen;
 import midplay.util.Lang;
 
@@ -161,14 +161,7 @@ public final class RedditLinks {
       error(navigator);
       return;
     }
-    loadPosts(
-        navigator,
-        RedditApi.subPostsUrl(subreddit, "new", ""),
-        RedditResultsScreen.SOURCE_SUBPOSTS,
-        subreddit,
-        "",
-        "new",
-        Lang.tr("reddit.results_posts", "r/" + subreddit));
+    RedditProfileScreen.open(navigator, false, subreddit);
   }
 
   private static void openUser(final Navigator navigator, final String username) {
@@ -176,56 +169,7 @@ public final class RedditLinks {
       error(navigator);
       return;
     }
-    loadPosts(
-        navigator,
-        RedditApi.userPostsUrl(username, ""),
-        RedditResultsScreen.SOURCE_USER_POSTS,
-        username,
-        "",
-        "",
-        Lang.tr("reddit.results_user_posts", username));
-  }
-
-  private static void loadPosts(
-      final Navigator navigator,
-      final String url,
-      final int source,
-      final String id,
-      final String query,
-      final String sort,
-      final String title) {
-    navigator.showLoadingAlert(Lang.tr("reddit.loading"));
-    MIDPlay.startOperation(
-        new HttpTextOperation(
-            url,
-            new HttpTextOperation.Listener() {
-              public void onText(final String text) {
-                navigator.callSerially(
-                    new Runnable() {
-                      public void run() {
-                        Vector posts = RedditApi.parsePosts(text);
-                        if (posts.size() == 0) {
-                          error(navigator);
-                          return;
-                        }
-                        navigator.forward(
-                            new RedditResultsScreen(
-                                navigator,
-                                source,
-                                id,
-                                query,
-                                sort,
-                                title,
-                                posts,
-                                RedditApi.parseBookmark(text)));
-                      }
-                    });
-              }
-
-              public void onError(Exception e) {
-                fail(navigator);
-              }
-            }));
+    RedditProfileScreen.open(navigator, true, username);
   }
 
   private static void fail(final Navigator navigator) {
