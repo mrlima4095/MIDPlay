@@ -199,6 +199,7 @@
     "select": "Çalma Listesi Seç",
     "status": {
       "created": "Çalma listesi başarıyla oluşturuldu",
+      "created_with_tracks": "Çalma listesi {0} parçayla oluşturuldu",
       "no_custom": "Özel çalma listesi yok",
       "renamed": "Çalma listesi başarıyla yeniden adlandırıldı",
       "track_added": "Şarkı çalma listesine eklendi",

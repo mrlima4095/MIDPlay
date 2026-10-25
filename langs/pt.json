@@ -262,6 +262,7 @@
     "select": "Selecionar Playlist",
     "status": {
       "created": "Playlist criada com sucesso",
+      "created_with_tracks": "Playlist criada com {0} faixa(s)",
       "no_custom": "Nenhuma playlist personalizada disponível",
       "renamed": "Playlist renomeada com sucesso",
       "track_added": "Música adicionada à playlist com sucesso",

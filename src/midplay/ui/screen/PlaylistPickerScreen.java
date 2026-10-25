@@ -10,6 +10,8 @@ import midplay.model.Track;
 import midplay.store.Configuration;
 import midplay.store.FavoritesManager;
 import midplay.ui.BaseList;
+import midplay.ui.Commands;
+import midplay.ui.FormHelpers;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
 
@@ -17,6 +19,7 @@ public final class PlaylistPickerScreen extends BaseList {
   private final FavoritesManager favoritesManager;
   private final Track[] tracksToAdd;
   private final Displayable previousScreen;
+  private final Command createCommand = Commands.playlistCreate();
   private Playlist[] customPlaylists = new Playlist[0];
 
   public PlaylistPickerScreen(Navigator navigator, Track trackToAdd, Displayable previousScreen) {
@@ -28,6 +31,7 @@ public final class PlaylistPickerScreen extends BaseList {
     this.favoritesManager = FavoritesManager.getInstance();
     this.tracksToAdd = tracksToAdd == null ? new Track[0] : tracksToAdd;
     this.previousScreen = previousScreen;
+    addCommand(createCommand);
     populateItems();
   }
 
@@ -59,10 +63,47 @@ public final class PlaylistPickerScreen extends BaseList {
     }
     Playlist selectedPlaylist = customPlaylists[selectedIndex];
     int[] result = favoritesManager.addTracksToPlaylist(selectedPlaylist, tracksToAdd);
-    int added = result[0];
-    int exists = result[1];
-    int failed = result[2];
     navigator.back();
+    showAddResult(result[0], result[1], result[2], false);
+  }
+
+  /**
+   * Asks for a name, creates the playlist and stores the selected tracks in it. The name form is on
+   * top of this screen, so both are closed to land back where the selection started.
+   */
+  private void showCreateForm() {
+    FormHelpers.promptName(
+        navigator,
+        Lang.tr("playlist.create"),
+        "",
+        new FormHelpers.NameSubmitHandler() {
+          public void onSubmit(String name) {
+            createPlaylistAndAdd(name);
+          }
+        });
+  }
+
+  private void createPlaylistAndAdd(String name) {
+    Playlist created = new Playlist("custom_" + System.currentTimeMillis(), name, "");
+    if (favoritesManager.addPlaylist(created) != FavoritesManager.SUCCESS) {
+      navigator.back();
+      navigator.showAlert(Lang.tr("playlist.error.create_failed"), AlertType.ERROR);
+      return;
+    }
+    int[] result = favoritesManager.addTracksToPlaylist(created, tracksToAdd);
+    navigator.back();
+    navigator.back();
+    showAddResult(result[0], result[1], result[2], true);
+  }
+
+  private void showAddResult(int added, int exists, int failed, boolean created) {
+    if (tracksToAdd.length == 0 || (created && failed == 0)) {
+      navigator.showAlert(
+          Lang.tr("playlist.status.created_with_tracks", String.valueOf(added)),
+          AlertType.CONFIRMATION,
+          previousScreen);
+      return;
+    }
     if (tracksToAdd.length == 1 && added == 1) {
       navigator.showAlert(Lang.tr("playlist.status.track_added"), AlertType.CONFIRMATION, previousScreen);
     } else if (tracksToAdd.length == 1 && exists == 1) {
@@ -77,5 +118,9 @@ public final class PlaylistPickerScreen extends BaseList {
     }
   }
 
-  protected void handleCommand(Command c, Displayable d) {}
+  protected void handleCommand(Command c, Displayable d) {
+    if (c == createCommand) {
+      showCreateForm();
+    }
+  }
 }

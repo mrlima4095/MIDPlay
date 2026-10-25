@@ -199,6 +199,7 @@
     "select": "Wybierz playlistę",
     "status": {
       "created": "Stworzono playlistę",
+      "created_with_tracks": "Utworzono playlistę z {0} utworami",
       "no_custom": "Brak własnych playlist",
       "renamed": "Zmieniono nazwę",
       "track_added": "Dodano utwór",

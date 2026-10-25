@@ -199,6 +199,7 @@
     "select": "Chọn playlist",
     "status": {
       "created": "Tạo playlist thành công",
+      "created_with_tracks": "Đã tạo danh sách phát với {0} bài",
       "no_custom": "Chưa có playlist tự tạo",
       "renamed": "Đổi tên playlist thành công",
       "track_added": "Đã thêm bài hát vào playlist",
