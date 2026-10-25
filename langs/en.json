@@ -87,7 +87,8 @@
     "open_uri": "Open...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
-    "reddit": "Reddit"
+    "reddit": "Reddit",
+    "rss": "RSS Reader"
   },
   "mpgram": {
     "send_note": "Send note",
@@ -769,5 +770,47 @@
     "remove_download_confirm": "Remove the downloaded chapters of {0}?",
     "download_removed": "Download removed",
     "offline": "offline"
+  },
+  "rss": {
+    "title": "RSS Reader",
+    "add": "Add feed",
+    "add_title": "Add feed",
+    "add_hint": "Paste a site or feed address. MIDPlay finds the feed automatically.",
+    "url_label": "Site or feed URL",
+    "suggestions": "Suggestions",
+    "suggestions_title": "Suggested feeds",
+    "refresh": "Reload",
+    "reloaded": "Feeds reloaded",
+    "remove": "Remove feed",
+    "remove_confirm": "Remove {0}?",
+    "removed": "Feed removed",
+    "saved": "Feed added",
+    "already_added": "This feed is already added",
+    "empty_hint": "No feeds yet. Tap to add the first one.",
+    "limit_reached": "Feed limit reached",
+    "loading": "Loading feed...",
+    "no_items": "This feed has no items right now",
+    "no_content": "This feed only publishes a summary. Open the original page to read the rest.",
+    "item": "Item",
+    "article": "Article",
+    "loading_article": "Loading article...",
+    "article_error": "Could not load the article",
+    "open_browser": "Open in browser",
+    "no_link": "This item has no link",
+    "open_failed": "Could not open the link",
+    "share": "Share",
+    "by": "By {0}",
+    "not_feed": "No feed found at this address",
+    "error": {
+      "generic": "Could not load the feed",
+      "missing_url": "Enter an address",
+      "invalid_url": "Invalid address",
+      "not_found": "Item not found",
+      "blocked": "This address is not allowed",
+      "too_large": "The feed is too large",
+      "too_many_redirects": "Too many redirects",
+      "fetch_failed": "Could not download the feed",
+      "http": "The feed server refused the connection"
+    }
   }
 }

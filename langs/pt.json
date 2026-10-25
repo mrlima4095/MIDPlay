@@ -87,7 +87,8 @@
     "open_uri": "Abrir...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
-    "reddit": "Reddit"
+    "reddit": "Reddit",
+    "rss": "Leitor RSS"
   },
   "mpgram": {
     "send_note": "Enviar nota",
@@ -769,5 +770,47 @@
     "remove_download_confirm": "Remover os capítulos baixados de {0}?",
     "download_removed": "Download removido",
     "offline": "offline"
+  },
+  "rss": {
+    "title": "Leitor RSS",
+    "add": "Adicionar feed",
+    "add_title": "Adicionar feed",
+    "add_hint": "Cole o endereço de um site ou feed. O MIDPlay encontra o feed automaticamente.",
+    "url_label": "Site ou URL do feed",
+    "suggestions": "Sugestões",
+    "suggestions_title": "Feeds sugeridos",
+    "refresh": "Atualizar",
+    "reloaded": "Feeds atualizados",
+    "remove": "Remover feed",
+    "remove_confirm": "Remover {0}?",
+    "removed": "Feed removido",
+    "saved": "Feed adicionado",
+    "already_added": "Este feed já foi adicionado",
+    "empty_hint": "Nenhum feed. Toque para adicionar o primeiro.",
+    "limit_reached": "Limite de feeds atingido",
+    "loading": "Carregando feed...",
+    "no_items": "Este feed não tem itens agora",
+    "no_content": "O feed publica apenas um resumo. Abra a página original para ler o texto completo.",
+    "item": "Item",
+    "article": "Artigo",
+    "loading_article": "Carregando artigo...",
+    "article_error": "Não foi possível carregar o artigo",
+    "open_browser": "Abrir no navegador",
+    "no_link": "Este item não tem link",
+    "open_failed": "Não foi possível abrir o link",
+    "share": "Compartilhar",
+    "by": "Por {0}",
+    "not_feed": "Nenhum feed encontrado neste endereço",
+    "error": {
+      "generic": "Não foi possível carregar o feed",
+      "missing_url": "Informe um endereço",
+      "invalid_url": "Endereço inválido",
+      "not_found": "Item não encontrado",
+      "blocked": "Este endereço não é permitido",
+      "too_large": "O feed é grande demais",
+      "too_many_redirects": "Muitos redirecionamentos",
+      "fetch_failed": "Falha ao baixar o feed",
+      "http": "O servidor do feed recusou a conexão"
+    }
   }
 }

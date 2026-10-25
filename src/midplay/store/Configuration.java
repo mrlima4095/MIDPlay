@@ -22,6 +22,7 @@ public class Configuration {
   public static final String STORAGE_DOWNLOADS_BACKUP = "storage.downloads.bak";
   public static final String STORAGE_NOTES = "storage.notes";
   public static final String STORAGE_TASKS = "storage.tasks";
+  public static final String STORAGE_RSS_SUBSCRIPTIONS = "storage.rss.subscriptions";
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
   public static final String DEFAULT_WATTPAD_PATH = "file:///SDCard/MIDPlay/Wattpad/";
@@ -46,6 +47,7 @@ public class Configuration {
   public static final String MENU_WATTPAD = "menu.wattpad";
   public static final String MENU_PINTEREST = "menu.pinterest";
   public static final String MENU_REDDIT = "menu.reddit";
+  public static final String MENU_RSS = "menu.rss";
 
   public static final String DEFAULT_HTTP_PROXY = "http://opentty.fun/proxy.php?";
 
@@ -60,6 +62,11 @@ public class Configuration {
   public static final int DEFAULT_REDDIT_POSTS_PER_PAGE = 20;
   public static final int REDDIT_POSTS_PER_PAGE_MIN = 1;
   public static final int REDDIT_POSTS_PER_PAGE_MAX = 25;
+
+  public static final String DEFAULT_RSS_API_URL = "http://opentty.fun/rss.php";
+  public static final String DEFAULT_RSS_IMAGE_PROXY = "http://opentty.fun/proxy.php?url=";
+  public static final int RSS_MAX_SUBSCRIPTIONS = 60;
+  public static final int RSS_THUMBNAIL_SIZE = 36;
 
   public static final String DEFAULT_LYRICS_API_URL = "http://opentty.fun/lyrics.php";
 
@@ -174,6 +181,7 @@ public class Configuration {
   public static Image wattpadIcon;
   public static Image pinterestIcon;
   public static Image redditIcon;
+  public static Image rssIcon;
   public static Image fileExplorerIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
@@ -215,12 +223,26 @@ public class Configuration {
     wattpadIcon = Utils.resizeImageToFit(Image.createImage("/wattpad.png"), 36, 36);
     pinterestIcon = Utils.resizeImageToFit(Image.createImage("/pinterest.png"), 36, 36);
     redditIcon = Utils.resizeImageToFit(Image.createImage("/reddit.png"), 36, 36);
+    rssIcon = createRssIcon();
     fileExplorerIcon = createFileExplorerIcon();
 
     folderBadgeIcon = Utils.resizeImageToFit(folderIcon, BADGE_SIZE, BADGE_SIZE);
     musicBadgeIcon = Utils.resizeImageToFit(musicIcon, BADGE_SIZE, BADGE_SIZE);
 
     loadPlayerIcons();
+  }
+
+  private static Image createRssIcon() {
+    Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
+    // Orange tile with the classic feed waves and dot.
+    graphics.setColor(0xE8752B);
+    graphics.fillRoundRect(2, 2, 32, 32, 7, 7);
+    graphics.setColor(0xFFFFFF);
+    graphics.fillArc(7, 25, 7, 7, 0, 360);
+    graphics.drawArc(-15, 3, 44, 44, 0, 90);
+    graphics.drawArc(-6, 12, 26, 26, 0, 90);
+    return image;
   }
 
   private static Image createNotesIcon() {

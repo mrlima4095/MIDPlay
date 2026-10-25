@@ -78,7 +78,8 @@
     "open_uri": "Aç...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
-    "reddit": "Reddit"
+    "reddit": "Reddit",
+    "rss": "RSS Okuyucu"
   },
   "task_viewer": {
     "title": "Çalışan görevler",
@@ -769,5 +770,47 @@
     "remove_download_confirm": "{0} hikayesinin indirilen bölümleri kaldırılsın mı?",
     "download_removed": "İndirme kaldırıldı",
     "offline": "çevrimdışı"
+  },
+  "rss": {
+    "title": "RSS Okuyucu",
+    "add": "Akış ekle",
+    "add_title": "Akış ekle",
+    "add_hint": "Bir site veya akış adresi yapıştırın. MIDPlay akışı otomatik bulur.",
+    "url_label": "Site veya akış adresi",
+    "suggestions": "Öneriler",
+    "suggestions_title": "Önerilen akışlar",
+    "refresh": "Yenile",
+    "reloaded": "Akışlar yenilendi",
+    "remove": "Akışı kaldır",
+    "remove_confirm": "{0} kaldırılsın mı?",
+    "removed": "Akış kaldırıldı",
+    "saved": "Akış eklendi",
+    "already_added": "Bu akış zaten ekli",
+    "empty_hint": "Akış yok. İlkini eklemek için dokunun.",
+    "limit_reached": "Akış sınırına ulaşıldı",
+    "loading": "Akış yükleniyor...",
+    "no_items": "Bu akışta şu anda öğe yok",
+    "no_content": "Akış yalnızca özet yayımlıyor. Devamını okumak için özgün sayfayı açın.",
+    "item": "Öğe",
+    "article": "Makale",
+    "loading_article": "Makale yükleniyor...",
+    "article_error": "Makale yüklenemedi",
+    "open_browser": "Tarayıcıda aç",
+    "no_link": "Bu öğenin bağlantısı yok",
+    "open_failed": "Bağlantı açılamadı",
+    "share": "Paylaş",
+    "by": "Yazan: {0}",
+    "not_feed": "Bu adreste akış bulunamadı",
+    "error": {
+      "generic": "Akış yüklenemedi",
+      "missing_url": "Bir adres girin",
+      "invalid_url": "Geçersiz adres",
+      "not_found": "Öğe bulunamadı",
+      "blocked": "Bu adrese izin verilmiyor",
+      "too_large": "Akış çok büyük",
+      "too_many_redirects": "Çok fazla yönlendirme",
+      "fetch_failed": "Akış indirilemedi",
+      "http": "Akış sunucusu bağlantıyı reddetti"
+    }
   }
 }

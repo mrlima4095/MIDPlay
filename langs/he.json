@@ -78,7 +78,8 @@
     "open_uri": "פתח...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
-    "reddit": "Reddit"
+    "reddit": "Reddit",
+    "rss": "קורא RSS"
   },
   "task_viewer": {
     "title": "משימות פעילות",
@@ -769,5 +770,47 @@
     "remove_download_confirm": "להסיר את הפרקים שהורדו של {0}?",
     "download_removed": "ההורדה הוסרה",
     "offline": "לא מקוון"
+  },
+  "rss": {
+    "title": "קורא RSS",
+    "add": "הוספת פיד",
+    "add_title": "הוספת פיד",
+    "add_hint": "הדביקו כתובת אתר או פיד. MIDPlay ימצא את הפיד אוטומטית.",
+    "url_label": "כתובת אתר או פיד",
+    "suggestions": "הצעות",
+    "suggestions_title": "פידים מוצעים",
+    "refresh": "רענון",
+    "reloaded": "הפידים רועננו",
+    "remove": "הסרת פיד",
+    "remove_confirm": "להסיר את {0}?",
+    "removed": "הפיד הוסר",
+    "saved": "הפיד נוסף",
+    "already_added": "הפיד הזה כבר נוסף",
+    "empty_hint": "אין פידים. הקישו כדי להוסיף את הראשון.",
+    "limit_reached": "הגעתם למגבלת הפידים",
+    "loading": "טוען פיד...",
+    "no_items": "אין פריטים בפיד כרגע",
+    "no_content": "הפיד מפרסם רק תקציר. פתחו את העמוד המקורי לקריאת ההמשך.",
+    "item": "פריט",
+    "article": "כתבה",
+    "loading_article": "טוען כתבה...",
+    "article_error": "לא ניתן היה לטעון את הכתבה",
+    "open_browser": "פתיחה בדפדפן",
+    "no_link": "לפריט הזה אין קישור",
+    "open_failed": "לא ניתן היה לפתוח את הקישור",
+    "share": "שיתוף",
+    "by": "מאת {0}",
+    "not_feed": "לא נמצא פיד בכתובת הזו",
+    "error": {
+      "generic": "לא ניתן היה לטעון את הפיד",
+      "missing_url": "יש להזין כתובת",
+      "invalid_url": "כתובת לא חוקית",
+      "not_found": "הפריט לא נמצא",
+      "blocked": "הכתובת הזו אינה מורשית",
+      "too_large": "הפיד גדול מדי",
+      "too_many_redirects": "יותר מדי הפניות",
+      "fetch_failed": "הורדת הפיד נכשלה",
+      "http": "שרת הפיד דחה את החיבור"
+    }
   }
 }

@@ -47,6 +47,7 @@ import midplay.ui.screen.NotesScreen;
 import midplay.ui.screen.TasksScreen;
 import midplay.ui.screen.PinterestScreen;
 import midplay.ui.screen.RedditScreen;
+import midplay.ui.screen.RssScreen;
 import midplay.ui.screen.WattpadScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
@@ -130,6 +131,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     registerMenuAction(Configuration.MENU_WATTPAD);
     registerMenuAction(Configuration.MENU_PINTEREST);
     registerMenuAction(Configuration.MENU_REDDIT);
+    registerMenuAction(Configuration.MENU_RSS);
   }
 
   private void registerMenuAction(final String key) {
@@ -276,9 +278,9 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
    * Opens one of MIDPlay's own screens when the user types a shortcut in Open URI. Returns {@code
    * false} when the text is not a known shortcut, so the caller can treat it as a real URI.
    *
-   * <p>Accepted shortcuts: {@code wattpad}, {@code pinterest}, {@code reddit}, {@code mpgram},
-   * {@code notes}, {@code tasks} and {@code playing}. The {@code htop} diagnostic is handled by the
-   * Open URI screen itself.
+   * <p>Accepted shortcuts: {@code wattpad}, {@code pinterest}, {@code reddit}, {@code rss},
+   * {@code feeds}, {@code leitor}, {@code mpgram}, {@code notes}, {@code tasks} and {@code playing}.
+   * The {@code htop} diagnostic is handled by the Open URI screen itself.
    */
   public boolean openInternalUri(String uri) {
     String key = internalUriKey(uri);
@@ -299,6 +301,11 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     }
     if (key.equalsIgnoreCase("reddit")) {
       return Configuration.MENU_REDDIT;
+    }
+    if (key.equalsIgnoreCase("rss")
+        || key.equalsIgnoreCase("feeds")
+        || key.equalsIgnoreCase("leitor")) {
+      return Configuration.MENU_RSS;
     }
     if (key.equalsIgnoreCase("mpgram")) {
       return Configuration.MENU_MPGRAM;
@@ -340,6 +347,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       goToPinterestScreen();
     } else if (Configuration.MENU_REDDIT.equals(key)) {
       goToRedditScreen();
+    } else if (Configuration.MENU_RSS.equals(key)) {
+      goToRssScreen();
     } else if (Configuration.MENU_MPGRAM.equals(key)) {
       openMPGram();
     } else if (Configuration.MENU_GITHUB.equals(key)) {
@@ -692,6 +701,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
 
   private void goToRedditScreen() {
     navigator.forward(new RedditScreen(navigator));
+  }
+
+  private void goToRssScreen() {
+    navigator.forward(new RssScreen(navigator));
   }
 
   private void showExitConfirmation() {
