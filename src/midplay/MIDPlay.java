@@ -34,9 +34,7 @@ import midplay.ui.MenuManager;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
 import midplay.ui.PlaylistsListForwarder;
-import midplay.ui.PinterestLinks;
-import midplay.ui.RedditLinks;
-import midplay.ui.WattpadLinks;
+import midplay.ui.UriRouter;
 import midplay.ui.screen.EqualizerScreen;
 import midplay.ui.screen.FavoritesScreen;
 import midplay.ui.screen.RecentListScreen;
@@ -47,7 +45,6 @@ import midplay.ui.screen.FileBrowserScreen;
 import midplay.ui.screen.OpenUriScreen;
 import midplay.ui.screen.NotesScreen;
 import midplay.ui.screen.TasksScreen;
-import midplay.ui.screen.VaultAuth;
 import midplay.ui.screen.PinterestScreen;
 import midplay.ui.screen.RedditScreen;
 import midplay.ui.screen.WattpadScreen;
@@ -117,134 +114,31 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   }
 
   private void registerMenuActions() {
-    menuManager.registerAction(
-        Configuration.MENU_SEARCH,
-        new Runnable() {
-          public void run() {
-            goToSearchScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_FAVORITES,
-        new Runnable() {
-          public void run() {
-            goToFavoritesScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_DISCOVER_PLAYLISTS,
-        new Runnable() {
-          public void run() {
-            goToDiscoverPlaylistsScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_RECENT,
-        new Runnable() {
-          public void run() {
-            goToRecentScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_DOWNLOADS,
-        new Runnable() {
-          public void run() {
-            goToDownloadsScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_FILES,
-        new Runnable() {
-          public void run() {
-            goToFileBrowserScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_SETTINGS,
-        new Runnable() {
-          public void run() {
-            goToSettingsScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_ABOUT,
-        new Runnable() {
-          public void run() {
-            goToAboutScreen();
-          }
-        });
-    menuManager.registerAction(
-        Configuration.MENU_EQUALIZER,
-        new Runnable() {
-          public void run() {
-            goToEqualizerScreen();
-          }
-        });
-    registerVaultAction(
-        Configuration.MENU_MPGRAM,
-        new Runnable() {
-          public void run() {
-            openMPGram();
-          }
-        });
-    registerVaultAction(
-        Configuration.MENU_GITHUB,
-        new Runnable() {
-          public void run() {
-            openGitHubJ2ME();
-          }
-        });
-    registerVaultAction(
-        Configuration.MENU_NOTES,
-        new Runnable() {
-          public void run() {
-            goToNotesScreen();
-          }
-        });
-    registerVaultAction(
-        Configuration.MENU_TASKS,
-        new Runnable() {
-          public void run() {
-            goToTasksScreen();
-          }
-        });
-    registerVaultAction(
-        Configuration.MENU_WATTPAD,
-        new Runnable() {
-          public void run() {
-            goToWattpadScreen();
-          }
-        });
-    registerVaultAction(
-        Configuration.MENU_PINTEREST,
-        new Runnable() {
-          public void run() {
-            goToPinterestScreen();
-          }
-        });
-    registerVaultAction(
-        Configuration.MENU_REDDIT,
-        new Runnable() {
-          public void run() {
-            goToRedditScreen();
-          }
-        });
+    registerMenuAction(Configuration.MENU_SEARCH);
+    registerMenuAction(Configuration.MENU_FAVORITES);
+    registerMenuAction(Configuration.MENU_DISCOVER_PLAYLISTS);
+    registerMenuAction(Configuration.MENU_RECENT);
+    registerMenuAction(Configuration.MENU_DOWNLOADS);
+    registerMenuAction(Configuration.MENU_FILES);
+    registerMenuAction(Configuration.MENU_SETTINGS);
+    registerMenuAction(Configuration.MENU_ABOUT);
+    registerMenuAction(Configuration.MENU_EQUALIZER);
+    registerMenuAction(Configuration.MENU_MPGRAM);
+    registerMenuAction(Configuration.MENU_GITHUB);
+    registerMenuAction(Configuration.MENU_NOTES);
+    registerMenuAction(Configuration.MENU_TASKS);
+    registerMenuAction(Configuration.MENU_WATTPAD);
+    registerMenuAction(Configuration.MENU_PINTEREST);
+    registerMenuAction(Configuration.MENU_REDDIT);
   }
 
-  /**
-   * Registers a subapp action that asks for the vault password first when the app is locked. Native
-   * MIDPlay features keep using {@link MenuManager#registerAction} directly.
-   */
-  private void registerVaultAction(final String key, final Runnable action) {
+  /** Routes every menu entry through {@link UriRouter}, so vault checks live in one place. */
+  private void registerMenuAction(final String key) {
     menuManager.registerAction(
         key,
         new Runnable() {
           public void run() {
-            if (settingsManager.isVaultAppLocked(key)) {
-              VaultAuth.authenticate(navigator, action);
-            } else {
-              action.run();
-            }
+            UriRouter.open(navigator, key);
           }
         });
   }
@@ -304,27 +198,27 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   }
 
   public void openWattpadLinkFromMPGram(String url) {
-    WattpadLinks.open(navigator, url);
+    UriRouter.open(navigator, url);
   }
 
   public void openPinterestLinkFromMPGram(String url) {
-    PinterestLinks.open(navigator, url);
+    UriRouter.open(navigator, url);
   }
 
   public void openPinterestLinkFromGH(String url) {
-    PinterestLinks.open(navigator, url);
+    UriRouter.open(navigator, url);
   }
 
   public void openRedditLinkFromMPGram(String url) {
-    RedditLinks.open(navigator, url);
+    UriRouter.open(navigator, url);
   }
 
   public void openRedditLinkFromGH(String url) {
-    RedditLinks.open(navigator, url);
+    UriRouter.open(navigator, url);
   }
 
   public void openWattpadLinkFromGH(String url) {
-    WattpadLinks.open(navigator, url);
+    UriRouter.open(navigator, url);
   }
 
   public void openTelegramLink(String url) {
@@ -342,108 +236,99 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     return Lang.getCurrentLang();
   }
 
-  public void openExternalUri(String uri) throws ConnectionNotFoundException {
-    if (WattpadLinks.isWattpad(uri)) {
-      WattpadLinks.open(navigator, uri);
-      return;
-    }
-    if (PinterestLinks.isPinterest(uri)) {
-      PinterestLinks.open(navigator, uri);
-      return;
-    }
-    if (RedditLinks.isReddit(uri)) {
-      RedditLinks.open(navigator, uri);
+  /** Opens a URI through the shared router, falling back to the platform browser. */
+  public void openUri(String uri) throws ConnectionNotFoundException {
+    if (UriRouter.open(navigator, uri)) {
       return;
     }
     platformRequest(uri);
   }
 
-  /**
-   * Opens one of MIDPlay's own screens when the user types a shortcut in Open URI. Returns {@code
-   * false} when the text is not a known shortcut, so the caller can treat it as a real URI.
-   *
-   * <p>Accepted forms: {@code wattpad}, {@code pinterest}, {@code mpgram}, {@code notes}, {@code
-   * tasks}, {@code playing}, optionally prefixed with {@code midplay:} or {@code midplay://}.
-   */
-  public boolean openInternalUri(String uri) {
-    String key = internalUriKey(uri);
-    if (key == null) {
-      return false;
-    }
-    openInternalKey(key);
-    return true;
+  /** Kept for callers that used the old name; it now shares the same routing path. */
+  public void openExternalUri(String uri) throws ConnectionNotFoundException {
+    openUri(uri);
+  }
+
+  /** Link bridge used by the subapps; returns true when MIDPlay handled the URL itself. */
+  public boolean openSharedLink(String url) {
+    return UriRouter.openShared(navigator, url);
+  }
+
+  /** Opens a GitHub URL inside the GitHub client, returning to the menu when it closes. */
+  public void openGitHubUri(final String url) {
+    GH.open(
+        this,
+        new Runnable() {
+          public void run() {
+            Display.getDisplay(MIDPlay.this).setCurrent(mainMenu);
+          }
+        });
+    GH.openExternalUrl(url);
+  }
+
+  /** Opens a Telegram link inside MPGram, returning to the menu when it closes. */
+  public void openTelegramUri(String url) {
+    MP.openLinkFromHost(
+        this,
+        url,
+        new Runnable() {
+          public void run() {
+            Display.getDisplay(MIDPlay.this).setCurrent(mainMenu);
+          }
+        });
   }
 
   /**
-   * Same as {@link #openInternalUri(String)}, but asks for the vault password first when the target
-   * subapp is locked. Used by the Open URI screen so its shortcuts cannot bypass the app vault.
+   * Opens a native destination by its canonical router key. Vault checks are applied by {@link
+   * UriRouter} before this method is called.
    */
-  public boolean openInternalUriSecurely(String uri) {
-    final String key = internalUriKey(uri);
-    if (key == null) {
-      return false;
-    }
-    if (settingsManager.isVaultAppLocked(key)) {
-      VaultAuth.authenticate(
-          navigator,
-          new Runnable() {
-            public void run() {
-              openInternalKey(key);
-            }
-          });
-    } else {
-      openInternalKey(key);
-    }
-    return true;
-  }
-
-  private static String internalUriKey(String uri) {
-    String key = uri == null ? "" : uri.trim();
-    if (key.regionMatches(true, 0, "midplay:", 0, 8)) {
-      key = key.substring(8);
-      while (key.startsWith("//")) {
-        key = key.substring(2);
-      }
-      key = key.trim();
-    }
-    if (key.equalsIgnoreCase("wattpad")) {
-      return Configuration.MENU_WATTPAD;
-    }
-    if (key.equalsIgnoreCase("pinterest")) {
-      return Configuration.MENU_PINTEREST;
-    }
-    if (key.equalsIgnoreCase("reddit")) {
-      return Configuration.MENU_REDDIT;
-    }
-    if (key.equalsIgnoreCase("mpgram")) {
-      return Configuration.MENU_MPGRAM;
-    }
-    if (key.equalsIgnoreCase("notes")) {
-      return Configuration.MENU_NOTES;
-    }
-    if (key.equalsIgnoreCase("tasks")) {
-      return Configuration.MENU_TASKS;
-    }
-    if (key.equalsIgnoreCase("playing")) {
-      return Configuration.MENU_NOW_PLAYING;
-    }
-    return null;
-  }
-
-  private void openInternalKey(String key) {
-    if (Configuration.MENU_WATTPAD.equals(key)) {
-      goToWattpadScreen();
-    } else if (Configuration.MENU_PINTEREST.equals(key)) {
-      goToPinterestScreen();
-    } else if (Configuration.MENU_REDDIT.equals(key)) {
-      goToRedditScreen();
-    } else if (Configuration.MENU_MPGRAM.equals(key)) {
+  public void openNativeKey(String key) {
+    if ("search".equals(key)) {
+      goToSearchScreen();
+    } else if ("favorites".equals(key)) {
+      goToFavoritesScreen();
+    } else if ("discover".equals(key)) {
+      goToDiscoverPlaylistsScreen();
+    } else if ("recent".equals(key)) {
+      goToRecentScreen();
+    } else if ("downloads".equals(key)) {
+      goToDownloadsScreen();
+    } else if ("files".equals(key)) {
+      goToFileBrowserScreen();
+    } else if ("settings".equals(key)) {
+      goToSettingsScreen();
+    } else if ("about".equals(key)) {
+      goToAboutScreen();
+    } else if ("equalizer".equals(key)) {
+      goToEqualizerScreen();
+    } else if ("mpgram".equals(key)) {
       openMPGram();
-    } else if (Configuration.MENU_NOTES.equals(key)) {
+    } else if ("github".equals(key)) {
+      openGitHubJ2ME();
+    } else if ("notes".equals(key)) {
       goToNotesScreen();
-    } else if (Configuration.MENU_TASKS.equals(key)) {
+    } else if ("tasks".equals(key)) {
       goToTasksScreen();
-    } else if (Configuration.MENU_NOW_PLAYING.equals(key)) {
+    } else if ("wattpad".equals(key)) {
+      goToWattpadScreen();
+    } else if ("pinterest".equals(key)) {
+      goToPinterestScreen();
+    } else if ("reddit".equals(key)) {
+      goToRedditScreen();
+    } else if ("playing".equals(key)) {
+      openNowPlaying();
+    } else if ("open_uri".equals(key)) {
+      openUri();
+    } else if ("queue".equals(key)) {
+      goToQueueScreen();
+    }
+  }
+
+  private void goToQueueScreen() {
+    PlayerScreen player = getPlayerScreen();
+    if (player != null) {
+      player.showCurrentPlaylist();
+    } else {
       openNowPlaying();
     }
   }

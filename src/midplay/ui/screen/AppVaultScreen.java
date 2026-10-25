@@ -3,7 +3,6 @@ package midplay.ui.screen;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.rms.RecordStoreException;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
 import midplay.ui.BaseList;
@@ -57,13 +56,10 @@ public final class AppVaultScreen extends BaseList {
     }
     String key = Configuration.VAULT_APP_KEYS[index];
     boolean locked = !getString(index).startsWith(Configuration.VISIBILITY_ICON);
-    try {
-      settingsManager.setVaultAppLocked(key, locked);
-    } catch (RecordStoreException e) {
-      navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
-      return;
-    }
-    set(index, rowText(key), getImage(index));
+    settingsManager.setVaultAppLocked(key, locked);
+    String prefix =
+        locked ? Configuration.VISIBILITY_ICON : Configuration.HIDDEN_ICON;
+    set(index, prefix + Lang.tr(key), getImage(index));
   }
 
   private String rowText(String key) {

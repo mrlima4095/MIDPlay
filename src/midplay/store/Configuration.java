@@ -68,6 +68,20 @@ public class Configuration {
 
   public static final String DEFAULT_LYRICS_API_URL = "http://opentty.fun/lyrics.php";
 
+  /**
+   * Hosts whose song pages are recognized by the Open... screen and by links shared in subapps.
+   * Add a host here to make its links open inside MIDPlay; letras.mus.br pages use their exact path,
+   * the other providers are searched by the artist/title taken from the URL.
+   */
+  public static final String[] LYRICS_LINK_HOSTS = {
+    "letras.mus.br",
+    "letras.com.br",
+    "vagalume.com.br",
+    "genius.com",
+    "musixmatch.com",
+    "lyricstranslate.com"
+  };
+
   public static final int REDDIT_TRANSLATE_OFF = 0;
   public static final int REDDIT_TRANSLATE_ON = 1;
   public static final int DEFAULT_REDDIT_AUTO_TRANSLATE = REDDIT_TRANSLATE_OFF;

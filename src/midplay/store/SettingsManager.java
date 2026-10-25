@@ -331,8 +331,12 @@ public class SettingsManager {
     }
   }
 
-  /** Locks or unlocks a subapp, keeping the remaining locked apps untouched. */
-  public void setVaultAppLocked(String key, boolean locked) throws RecordStoreException {
+  /**
+   * Locks or unlocks a subapp, keeping the remaining locked apps untouched. The in-memory settings
+   * are updated immediately and the document is queued for the background writer, so toggling a row
+   * never blocks the command thread with RMS I/O.
+   */
+  public void setVaultAppLocked(String key, boolean locked) {
     if (key == null || key.length() == 0) {
       return;
     }
@@ -342,7 +346,12 @@ public class SettingsManager {
     } catch (Exception e) {
       current = "";
     }
-    saveSetting("vaultLockedApps", locked ? addLockedApp(current, key) : removeLockedApp(current, key));
+    String updated = locked ? addLockedApp(current, key) : removeLockedApp(current, key);
+    if (updated.equals(current)) {
+      return;
+    }
+    settings().put("vaultLockedApps", updated);
+    storage.saveAsync(settings().toString());
   }
 
   private static String addLockedApp(String list, String key) {
