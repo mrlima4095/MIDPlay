@@ -79,7 +79,9 @@ public class Lang {
     "wattpad.offline", "rss.title", "rss.add", "rss.add_title", "rss.add_hint", "rss.url_label", "rss.suggestions", "rss.suggestions_title", "rss.refresh", "rss.reloaded",
     "rss.remove", "rss.remove_confirm", "rss.removed", "rss.saved", "rss.already_added", "rss.empty_hint", "rss.limit_reached", "rss.loading", "rss.no_items", "rss.no_content",
     "rss.item", "rss.article", "rss.loading_article", "rss.article_error", "rss.open_browser", "rss.no_link", "rss.open_failed", "rss.share", "rss.by", "rss.not_feed",
-    "rss.error.generic", "rss.error.missing_url", "rss.error.invalid_url", "rss.error.not_found", "rss.error.blocked", "rss.error.too_large", "rss.error.too_many_redirects", "rss.error.fetch_failed", "rss.error.http"
+    "rss.error.generic", "rss.error.missing_url", "rss.error.invalid_url", "rss.error.not_found", "rss.error.blocked", "rss.error.too_large", "rss.error.too_many_redirects", "rss.error.fetch_failed", "rss.error.http", "rss.select",
+    "rss.select_all", "rss.delete_selected", "rss.delete_selected_confirm", "rss.removed_many", "rss.select_none", "rss.select_title", "rss.settings_title", "rss.settings_api_url", "rss.settings_image_proxy", "rss.settings_browser_proxy",
+    "rss.settings_use_browser_proxy", "rss.settings_browser_hint"
   };
 
   private static class EN {
@@ -223,7 +225,10 @@ public class Lang {
       "Item", "Article", "Loading article...", "Could not load the article", "Open in browser",
       "This item has no link", "Could not open the link", "Share", "By {0}", "No feed found at this address",
       "Could not load the feed", "Enter an address", "Invalid address", "Item not found", "This address is not allowed",
-      "The feed is too large", "Too many redirects", "Could not download the feed", "The feed server refused the connection"
+      "The feed is too large", "Too many redirects", "Could not download the feed", "The feed server refused the connection", "Select",
+      "Select all", "Delete selected", "Delete {0} selected feeds?", "{0} feeds deleted", "Select at least one feed",
+      "Select feeds", "RSS settings", "RSS proxy URL", "Image proxy", "Browser proxy",
+      "Open HTTPS links through the proxy", "When enabled, HTTPS article links open through the browser proxy, which older phones can reach over plain HTTP."
     };
   }
 
@@ -368,7 +373,10 @@ public class Lang {
       "פריט", "כתבה", "טוען כתבה...", "לא ניתן היה לטעון את הכתבה", "פתיחה בדפדפן",
       "לפריט הזה אין קישור", "לא ניתן היה לפתוח את הקישור", "שיתוף", "מאת {0}", "לא נמצא פיד בכתובת הזו",
       "לא ניתן היה לטעון את הפיד", "יש להזין כתובת", "כתובת לא חוקית", "הפריט לא נמצא", "הכתובת הזו אינה מורשית",
-      "הפיד גדול מדי", "יותר מדי הפניות", "הורדת הפיד נכשלה", "שרת הפיד דחה את החיבור"
+      "הפיד גדול מדי", "יותר מדי הפניות", "הורדת הפיד נכשלה", "שרת הפיד דחה את החיבור", "בחירה",
+      "בחר הכול", "מחק נבחרים", "למחוק {0} פידים נבחרים?", "{0} פידים נמחקו", "יש לבחור לפחות פיד אחד",
+      "בחירת פידים", "הגדרות RSS", "כתובת פרוקסי RSS", "פרוקסי תמונות", "פרוקסי דפדפן",
+      "פתיחת קישורי HTTPS דרך הפרוקסי", "כאשר מופעל, קישורי HTTPS של כתבות נפתחים דרך פרוקסי הדפדפן, שאליו טלפונים ישנים יכולים להגיע ב-HTTP רגיל."
     };
   }
 
@@ -513,7 +521,10 @@ public class Lang {
       "Wpis", "Artykuł", "Ładowanie artykułu...", "Nie udało się wczytać artykułu", "Otwórz w przeglądarce",
       "Ten wpis nie ma odnośnika", "Nie udało się otworzyć odnośnika", "Udostępnij", "Autor: {0}", "Nie znaleziono kanału pod tym adresem",
       "Nie udało się wczytać kanału", "Podaj adres", "Nieprawidłowy adres", "Nie znaleziono wpisu", "Ten adres jest niedozwolony",
-      "Kanał jest zbyt duży", "Zbyt wiele przekierowań", "Pobieranie kanału nie powiodło się", "Serwer kanału odrzucił połączenie"
+      "Kanał jest zbyt duży", "Zbyt wiele przekierowań", "Pobieranie kanału nie powiodło się", "Serwer kanału odrzucił połączenie", "Wybierz",
+      "Wybierz wszystko", "Usuń wybrane", "Usunąć {0} wybranych kanałów?", "Usunięto kanały: {0}", "Wybierz co najmniej jeden kanał",
+      "Wybierz kanały", "Ustawienia RSS", "Adres proxy RSS", "Proxy obrazów", "Proxy przeglądarki",
+      "Otwieraj linki HTTPS przez proxy", "Po włączeniu linki HTTPS artykułów otwierają się przez proxy przeglądarki, dostępne dla starszych telefonów przez zwykłe HTTP."
     };
   }
 
@@ -658,7 +669,10 @@ public class Lang {
       "Item", "Artigo", "Carregando artigo...", "Não foi possível carregar o artigo", "Abrir no navegador",
       "Este item não tem link", "Não foi possível abrir o link", "Compartilhar", "Por {0}", "Nenhum feed encontrado neste endereço",
       "Não foi possível carregar o feed", "Informe um endereço", "Endereço inválido", "Item não encontrado", "Este endereço não é permitido",
-      "O feed é grande demais", "Muitos redirecionamentos", "Falha ao baixar o feed", "O servidor do feed recusou a conexão"
+      "O feed é grande demais", "Muitos redirecionamentos", "Falha ao baixar o feed", "O servidor do feed recusou a conexão", "Selecionar",
+      "Selecionar tudo", "Apagar selecionados", "Apagar {0} feeds selecionados?", "{0} feeds apagados", "Selecione pelo menos um feed",
+      "Selecionar feeds", "Configurações do RSS", "URL do proxy RSS", "Proxy de imagens", "Proxy do navegador",
+      "Abrir links HTTPS pelo proxy", "Quando ativado, links HTTPS dos artigos abrem pelo proxy do navegador, que celulares antigos alcançam por HTTP simples."
     };
   }
 
@@ -803,7 +817,10 @@ public class Lang {
       "Öğe", "Makale", "Makale yükleniyor...", "Makale yüklenemedi", "Tarayıcıda aç",
       "Bu öğenin bağlantısı yok", "Bağlantı açılamadı", "Paylaş", "Yazan: {0}", "Bu adreste akış bulunamadı",
       "Akış yüklenemedi", "Bir adres girin", "Geçersiz adres", "Öğe bulunamadı", "Bu adrese izin verilmiyor",
-      "Akış çok büyük", "Çok fazla yönlendirme", "Akış indirilemedi", "Akış sunucusu bağlantıyı reddetti"
+      "Akış çok büyük", "Çok fazla yönlendirme", "Akış indirilemedi", "Akış sunucusu bağlantıyı reddetti", "Seç",
+      "Tümünü seç", "Seçilenleri sil", "Seçili {0} akış silinsin mi?", "{0} akış silindi", "En az bir akış seçin",
+      "Akışları seç", "RSS ayarları", "RSS proxy adresi", "Görsel proxy'si", "Tarayıcı proxy'si",
+      "HTTPS bağlantılarını proxy ile aç", "Etkinleştirildiğinde, makale HTTPS bağlantıları eski telefonların düz HTTP ile erişebildiği tarayıcı proxy'si üzerinden açılır."
     };
   }
 
@@ -948,7 +965,10 @@ public class Lang {
       "Mục", "Bài viết", "Đang tải bài viết...", "Không thể tải bài viết", "Mở trong trình duyệt",
       "Mục này không có liên kết", "Không thể mở liên kết", "Chia sẻ", "Bởi {0}", "Không tìm thấy nguồn tin tại địa chỉ này",
       "Không thể tải nguồn tin", "Hãy nhập địa chỉ", "Địa chỉ không hợp lệ", "Không tìm thấy mục", "Địa chỉ này không được phép",
-      "Nguồn tin quá lớn", "Quá nhiều chuyển hướng", "Tải nguồn tin thất bại", "Máy chủ nguồn tin từ chối kết nối"
+      "Nguồn tin quá lớn", "Quá nhiều chuyển hướng", "Tải nguồn tin thất bại", "Máy chủ nguồn tin từ chối kết nối", "Chọn",
+      "Chọn tất cả", "Xóa mục đã chọn", "Xóa {0} nguồn tin đã chọn?", "Đã xóa {0} nguồn tin", "Chọn ít nhất một nguồn tin",
+      "Chọn nguồn tin", "Cài đặt RSS", "Địa chỉ proxy RSS", "Proxy hình ảnh", "Proxy trình duyệt",
+      "Mở liên kết HTTPS qua proxy", "Khi bật, liên kết HTTPS của bài viết mở qua proxy trình duyệt, giúp điện thoại cũ truy cập bằng HTTP thường."
     };
   }
 

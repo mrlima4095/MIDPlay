@@ -811,6 +811,19 @@
       "too_many_redirects": "Muitos redirecionamentos",
       "fetch_failed": "Falha ao baixar o feed",
       "http": "O servidor do feed recusou a conexão"
-    }
+    },
+    "select": "Selecionar",
+    "select_all": "Selecionar tudo",
+    "delete_selected": "Apagar selecionados",
+    "delete_selected_confirm": "Apagar {0} feeds selecionados?",
+    "removed_many": "{0} feeds apagados",
+    "select_none": "Selecione pelo menos um feed",
+    "select_title": "Selecionar feeds",
+    "settings_title": "Configurações do RSS",
+    "settings_api_url": "URL do proxy RSS",
+    "settings_image_proxy": "Proxy de imagens",
+    "settings_browser_proxy": "Proxy do navegador",
+    "settings_use_browser_proxy": "Abrir links HTTPS pelo proxy",
+    "settings_browser_hint": "Quando ativado, links HTTPS dos artigos abrem pelo proxy do navegador, que celulares antigos alcançam por HTTP simples."
   }
 }

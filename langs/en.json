@@ -811,6 +811,19 @@
       "too_many_redirects": "Too many redirects",
       "fetch_failed": "Could not download the feed",
       "http": "The feed server refused the connection"
-    }
+    },
+    "select": "Select",
+    "select_all": "Select all",
+    "delete_selected": "Delete selected",
+    "delete_selected_confirm": "Delete {0} selected feeds?",
+    "removed_many": "{0} feeds deleted",
+    "select_none": "Select at least one feed",
+    "select_title": "Select feeds",
+    "settings_title": "RSS settings",
+    "settings_api_url": "RSS proxy URL",
+    "settings_image_proxy": "Image proxy",
+    "settings_browser_proxy": "Browser proxy",
+    "settings_use_browser_proxy": "Open HTTPS links through the proxy",
+    "settings_browser_hint": "When enabled, HTTPS article links open through the browser proxy, which older phones can reach over plain HTTP."
   }
 }

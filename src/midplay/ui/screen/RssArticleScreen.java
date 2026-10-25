@@ -208,7 +208,7 @@ public final class RssArticleScreen extends BaseForm {
       return;
     }
     try {
-      MIDPlay.getInstance().openUri(link);
+      MIDPlay.getInstance().openUri(RssApi.browserUrl(link));
     } catch (Exception e) {
       navigator.showAlert(Lang.tr("rss.open_failed"), AlertType.ERROR);
     }

@@ -811,6 +811,19 @@
       "too_many_redirects": "Çok fazla yönlendirme",
       "fetch_failed": "Akış indirilemedi",
       "http": "Akış sunucusu bağlantıyı reddetti"
-    }
+    },
+    "select": "Seç",
+    "select_all": "Tümünü seç",
+    "delete_selected": "Seçilenleri sil",
+    "delete_selected_confirm": "Seçili {0} akış silinsin mi?",
+    "removed_many": "{0} akış silindi",
+    "select_none": "En az bir akış seçin",
+    "select_title": "Akışları seç",
+    "settings_title": "RSS ayarları",
+    "settings_api_url": "RSS proxy adresi",
+    "settings_image_proxy": "Görsel proxy'si",
+    "settings_browser_proxy": "Tarayıcı proxy'si",
+    "settings_use_browser_proxy": "HTTPS bağlantılarını proxy ile aç",
+    "settings_browser_hint": "Etkinleştirildiğinde, makale HTTPS bağlantıları eski telefonların düz HTTP ile erişebildiği tarayıcı proxy'si üzerinden açılır."
   }
 }

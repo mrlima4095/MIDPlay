@@ -8,6 +8,7 @@ import midplay.model.RssArticle;
 import midplay.model.RssItem;
 import midplay.model.RssSubscription;
 import midplay.store.Configuration;
+import midplay.store.SettingsManager;
 import midplay.util.Lang;
 import midplay.util.Utils;
 
@@ -32,9 +33,9 @@ public final class RssApi {
   private RssApi() {}
 
   private static String apiBase() {
-    String base = Configuration.DEFAULT_RSS_API_URL;
+    String base = SettingsManager.getInstance().getRssApiUrl();
     if (base == null || base.length() == 0) {
-      return "http://opentty.fun/rss.php";
+      base = Configuration.DEFAULT_RSS_API_URL;
     }
     int hash = base.indexOf('#');
     if (hash >= 0) {
@@ -65,7 +66,45 @@ public final class RssApi {
     if (source == null || source.length() == 0) {
       return "";
     }
-    return Configuration.DEFAULT_RSS_IMAGE_PROXY + Utils.urlEncode(source);
+    return appendToProxy(SettingsManager.getInstance().getRssImageProxy(), source);
+  }
+
+  /**
+   * URL handed to the platform browser. When the option is enabled, HTTPS links go through the
+   * browser proxy so devices whose browser only speaks HTTP can still open them.
+   */
+  public static String browserUrl(String source) {
+    if (source == null || source.length() == 0) {
+      return "";
+    }
+    String value = source.trim();
+    if (SettingsManager.getInstance().getRssBrowserProxyMode()
+            == Configuration.RSS_BROWSER_PROXY_ON
+        && value.toLowerCase().startsWith("https://")) {
+      String proxy = SettingsManager.getInstance().getRssBrowserProxy();
+      if (proxy != null && proxy.length() > 0) {
+        return appendToProxy(proxy, value);
+      }
+    }
+    return value;
+  }
+
+  /** Appends an encoded source URL to a user-configured proxy prefix. */
+  private static String appendToProxy(String proxy, String source) {
+    String value = proxy == null ? "" : proxy.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_RSS_IMAGE_PROXY;
+    }
+    if (value.endsWith("url=") || value.endsWith("url%3D")) {
+      return value + Utils.urlEncode(source);
+    }
+    if (value.endsWith("?") || value.endsWith("&")) {
+      return value + "url=" + Utils.urlEncode(source);
+    }
+    if (value.indexOf("url=") >= 0) {
+      return value + Utils.urlEncode(source);
+    }
+    return value + (value.indexOf('?') >= 0 ? "&url=" : "?url=") + Utils.urlEncode(source);
   }
 
   /** Returns the proxy error code, or an empty string when the response is a success. */

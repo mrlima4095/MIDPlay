@@ -6,15 +6,17 @@ import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.List;
 import midplay.model.RssSubscription;
 import midplay.net.RssThumbnailOperation;
 import midplay.store.Configuration;
 import midplay.store.RssSubscriptionManager;
 import midplay.ui.BaseList;
+import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
 
-/** Root of the RSS reader: the feeds the user follows, with commands to add or remove them. */
+/** Root of the RSS reader: the feeds the user follows, with add/remove and multi-select delete. */
 public final class RssScreen extends BaseList {
   private static final int MAX_THUMBNAILS = 20;
 
@@ -22,10 +24,16 @@ public final class RssScreen extends BaseList {
   private final Command suggestionsCommand;
   private final Command reloadCommand;
   private final Command removeCommand;
+  private final Command settingsCommand;
+  private final Command selectCommand;
+  private final Command selectAllCommand;
+  private final Command deleteSelectedCommand;
   private final Hashtable thumbCache = new Hashtable();
+  private final Hashtable selected = new Hashtable();
   private final Vector subscriptions = new Vector();
   private RssThumbnailOperation thumbOperation;
   private int thumbToken;
+  private boolean selecting;
 
   public RssScreen(Navigator navigator) {
     super(Lang.tr("rss.title"), navigator);
@@ -33,9 +41,10 @@ public final class RssScreen extends BaseList {
     suggestionsCommand = new Command(Lang.tr("rss.suggestions"), Command.SCREEN, 2);
     reloadCommand = new Command(Lang.tr("rss.refresh"), Command.SCREEN, 3);
     removeCommand = new Command(Lang.tr("rss.remove"), Command.SCREEN, 4);
-    addCommand(addCommand);
-    addCommand(suggestionsCommand);
-    addCommand(reloadCommand);
+    settingsCommand = new Command(Lang.tr("rss.settings_title"), Command.SCREEN, 5);
+    selectCommand = new Command(Lang.tr("rss.select"), Command.SCREEN, 6);
+    selectAllCommand = new Command(Lang.tr("rss.select_all"), Command.SCREEN, 2);
+    deleteSelectedCommand = new Command(Lang.tr("rss.delete_selected"), Command.SCREEN, 1);
     reload();
   }
 
@@ -46,12 +55,13 @@ public final class RssScreen extends BaseList {
     for (int i = 0; i < stored.size(); i++) {
       subscriptions.addElement(stored.elementAt(i));
     }
-    refresh();
-    if (subscriptions.size() > 0) {
-      addCommand(removeCommand);
-    } else {
-      removeCommand(removeCommand);
+    if (selecting && subscriptions.size() == 0) {
+      selecting = false;
+      selected.clear();
+      setTitle(Lang.tr("rss.title"));
     }
+    refresh();
+    updateCommands();
     loadThumbnails();
   }
 
@@ -67,6 +77,20 @@ public final class RssScreen extends BaseList {
     reload();
   }
 
+  public void commandAction(Command c, Displayable d) {
+    if (selecting) {
+      if (c == Commands.back()) {
+        exitSelection();
+        return;
+      }
+      if (c == List.SELECT_COMMAND) {
+        toggleSelected(getSelectedIndex());
+        return;
+      }
+    }
+    super.commandAction(c, d);
+  }
+
   protected void populateItems() {
     if (subscriptions.size() == 0) {
       append(Lang.tr("rss.empty_hint"), null);
@@ -75,13 +99,25 @@ public final class RssScreen extends BaseList {
     for (int i = 0; i < subscriptions.size(); i++) {
       RssSubscription subscription = (RssSubscription) subscriptions.elementAt(i);
       String image = subscription.image;
+      String title = subscription.displayTitle();
+      if (selecting) {
+        title =
+            (selected.containsKey(subscription.url)
+                    ? Configuration.VISIBILITY_ICON
+                    : Configuration.HIDDEN_ICON)
+                + title;
+      }
       append(
-          subscription.displayTitle(),
+          title,
           image == null || image.length() == 0 ? null : (Image) thumbCache.get(image));
     }
   }
 
   protected void handleSelection() {
+    if (selecting) {
+      toggleSelected(getSelectedIndex());
+      return;
+    }
     if (subscriptions.size() == 0) {
       navigator.forward(new RssAddScreen(navigator, this));
       return;
@@ -90,7 +126,8 @@ public final class RssScreen extends BaseList {
     if (!isValidSelection(index, subscriptions.size())) {
       return;
     }
-    navigator.forward(new RssItemsScreen(navigator, (RssSubscription) subscriptions.elementAt(index)));
+    navigator.forward(
+        new RssItemsScreen(navigator, (RssSubscription) subscriptions.elementAt(index)));
   }
 
   protected void handleCommand(Command c, Displayable d) {
@@ -103,7 +140,111 @@ public final class RssScreen extends BaseList {
       navigator.showAlert(Lang.tr("rss.reloaded"), AlertType.CONFIRMATION);
     } else if (c == removeCommand) {
       removeSelected();
+    } else if (c == settingsCommand) {
+      navigator.forward(new RssSettingsScreen(navigator));
+    } else if (c == selectCommand) {
+      enterSelection();
+    } else if (c == selectAllCommand) {
+      toggleSelectAll();
+    } else if (c == deleteSelectedCommand) {
+      deleteSelected();
     }
+  }
+
+  private void updateCommands() {
+    removeCommand(addCommand);
+    removeCommand(suggestionsCommand);
+    removeCommand(reloadCommand);
+    removeCommand(removeCommand);
+    removeCommand(settingsCommand);
+    removeCommand(selectCommand);
+    removeCommand(selectAllCommand);
+    removeCommand(deleteSelectedCommand);
+    if (selecting) {
+      addCommand(deleteSelectedCommand);
+      addCommand(selectAllCommand);
+      return;
+    }
+    addCommand(addCommand);
+    addCommand(suggestionsCommand);
+    addCommand(reloadCommand);
+    addCommand(settingsCommand);
+    if (subscriptions.size() > 0) {
+      addCommand(selectCommand);
+      addCommand(removeCommand);
+    }
+  }
+
+  private void enterSelection() {
+    if (subscriptions.size() == 0) {
+      return;
+    }
+    selecting = true;
+    selected.clear();
+    setTitle(Lang.tr("rss.select_title"));
+    updateCommands();
+    refresh();
+  }
+
+  private void exitSelection() {
+    selecting = false;
+    selected.clear();
+    setTitle(Lang.tr("rss.title"));
+    updateCommands();
+    refresh();
+  }
+
+  private void toggleSelected(int index) {
+    if (!isValidSelection(index, subscriptions.size())) {
+      return;
+    }
+    String url = ((RssSubscription) subscriptions.elementAt(index)).url;
+    if (selected.containsKey(url)) {
+      selected.remove(url);
+    } else {
+      selected.put(url, url);
+    }
+    refresh();
+  }
+
+  private void toggleSelectAll() {
+    if (selected.size() >= subscriptions.size()) {
+      selected.clear();
+    } else {
+      for (int i = 0; i < subscriptions.size(); i++) {
+        String url = ((RssSubscription) subscriptions.elementAt(i)).url;
+        selected.put(url, url);
+      }
+    }
+    refresh();
+  }
+
+  private void deleteSelected() {
+    final int count = selected.size();
+    if (count == 0) {
+      navigator.showAlert(Lang.tr("rss.select_none"), AlertType.INFO);
+      return;
+    }
+    navigator.showConfirmationAlert(
+        Lang.tr("rss.delete_selected_confirm", String.valueOf(count)),
+        new Runnable() {
+          public void run() {
+            Vector urls = new Vector();
+            java.util.Enumeration keys = selected.keys();
+            while (keys.hasMoreElements()) {
+              urls.addElement(keys.nextElement());
+            }
+            for (int i = 0; i < urls.size(); i++) {
+              RssSubscriptionManager.getInstance().remove((String) urls.elementAt(i));
+            }
+            selected.clear();
+            selecting = false;
+            setTitle(Lang.tr("rss.title"));
+            reload();
+            navigator.showAlert(
+                Lang.tr("rss.removed_many", String.valueOf(count)), AlertType.CONFIRMATION);
+          }
+        });
   }
 
   private void removeSelected() {

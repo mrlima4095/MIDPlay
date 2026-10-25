@@ -9,60 +9,120 @@ import midplay.ui.BaseList;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
 
-/** A short list of feeds that work without any setup, offered on first use. */
+/** A short list of feeds that work without any setup, picked for the current UI language. */
 public final class RssSuggestionsScreen extends BaseList {
-  private static final String[] TITLES = {
-    "G1",
-    "BBC Brasil",
-    "Tecnoblog",
-    "Olhar Digital",
-    "Hacker News",
-    "The Verge",
-    "Ars Technica",
-    "Wikipedia"
-  };
-
   private final RssScreen root;
+  private final String[] titles;
   private final String[] urls;
   private final String[] sites;
 
   public RssSuggestionsScreen(Navigator navigator, RssScreen root) {
     super(Lang.tr("rss.suggestions_title"), navigator);
     this.root = root;
-    String wikiLang = Lang.getCurrentLang();
-    if (wikiLang == null || wikiLang.length() == 0) {
-      wikiLang = "en";
+    String language = Lang.getCurrentLang();
+    if (language == null || language.length() == 0) {
+      language = "en";
     }
-    urls = new String[] {
-      "https://g1.globo.com/rss/g1/",
-      "https://feeds.bbci.co.uk/portuguese/rss.xml",
-      "https://tecnoblog.net/feed/",
-      "https://olhardigital.com.br/feed/",
-      "https://news.ycombinator.com/rss",
-      "https://www.theverge.com/rss/index.xml",
-      "https://feeds.arstechnica.com/arstechnica/index",
-      "https://" + wikiLang + ".wikipedia.org/w/index.php?title=Special:RecentChanges&feed=atom"
-    };
-    sites = new String[] {
-      "https://g1.globo.com/",
-      "https://www.bbc.com/portuguese",
-      "https://tecnoblog.net/",
-      "https://olhardigital.com.br/",
-      "https://news.ycombinator.com/",
-      "https://www.theverge.com/",
-      "https://arstechnica.com/",
-      "https://" + wikiLang + ".wikipedia.org/"
-    };
+    if ("pt".equals(language)) {
+      titles = new String[] {"G1", "BBC Brasil", "Tecnoblog", "Olhar Digital", "Wikipédia"};
+      urls =
+          new String[] {
+            "https://g1.globo.com/rss/g1/",
+            "https://feeds.bbci.co.uk/portuguese/rss.xml",
+            "https://tecnoblog.net/feed/",
+            "https://olhardigital.com.br/feed/",
+            "https://pt.wikipedia.org/w/index.php?title=Special:RecentChanges&feed=atom"
+          };
+      sites =
+          new String[] {
+            "https://g1.globo.com/",
+            "https://www.bbc.com/portuguese",
+            "https://tecnoblog.net/",
+            "https://olhardigital.com.br/",
+            "https://pt.wikipedia.org/"
+          };
+    } else if ("he".equals(language)) {
+      titles = new String[] {"ynet", "Google News", "ויקיפדיה"};
+      urls =
+          new String[] {
+            "https://www.ynet.co.il/Integration/StoryRss2.xml",
+            "https://news.google.com/rss?hl=he&gl=IL&ceid=IL:he",
+            "https://he.wikipedia.org/w/index.php?title=Special:RecentChanges&feed=atom"
+          };
+      sites =
+          new String[] {
+            "https://www.ynet.co.il/",
+            "https://news.google.com/?hl=he&gl=IL&ceid=IL:he",
+            "https://he.wikipedia.org/"
+          };
+    } else if ("pl".equals(language)) {
+      titles = new String[] {"RMF24", "Google News", "Wikipedia"};
+      urls =
+          new String[] {
+            "https://www.rmf24.pl/feed",
+            "https://news.google.com/rss?hl=pl&gl=PL&ceid=PL:pl",
+            "https://pl.wikipedia.org/w/index.php?title=Special:RecentChanges&feed=atom"
+          };
+      sites =
+          new String[] {
+            "https://www.rmf24.pl/",
+            "https://news.google.com/?hl=pl&gl=PL&ceid=PL:pl",
+            "https://pl.wikipedia.org/"
+          };
+    } else if ("tr".equals(language)) {
+      titles = new String[] {"Hürriyet", "Google News", "Vikipedi"};
+      urls =
+          new String[] {
+            "https://www.hurriyet.com.tr/rss/anasayfa",
+            "https://news.google.com/rss?hl=tr&gl=TR&ceid=TR:tr",
+            "https://tr.wikipedia.org/w/index.php?title=Special:RecentChanges&feed=atom"
+          };
+      sites =
+          new String[] {
+            "https://www.hurriyet.com.tr/",
+            "https://news.google.com/?hl=tr&gl=TR&ceid=TR:tr",
+            "https://tr.wikipedia.org/"
+          };
+    } else if ("vi".equals(language)) {
+      titles = new String[] {"Tuổi Trẻ", "Google News", "Wikipedia"};
+      urls =
+          new String[] {
+            "https://tuoitre.vn/rss/tin-moi-nhat.rss",
+            "https://news.google.com/rss?hl=vi&gl=VN&ceid=VN:vi",
+            "https://vi.wikipedia.org/w/index.php?title=Special:RecentChanges&feed=atom"
+          };
+      sites =
+          new String[] {
+            "https://tuoitre.vn/",
+            "https://news.google.com/?hl=vi&gl=VN&ceid=VN:vi",
+            "https://vi.wikipedia.org/"
+          };
+    } else {
+      titles =
+          new String[] {"BBC News", "Hacker News", "The Verge", "Ars Technica", "Wikipedia"};
+      urls =
+          new String[] {
+            "https://feeds.bbci.co.uk/news/rss.xml",
+            "https://news.ycombinator.com/rss",
+            "https://www.theverge.com/rss/index.xml",
+            "https://feeds.arstechnica.com/arstechnica/index",
+            "https://en.wikipedia.org/w/index.php?title=Special:RecentChanges&feed=atom"
+          };
+      sites =
+          new String[] {
+            "https://www.bbc.com/news",
+            "https://news.ycombinator.com/",
+            "https://www.theverge.com/",
+            "https://arstechnica.com/",
+            "https://en.wikipedia.org/"
+          };
+    }
     populateItems();
   }
 
   protected void populateItems() {
-    for (int i = 0; i < TITLES.length; i++) {
-      String title = TITLES[i];
-      if ("Wikipedia".equals(title)) {
-        title = "Wikipedia (" + Lang.getCurrentLang() + ")";
-      }
-      append(title, null);
+    for (int i = 0; i < titles.length; i++) {
+      append(titles[i], null);
     }
   }
 
@@ -72,7 +132,7 @@ public final class RssSuggestionsScreen extends BaseList {
       return;
     }
     RssSubscription subscription =
-        new RssSubscription(urls[index], TITLES[index], sites[index], "", "");
+        new RssSubscription(urls[index], titles[index], sites[index], "", "");
     int result = RssSubscriptionManager.getInstance().add(subscription);
     if (result == RssSubscriptionManager.ALREADY_EXISTS) {
       navigator.showAlert(Lang.tr("rss.already_added"), AlertType.INFO);

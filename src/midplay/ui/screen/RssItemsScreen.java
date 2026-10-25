@@ -239,7 +239,7 @@ public final class RssItemsScreen extends BaseList {
       return;
     }
     try {
-      MIDPlay.getInstance().openUri(item.link);
+      MIDPlay.getInstance().openUri(RssApi.browserUrl(item.link));
     } catch (Exception e) {
       navigator.showAlert(Lang.tr("rss.open_failed"), AlertType.ERROR);
     }

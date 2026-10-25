@@ -811,6 +811,19 @@
       "too_many_redirects": "יותר מדי הפניות",
       "fetch_failed": "הורדת הפיד נכשלה",
       "http": "שרת הפיד דחה את החיבור"
-    }
+    },
+    "select": "בחירה",
+    "select_all": "בחר הכול",
+    "delete_selected": "מחק נבחרים",
+    "delete_selected_confirm": "למחוק {0} פידים נבחרים?",
+    "removed_many": "{0} פידים נמחקו",
+    "select_none": "יש לבחור לפחות פיד אחד",
+    "select_title": "בחירת פידים",
+    "settings_title": "הגדרות RSS",
+    "settings_api_url": "כתובת פרוקסי RSS",
+    "settings_image_proxy": "פרוקסי תמונות",
+    "settings_browser_proxy": "פרוקסי דפדפן",
+    "settings_use_browser_proxy": "פתיחת קישורי HTTPS דרך הפרוקסי",
+    "settings_browser_hint": "כאשר מופעל, קישורי HTTPS של כתבות נפתחים דרך פרוקסי הדפדפן, שאליו טלפונים ישנים יכולים להגיע ב-HTTP רגיל."
   }
 }

@@ -811,6 +811,19 @@
       "too_many_redirects": "Zbyt wiele przekierowań",
       "fetch_failed": "Pobieranie kanału nie powiodło się",
       "http": "Serwer kanału odrzucił połączenie"
-    }
+    },
+    "select": "Wybierz",
+    "select_all": "Wybierz wszystko",
+    "delete_selected": "Usuń wybrane",
+    "delete_selected_confirm": "Usunąć {0} wybranych kanałów?",
+    "removed_many": "Usunięto kanały: {0}",
+    "select_none": "Wybierz co najmniej jeden kanał",
+    "select_title": "Wybierz kanały",
+    "settings_title": "Ustawienia RSS",
+    "settings_api_url": "Adres proxy RSS",
+    "settings_image_proxy": "Proxy obrazów",
+    "settings_browser_proxy": "Proxy przeglądarki",
+    "settings_use_browser_proxy": "Otwieraj linki HTTPS przez proxy",
+    "settings_browser_hint": "Po włączeniu linki HTTPS artykułów otwierają się przez proxy przeglądarki, dostępne dla starszych telefonów przez zwykłe HTTP."
   }
 }

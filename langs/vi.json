@@ -811,6 +811,19 @@
       "too_many_redirects": "Quá nhiều chuyển hướng",
       "fetch_failed": "Tải nguồn tin thất bại",
       "http": "Máy chủ nguồn tin từ chối kết nối"
-    }
+    },
+    "select": "Chọn",
+    "select_all": "Chọn tất cả",
+    "delete_selected": "Xóa mục đã chọn",
+    "delete_selected_confirm": "Xóa {0} nguồn tin đã chọn?",
+    "removed_many": "Đã xóa {0} nguồn tin",
+    "select_none": "Chọn ít nhất một nguồn tin",
+    "select_title": "Chọn nguồn tin",
+    "settings_title": "Cài đặt RSS",
+    "settings_api_url": "Địa chỉ proxy RSS",
+    "settings_image_proxy": "Proxy hình ảnh",
+    "settings_browser_proxy": "Proxy trình duyệt",
+    "settings_use_browser_proxy": "Mở liên kết HTTPS qua proxy",
+    "settings_browser_hint": "Khi bật, liên kết HTTPS của bài viết mở qua proxy trình duyệt, giúp điện thoại cũ truy cập bằng HTTP thường."
   }
 }

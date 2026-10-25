@@ -65,8 +65,13 @@ public class Configuration {
 
   public static final String DEFAULT_RSS_API_URL = "http://opentty.fun/rss.php";
   public static final String DEFAULT_RSS_IMAGE_PROXY = "http://opentty.fun/proxy.php?url=";
+  public static final String DEFAULT_RSS_BROWSER_PROXY = "http://opentty.fun/proxy.php?url=";
   public static final int RSS_MAX_SUBSCRIPTIONS = 60;
   public static final int RSS_THUMBNAIL_SIZE = 36;
+
+  public static final int RSS_BROWSER_PROXY_OFF = 0;
+  public static final int RSS_BROWSER_PROXY_ON = 1;
+  public static final int DEFAULT_RSS_BROWSER_PROXY_MODE = RSS_BROWSER_PROXY_ON;
 
   public static final String DEFAULT_LYRICS_API_URL = "http://opentty.fun/lyrics.php";
 
