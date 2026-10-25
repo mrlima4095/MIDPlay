@@ -64,7 +64,10 @@ public final class OpenUriScreen extends BaseForm {
       return;
     }
     if (uri.equalsIgnoreCase("htop")) {
-      // Hidden diagnostic command; do not add it to the URI history.
+      // Hidden diagnostic command; it stays in the history like any other
+      // shortcut typed in this screen.
+      UriHistoryManager.getInstance().record("htop");
+      refreshHistory();
       navigator.forward(new TaskViewerScreen(navigator));
       return;
     }

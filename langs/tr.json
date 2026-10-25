@@ -787,6 +787,7 @@
     "run": "Tekrar test et",
     "waiting": "—",
     "start": "Testi başlat",
-    "last": "Bu oturumdaki son test"
+    "last": "Bu oturumdaki son test",
+    "ready": "Başlamaya hazır"
   }
 }

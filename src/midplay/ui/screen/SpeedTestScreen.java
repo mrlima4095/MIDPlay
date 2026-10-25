@@ -46,13 +46,11 @@ public final class SpeedTestScreen extends BaseForm {
     addCommand(hasLastResult ? runCommand : startCommand);
     addCommand(Commands.playerNowPlaying());
     if (hasLastResult) {
-      // Reopening the screen shows the last result of this session instead of
-      // running the test again.
+      // Reopening the screen shows the last result of this session.
       showLastResult(Lang.tr("speedtest.last"));
     } else {
-      // Some MIDP runtimes used with MIDPlay do not deliver
-      // Displayable.showNotify(), so the first test starts right here.
-      start();
+      // Nothing runs until the user presses the start command.
+      statusItem.setText(Lang.tr("speedtest.ready"));
     }
   }
 

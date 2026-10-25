@@ -77,7 +77,7 @@ public class Lang {
     "wattpad.archived_cleared", "wattpad.end_of_results", "wattpad.sort", "wattpad.sort_relevance", "wattpad.sort_recent", "wattpad.sort_title", "wattpad.sort_author", "wattpad.sort_chapters", "wattpad.sort_progress", "wattpad.archive_selected",
     "wattpad.archive_selected_confirm", "wattpad.archived_many", "wattpad.download", "wattpad.downloading", "wattpad.download_confirm", "wattpad.download_done", "wattpad.download_failed", "wattpad.download_error", "wattpad.download_none", "wattpad.download_cancelled",
     "wattpad.remove_download", "wattpad.remove_download_confirm", "wattpad.download_removed", "wattpad.offline", "speedtest.title", "speedtest.ping", "speedtest.download", "speedtest.upload", "speedtest.phase_ping", "speedtest.phase_download",
-    "speedtest.phase_upload", "speedtest.done", "speedtest.error", "speedtest.run", "speedtest.waiting", "speedtest.start", "speedtest.last"
+    "speedtest.phase_upload", "speedtest.done", "speedtest.error", "speedtest.run", "speedtest.waiting", "speedtest.start", "speedtest.last", "speedtest.ready"
   };
 
   private static class EN {
@@ -217,7 +217,7 @@ public class Lang {
       "Remove download", "Remove the downloaded chapters of {0}?", "Download removed", "offline", "Network speed test",
       "Latency", "Download", "Upload", "Measuring latency...", "Measuring download...",
       "Measuring upload...", "Test complete", "Speed test failed", "Test again", "—",
-      "Start test", "Last test this session"
+      "Start test", "Last test this session", "Ready to start"
     };
   }
 
@@ -358,7 +358,7 @@ public class Lang {
       "הסרת הורדה", "להסיר את הפרקים שהורדו של {0}?", "ההורדה הוסרה", "לא מקוון", "בדיקת מהירות רשת",
       "השהיה", "הורדה", "העלאה", "מודד השהיה...", "מודד הורדה...",
       "מודד העלאה...", "הבדיקה הושלמה", "בדיקת המהירות נכשלה", "בדוק שוב", "—",
-      "התחל בדיקה", "הבדיקה האחרונה בהפעלה זו"
+      "התחל בדיקה", "הבדיקה האחרונה בהפעלה זו", "מוכן להתחלה"
     };
   }
 
@@ -499,7 +499,7 @@ public class Lang {
       "Usuń pobrane", "Usunąć pobrane rozdziały {0}?", "Pobrane usunięto", "offline", "Test prędkości sieci",
       "Opóźnienie", "Pobieranie", "Wysyłanie", "Pomiar opóźnienia...", "Pomiar pobierania...",
       "Pomiar wysyłania...", "Test zakończony", "Test prędkości nie powiódł się", "Testuj ponownie", "—",
-      "Rozpocznij test", "Ostatni test w tej sesji"
+      "Rozpocznij test", "Ostatni test w tej sesji", "Gotowy do rozpoczęcia"
     };
   }
 
@@ -640,7 +640,7 @@ public class Lang {
       "Remover download", "Remover os capítulos baixados de {0}?", "Download removido", "offline", "Teste de velocidade",
       "Latência", "Download", "Upload", "Medindo latência...", "Medindo download...",
       "Medindo upload...", "Teste concluído", "Falha no teste de velocidade", "Testar novamente", "—",
-      "Iniciar teste", "Último teste desta sessão"
+      "Iniciar teste", "Último teste desta sessão", "Pronto para iniciar"
     };
   }
 
@@ -781,7 +781,7 @@ public class Lang {
       "İndirmeyi kaldır", "{0} hikayesinin indirilen bölümleri kaldırılsın mı?", "İndirme kaldırıldı", "çevrimdışı", "Ağ hız testi",
       "Gecikme", "İndirme", "Yükleme", "Gecikme ölçülüyor...", "İndirme ölçülüyor...",
       "Yükleme ölçülüyor...", "Test tamamlandı", "Hız testi başarısız", "Tekrar test et", "—",
-      "Testi başlat", "Bu oturumdaki son test"
+      "Testi başlat", "Bu oturumdaki son test", "Başlamaya hazır"
     };
   }
 
@@ -922,7 +922,7 @@ public class Lang {
       "Xóa bản tải", "Xóa các chương đã tải của {0}?", "Đã xóa bản tải", "ngoại tuyến", "Kiểm tra tốc độ mạng",
       "Độ trễ", "Tải xuống", "Tải lên", "Đang đo độ trễ...", "Đang đo tải xuống...",
       "Đang đo tải lên...", "Kiểm tra xong", "Kiểm tra tốc độ thất bại", "Kiểm tra lại", "—",
-      "Bắt đầu kiểm tra", "Lần kiểm tra gần nhất trong phiên này"
+      "Bắt đầu kiểm tra", "Lần kiểm tra gần nhất trong phiên này", "Sẵn sàng bắt đầu"
     };
   }
 

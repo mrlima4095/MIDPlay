@@ -787,6 +787,7 @@
     "run": "Kiểm tra lại",
     "waiting": "—",
     "start": "Bắt đầu kiểm tra",
-    "last": "Lần kiểm tra gần nhất trong phiên này"
+    "last": "Lần kiểm tra gần nhất trong phiên này",
+    "ready": "Sẵn sàng bắt đầu"
   }
 }

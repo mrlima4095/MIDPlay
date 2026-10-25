@@ -787,6 +787,7 @@
     "run": "Testar novamente",
     "waiting": "—",
     "start": "Iniciar teste",
-    "last": "Último teste desta sessão"
+    "last": "Último teste desta sessão",
+    "ready": "Pronto para iniciar"
   }
 }
