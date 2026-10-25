@@ -433,8 +433,6 @@
   },
   "vault": {
     "title": "Két",
-    "apps": "Két ứng dụng",
-    "apps_instructions": "Chọn ứng dụng cần mật khẩu két để mở. [x] = đã khóa",
     "open": "Két",
     "protect": "Chuyển vào két",
     "remove": "Xóa khỏi két",

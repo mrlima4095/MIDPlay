@@ -132,13 +132,12 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     registerMenuAction(Configuration.MENU_REDDIT);
   }
 
-  /** Routes every menu entry through {@link UriRouter}, so vault checks live in one place. */
   private void registerMenuAction(final String key) {
     menuManager.registerAction(
         key,
         new Runnable() {
           public void run() {
-            UriRouter.open(navigator, key);
+            openInternalKey(key);
           }
         });
   }
@@ -244,11 +243,6 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     platformRequest(uri);
   }
 
-  /** Kept for callers that used the old name; it now shares the same routing path. */
-  public void openExternalUri(String uri) throws ConnectionNotFoundException {
-    openUri(uri);
-  }
-
   /** Link bridge used by the subapps; returns true when MIDPlay handled the URL itself. */
   public boolean openSharedLink(String url) {
     return UriRouter.openShared(navigator, url);
@@ -279,56 +273,82 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   }
 
   /**
-   * Opens a native destination by its canonical router key. Vault checks are applied by {@link
-   * UriRouter} before this method is called.
+   * Opens one of MIDPlay's own screens when the user types a shortcut in Open URI. Returns {@code
+   * false} when the text is not a known shortcut, so the caller can treat it as a real URI.
+   *
+   * <p>Accepted shortcuts: {@code wattpad}, {@code pinterest}, {@code reddit}, {@code mpgram},
+   * {@code notes}, {@code tasks} and {@code playing}. The {@code htop} diagnostic is handled by the
+   * Open URI screen itself.
    */
-  public void openNativeKey(String key) {
-    if ("search".equals(key)) {
-      goToSearchScreen();
-    } else if ("favorites".equals(key)) {
-      goToFavoritesScreen();
-    } else if ("discover".equals(key)) {
-      goToDiscoverPlaylistsScreen();
-    } else if ("recent".equals(key)) {
-      goToRecentScreen();
-    } else if ("downloads".equals(key)) {
-      goToDownloadsScreen();
-    } else if ("files".equals(key)) {
-      goToFileBrowserScreen();
-    } else if ("settings".equals(key)) {
-      goToSettingsScreen();
-    } else if ("about".equals(key)) {
-      goToAboutScreen();
-    } else if ("equalizer".equals(key)) {
-      goToEqualizerScreen();
-    } else if ("mpgram".equals(key)) {
-      openMPGram();
-    } else if ("github".equals(key)) {
-      openGitHubJ2ME();
-    } else if ("notes".equals(key)) {
-      goToNotesScreen();
-    } else if ("tasks".equals(key)) {
-      goToTasksScreen();
-    } else if ("wattpad".equals(key)) {
-      goToWattpadScreen();
-    } else if ("pinterest".equals(key)) {
-      goToPinterestScreen();
-    } else if ("reddit".equals(key)) {
-      goToRedditScreen();
-    } else if ("playing".equals(key)) {
-      openNowPlaying();
-    } else if ("open_uri".equals(key)) {
-      openUri();
-    } else if ("queue".equals(key)) {
-      goToQueueScreen();
+  public boolean openInternalUri(String uri) {
+    String key = internalUriKey(uri);
+    if (key == null) {
+      return false;
     }
+    openInternalKey(key);
+    return true;
   }
 
-  private void goToQueueScreen() {
-    PlayerScreen player = getPlayerScreen();
-    if (player != null) {
-      player.showCurrentPlaylist();
-    } else {
+  private static String internalUriKey(String uri) {
+    String key = uri == null ? "" : uri.trim();
+    if (key.equalsIgnoreCase("wattpad")) {
+      return Configuration.MENU_WATTPAD;
+    }
+    if (key.equalsIgnoreCase("pinterest")) {
+      return Configuration.MENU_PINTEREST;
+    }
+    if (key.equalsIgnoreCase("reddit")) {
+      return Configuration.MENU_REDDIT;
+    }
+    if (key.equalsIgnoreCase("mpgram")) {
+      return Configuration.MENU_MPGRAM;
+    }
+    if (key.equalsIgnoreCase("notes")) {
+      return Configuration.MENU_NOTES;
+    }
+    if (key.equalsIgnoreCase("tasks")) {
+      return Configuration.MENU_TASKS;
+    }
+    if (key.equalsIgnoreCase("playing")) {
+      return Configuration.MENU_NOW_PLAYING;
+    }
+    return null;
+  }
+
+  private void openInternalKey(String key) {
+    if (Configuration.MENU_SEARCH.equals(key)) {
+      goToSearchScreen();
+    } else if (Configuration.MENU_FAVORITES.equals(key)) {
+      goToFavoritesScreen();
+    } else if (Configuration.MENU_DISCOVER_PLAYLISTS.equals(key)) {
+      goToDiscoverPlaylistsScreen();
+    } else if (Configuration.MENU_RECENT.equals(key)) {
+      goToRecentScreen();
+    } else if (Configuration.MENU_DOWNLOADS.equals(key)) {
+      goToDownloadsScreen();
+    } else if (Configuration.MENU_FILES.equals(key)) {
+      goToFileBrowserScreen();
+    } else if (Configuration.MENU_SETTINGS.equals(key)) {
+      goToSettingsScreen();
+    } else if (Configuration.MENU_ABOUT.equals(key)) {
+      goToAboutScreen();
+    } else if (Configuration.MENU_EQUALIZER.equals(key)) {
+      goToEqualizerScreen();
+    } else if (Configuration.MENU_WATTPAD.equals(key)) {
+      goToWattpadScreen();
+    } else if (Configuration.MENU_PINTEREST.equals(key)) {
+      goToPinterestScreen();
+    } else if (Configuration.MENU_REDDIT.equals(key)) {
+      goToRedditScreen();
+    } else if (Configuration.MENU_MPGRAM.equals(key)) {
+      openMPGram();
+    } else if (Configuration.MENU_GITHUB.equals(key)) {
+      openGitHubJ2ME();
+    } else if (Configuration.MENU_NOTES.equals(key)) {
+      goToNotesScreen();
+    } else if (Configuration.MENU_TASKS.equals(key)) {
+      goToTasksScreen();
+    } else if (Configuration.MENU_NOW_PLAYING.equals(key)) {
       openNowPlaying();
     }
   }

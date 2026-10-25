@@ -47,11 +47,6 @@ public class Configuration {
   public static final String MENU_PINTEREST = "menu.pinterest";
   public static final String MENU_REDDIT = "menu.reddit";
 
-  /** Subapps that can be protected by the app vault, in the order shown in its screen. */
-  public static final String[] VAULT_APP_KEYS = {
-    MENU_MPGRAM, MENU_NOTES, MENU_TASKS, MENU_WATTPAD, MENU_PINTEREST, MENU_REDDIT, MENU_GITHUB
-  };
-
   public static final String DEFAULT_HTTP_PROXY = "http://opentty.fun/proxy.php?";
 
   public static final String DEFAULT_PINTEREST_API_URL = "http://opentty.fun/pinterest.php";
@@ -182,62 +177,6 @@ public class Configuration {
   public static Image fileExplorerIcon;
   public static Image folderBadgeIcon;
   public static Image musicBadgeIcon;
-
-  /** Icon used for a menu entry, sharing the same artwork as the main menu. */
-  public static Image getMenuIcon(String key) {
-    if (key == null) {
-      return null;
-    }
-    if (MENU_SEARCH.equals(key)) {
-      return searchIcon;
-    }
-    if (MENU_FAVORITES.equals(key)) {
-      return favoriteIcon;
-    }
-    if (MENU_DISCOVER_PLAYLISTS.equals(key)) {
-      return playlistIcon;
-    }
-    if (MENU_RECENT.equals(key)) {
-      return recentIcon;
-    }
-    if (MENU_DOWNLOADS.equals(key)) {
-      return musicIcon;
-    }
-    if (MENU_FILES.equals(key)) {
-      return fileExplorerIcon;
-    }
-    if (MENU_SETTINGS.equals(key)) {
-      return settingsIcon;
-    }
-    if (MENU_ABOUT.equals(key)) {
-      return infoIcon;
-    }
-    if (MENU_EQUALIZER.equals(key)) {
-      return equalizerIcon;
-    }
-    if (MENU_MPGRAM.equals(key)) {
-      return mpgramIcon;
-    }
-    if (MENU_GITHUB.equals(key)) {
-      return githubIcon;
-    }
-    if (MENU_NOTES.equals(key)) {
-      return notesIcon;
-    }
-    if (MENU_TASKS.equals(key)) {
-      return tasksIcon;
-    }
-    if (MENU_WATTPAD.equals(key)) {
-      return wattpadIcon;
-    }
-    if (MENU_PINTEREST.equals(key)) {
-      return pinterestIcon;
-    }
-    if (MENU_REDDIT.equals(key)) {
-      return redditIcon;
-    }
-    return null;
-  }
 
   public static Image playIcon;
   public static Image pauseIcon;

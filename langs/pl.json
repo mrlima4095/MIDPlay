@@ -433,8 +433,6 @@
   },
   "vault": {
     "title": "Sejf",
-    "apps": "Sejf aplikacji",
-    "apps_instructions": "Wybierz aplikacje wymagające hasła sejfu do otwarcia. [x] = zablokowana",
     "open": "Sejf",
     "protect": "Przenieś do sejfu",
     "remove": "Usuń z sejfu",

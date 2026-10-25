@@ -10,8 +10,8 @@ import midplay.ui.Navigator;
 import midplay.util.Lang;
 
 /**
- * Hidden runtime monitor. It is reachable by typing {@code htop} or {@code midplay://htop} in the
- * Open... screen, so it does not add another item to the main menu.
+ * Hidden runtime monitor. It is reachable by typing {@code htop} in the Open... screen, so it does
+ * not add another item to the main menu.
  */
 public final class TaskViewerScreen extends BaseForm {
   private final StringItem content = new StringItem(null, "");

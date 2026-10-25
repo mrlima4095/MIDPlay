@@ -744,7 +744,7 @@ public final class PlayerScreen extends Canvas
     navigator.forward(selectionScreen);
   }
 
-  public void showCurrentPlaylist() {
+  private void showCurrentPlaylist() {
     Tracks currentTracks = getPlayerGUI().getCurrentTracks();
     if (isPlaylistEmpty(currentTracks)) {
       return;

@@ -433,8 +433,6 @@
   },
   "vault": {
     "title": "Cofre",
-    "apps": "Cofre de apps",
-    "apps_instructions": "Selecione os apps que devem pedir a senha do cofre para abrir. [x] = bloqueado",
     "open": "Cofre",
     "protect": "Mover para o cofre",
     "remove": "Remover do cofre",

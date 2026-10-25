@@ -32,18 +32,10 @@ public final class SearchScreen extends BaseForm {
   private final SettingsManager settingsManager;
 
   public SearchScreen(Navigator navigator) {
-    this(navigator, null);
-  }
-
-  /** Opens the search screen with the field already filled, used by {@code midplay://} links. */
-  public SearchScreen(Navigator navigator, String initialQuery) {
     super(Lang.tr(Configuration.MENU_SEARCH), navigator);
     this.settingsManager = SettingsManager.getInstance();
     this.searchType = settingsManager.getCurrentSearchType();
     addComponents();
-    if (initialQuery != null) {
-      searchField.setString(initialQuery.trim());
-    }
     history =
         new ChoiceGroup(
             Lang.tr("open_uri.history"),

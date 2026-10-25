@@ -433,8 +433,6 @@
   },
   "vault": {
     "title": "Vault",
-    "apps": "App vault",
-    "apps_instructions": "Select the apps that require the vault password to open. [x] = locked",
     "open": "Vault",
     "protect": "Move to vault",
     "remove": "Remove from vault",
