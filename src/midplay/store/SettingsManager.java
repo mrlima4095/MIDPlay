@@ -45,10 +45,6 @@ public class SettingsManager {
   private static int currentRedditPostsPerPage;
   private static String currentRedditPath;
   private static int currentRedditAutoTranslate;
-  private static String currentRssApiUrl;
-  private static String currentRssImageProxy;
-  private static String currentRssBrowserProxy;
-  private static int currentRssBrowserProxyMode;
   private static int currentEconomyMode;
 
   public static SettingsManager getInstance() {
@@ -173,13 +169,6 @@ public class SettingsManager {
         settings.getString("redditPath", Configuration.DEFAULT_REDDIT_PATH);
     currentRedditAutoTranslate =
         settings.getInt("redditAutoTranslate", Configuration.DEFAULT_REDDIT_AUTO_TRANSLATE);
-    currentRssApiUrl = settings.getString("rssApiUrl", Configuration.DEFAULT_RSS_API_URL);
-    currentRssImageProxy =
-        settings.getString("rssImageProxy", Configuration.DEFAULT_RSS_IMAGE_PROXY);
-    currentRssBrowserProxy =
-        settings.getString("rssBrowserProxy", Configuration.DEFAULT_RSS_BROWSER_PROXY);
-    currentRssBrowserProxyMode =
-        settings.getInt("rssBrowserProxyMode", Configuration.DEFAULT_RSS_BROWSER_PROXY_MODE);
     currentEconomyMode = settings.getInt("economyMode", Configuration.ECONOMY_MODE_OFF);
   }
 
@@ -225,10 +214,6 @@ public class SettingsManager {
     settings.put("redditPostsPerPage", Configuration.DEFAULT_REDDIT_POSTS_PER_PAGE);
     settings.put("redditPath", Configuration.DEFAULT_REDDIT_PATH);
     settings.put("redditAutoTranslate", Configuration.DEFAULT_REDDIT_AUTO_TRANSLATE);
-    settings.put("rssApiUrl", Configuration.DEFAULT_RSS_API_URL);
-    settings.put("rssImageProxy", Configuration.DEFAULT_RSS_IMAGE_PROXY);
-    settings.put("rssBrowserProxy", Configuration.DEFAULT_RSS_BROWSER_PROXY);
-    settings.put("rssBrowserProxyMode", Configuration.DEFAULT_RSS_BROWSER_PROXY_MODE);
     settings.put("economyMode", Configuration.ECONOMY_MODE_OFF);
     settings.put("vaultPasswordHash", "");
     return settings;
@@ -581,72 +566,6 @@ public class SettingsManager {
             : Configuration.REDDIT_TRANSLATE_OFF;
     saveSetting("redditAutoTranslate", value);
     currentRedditAutoTranslate = value;
-  }
-
-  /** Base URL of the RSS proxy (defaults to {@code opentty.fun/rss.php}). */
-  public String getRssApiUrl() {
-    if (currentRssApiUrl == null || currentRssApiUrl.length() == 0) {
-      currentRssApiUrl = Configuration.DEFAULT_RSS_API_URL;
-    }
-    return currentRssApiUrl;
-  }
-
-  public void saveRssApiUrl(String url) throws RecordStoreException {
-    String value = url == null ? "" : url.trim();
-    if (value.length() == 0) {
-      value = Configuration.DEFAULT_RSS_API_URL;
-    }
-    saveSetting("rssApiUrl", value);
-    currentRssApiUrl = value;
-  }
-
-  /** Prefix used to fetch feed images, ending with {@code url=} by default. */
-  public String getRssImageProxy() {
-    if (currentRssImageProxy == null || currentRssImageProxy.length() == 0) {
-      currentRssImageProxy = Configuration.DEFAULT_RSS_IMAGE_PROXY;
-    }
-    return currentRssImageProxy;
-  }
-
-  public void saveRssImageProxy(String url) throws RecordStoreException {
-    String value = url == null ? "" : url.trim();
-    if (value.length() == 0) {
-      value = Configuration.DEFAULT_RSS_IMAGE_PROXY;
-    }
-    saveSetting("rssImageProxy", value);
-    currentRssImageProxy = value;
-  }
-
-  /** Prefix used to open HTTPS article links through the browser proxy. */
-  public String getRssBrowserProxy() {
-    if (currentRssBrowserProxy == null || currentRssBrowserProxy.length() == 0) {
-      currentRssBrowserProxy = Configuration.DEFAULT_RSS_BROWSER_PROXY;
-    }
-    return currentRssBrowserProxy;
-  }
-
-  public void saveRssBrowserProxy(String url) throws RecordStoreException {
-    String value = url == null ? "" : url.trim();
-    if (value.length() == 0) {
-      value = Configuration.DEFAULT_RSS_BROWSER_PROXY;
-    }
-    saveSetting("rssBrowserProxy", value);
-    currentRssBrowserProxy = value;
-  }
-
-  public int getRssBrowserProxyMode() {
-    return currentRssBrowserProxyMode == Configuration.RSS_BROWSER_PROXY_ON
-        ? Configuration.RSS_BROWSER_PROXY_ON
-        : Configuration.RSS_BROWSER_PROXY_OFF;
-  }
-
-  public void saveRssBrowserProxyMode(int mode) throws RecordStoreException {
-    int value =
-        mode == Configuration.RSS_BROWSER_PROXY_ON
-            ? Configuration.RSS_BROWSER_PROXY_ON
-            : Configuration.RSS_BROWSER_PROXY_OFF;
-    saveSetting("rssBrowserProxyMode", value);
-    currentRssBrowserProxyMode = value;
   }
 
   public int getEconomyMode() {

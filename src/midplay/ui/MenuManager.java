@@ -66,16 +66,14 @@ public class MenuManager {
     // The Wikipedia and weather sections were removed from the app.
     removeMenuItem("menu.wikipedia");
     removeMenuItem("menu.weather");
+    // The RSS reader was removed from the app.
+    removeMenuItem("menu.rss");
     boolean hadReddit = hasMenuItem(Configuration.MENU_REDDIT);
-    boolean hadRss = hasMenuItem(Configuration.MENU_RSS);
     ensureDefaultItemsPresent();
-    // On upgrades, slot new entries in right after their neighbours without touching
-    // the rest of the user's custom arrangement.
+    // On upgrades, slot Reddit in right after Pinterest without touching the rest
+    // of the user's custom arrangement.
     if (!hadReddit) {
       insertAfterAnchor(Configuration.MENU_REDDIT, Configuration.MENU_PINTEREST);
-    }
-    if (!hadRss) {
-      insertAfterAnchor(Configuration.MENU_RSS, Configuration.MENU_REDDIT);
     }
   }
 
@@ -169,10 +167,9 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_WATTPAD, 11, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_PINTEREST, 12, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_REDDIT, 13, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_RSS, 14, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 15, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 16, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 17, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 14, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 15, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 16, true));
     return defaultConfig;
   }
 
