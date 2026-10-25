@@ -24,6 +24,7 @@ public final class OpenUriScreen extends BaseForm {
   private final Command clearHistory;
   private final Command enableEconomyCommand;
   private final Command disableEconomyCommand;
+  private final Command vaultAppsCommand;
 
   public OpenUriScreen(Navigator navigator) {
     super(Lang.tr("open_uri.title"), navigator);
@@ -35,9 +36,11 @@ public final class OpenUriScreen extends BaseForm {
     clearHistory = new Command(Lang.tr("open_uri.clear"), Command.SCREEN, 2);
     enableEconomyCommand = new Command(Lang.tr("open_uri.economy_enable"), Command.SCREEN, 3);
     disableEconomyCommand = new Command(Lang.tr("open_uri.economy_disable"), Command.SCREEN, 3);
+    vaultAppsCommand = new Command(Lang.tr("vault.apps"), Command.SCREEN, 4);
     addCommand(Commands.ok());
     addCommand(useHistory);
     addCommand(clearHistory);
+    addCommand(vaultAppsCommand);
     updateEconomyCommand();
   }
 
@@ -55,6 +58,10 @@ public final class OpenUriScreen extends BaseForm {
       toggleEconomyMode();
       return;
     }
+    if (c == vaultAppsCommand) {
+      AppVaultScreen.open(navigator);
+      return;
+    }
     if (c != Commands.ok()) {
       return;
     }
@@ -68,7 +75,7 @@ public final class OpenUriScreen extends BaseForm {
       navigator.forward(new TaskViewerScreen(navigator));
       return;
     }
-    if (MIDPlay.getInstance().openInternalUri(uri)) {
+    if (MIDPlay.getInstance().openInternalUriSecurely(uri)) {
       UriHistoryManager.getInstance().record(uri);
       refreshHistory();
       return;

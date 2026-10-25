@@ -47,6 +47,7 @@ import midplay.ui.screen.FileBrowserScreen;
 import midplay.ui.screen.OpenUriScreen;
 import midplay.ui.screen.NotesScreen;
 import midplay.ui.screen.TasksScreen;
+import midplay.ui.screen.VaultAuth;
 import midplay.ui.screen.PinterestScreen;
 import midplay.ui.screen.RedditScreen;
 import midplay.ui.screen.WattpadScreen;
@@ -179,53 +180,71 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
             goToEqualizerScreen();
           }
         });
-    menuManager.registerAction(
+    registerVaultAction(
         Configuration.MENU_MPGRAM,
         new Runnable() {
           public void run() {
             openMPGram();
           }
         });
-    menuManager.registerAction(
+    registerVaultAction(
         Configuration.MENU_GITHUB,
         new Runnable() {
           public void run() {
             openGitHubJ2ME();
           }
         });
-    menuManager.registerAction(
+    registerVaultAction(
         Configuration.MENU_NOTES,
         new Runnable() {
           public void run() {
             goToNotesScreen();
           }
         });
-    menuManager.registerAction(
+    registerVaultAction(
         Configuration.MENU_TASKS,
         new Runnable() {
           public void run() {
             goToTasksScreen();
           }
         });
-    menuManager.registerAction(
+    registerVaultAction(
         Configuration.MENU_WATTPAD,
         new Runnable() {
           public void run() {
             goToWattpadScreen();
           }
         });
-    menuManager.registerAction(
+    registerVaultAction(
         Configuration.MENU_PINTEREST,
         new Runnable() {
           public void run() {
             goToPinterestScreen();
           }
         });
-    menuManager.registerAction(
+    registerVaultAction(
         Configuration.MENU_REDDIT,
         new Runnable() {
           public void run() {
             goToRedditScreen();
+          }
+        });
+  }
+
+  /**
+   * Registers a subapp action that asks for the vault password first when the app is locked. Native
+   * MIDPlay features keep using {@link MenuManager#registerAction} directly.
+   */
+  private void registerVaultAction(final String key, final Runnable action) {
+    menuManager.registerAction(
+        key,
+        new Runnable() {
+          public void run() {
+            if (settingsManager.isVaultAppLocked(key)) {
+              VaultAuth.authenticate(navigator, action);
+            } else {
+              action.run();
+            }
           }
         });
   }
@@ -347,6 +366,38 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
    * tasks}, {@code playing}, optionally prefixed with {@code midplay:} or {@code midplay://}.
    */
   public boolean openInternalUri(String uri) {
+    String key = internalUriKey(uri);
+    if (key == null) {
+      return false;
+    }
+    openInternalKey(key);
+    return true;
+  }
+
+  /**
+   * Same as {@link #openInternalUri(String)}, but asks for the vault password first when the target
+   * subapp is locked. Used by the Open URI screen so its shortcuts cannot bypass the app vault.
+   */
+  public boolean openInternalUriSecurely(String uri) {
+    final String key = internalUriKey(uri);
+    if (key == null) {
+      return false;
+    }
+    if (settingsManager.isVaultAppLocked(key)) {
+      VaultAuth.authenticate(
+          navigator,
+          new Runnable() {
+            public void run() {
+              openInternalKey(key);
+            }
+          });
+    } else {
+      openInternalKey(key);
+    }
+    return true;
+  }
+
+  private static String internalUriKey(String uri) {
     String key = uri == null ? "" : uri.trim();
     if (key.regionMatches(true, 0, "midplay:", 0, 8)) {
       key = key.substring(8);
@@ -356,34 +407,45 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       key = key.trim();
     }
     if (key.equalsIgnoreCase("wattpad")) {
-      goToWattpadScreen();
-      return true;
+      return Configuration.MENU_WATTPAD;
     }
     if (key.equalsIgnoreCase("pinterest")) {
-      goToPinterestScreen();
-      return true;
+      return Configuration.MENU_PINTEREST;
     }
     if (key.equalsIgnoreCase("reddit")) {
-      goToRedditScreen();
-      return true;
+      return Configuration.MENU_REDDIT;
     }
     if (key.equalsIgnoreCase("mpgram")) {
-      openMPGram();
-      return true;
+      return Configuration.MENU_MPGRAM;
     }
     if (key.equalsIgnoreCase("notes")) {
-      goToNotesScreen();
-      return true;
+      return Configuration.MENU_NOTES;
     }
     if (key.equalsIgnoreCase("tasks")) {
-      goToTasksScreen();
-      return true;
+      return Configuration.MENU_TASKS;
     }
     if (key.equalsIgnoreCase("playing")) {
-      openNowPlaying();
-      return true;
+      return Configuration.MENU_NOW_PLAYING;
     }
-    return false;
+    return null;
+  }
+
+  private void openInternalKey(String key) {
+    if (Configuration.MENU_WATTPAD.equals(key)) {
+      goToWattpadScreen();
+    } else if (Configuration.MENU_PINTEREST.equals(key)) {
+      goToPinterestScreen();
+    } else if (Configuration.MENU_REDDIT.equals(key)) {
+      goToRedditScreen();
+    } else if (Configuration.MENU_MPGRAM.equals(key)) {
+      openMPGram();
+    } else if (Configuration.MENU_NOTES.equals(key)) {
+      goToNotesScreen();
+    } else if (Configuration.MENU_TASKS.equals(key)) {
+      goToTasksScreen();
+    } else if (Configuration.MENU_NOW_PLAYING.equals(key)) {
+      openNowPlaying();
+    }
   }
 
   private void openMPGram() {

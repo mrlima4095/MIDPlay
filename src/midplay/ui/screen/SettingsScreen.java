@@ -24,6 +24,7 @@ public final class SettingsScreen extends BaseForm {
   private final SettingsManager settingsManager;
   private final Listener listener;
   private final String[] availableLanguages = Lang.getAvailableLanguages();
+  private final Command vaultAppsCommand;
 
   private ChoiceGroup languageGroup;
   private ChoiceGroup themeModeGroup;
@@ -56,14 +57,18 @@ public final class SettingsScreen extends BaseForm {
     super(Lang.tr(Configuration.MENU_SETTINGS), navigator);
     this.listener = listener;
     this.settingsManager = SettingsManager.getInstance();
+    vaultAppsCommand = new Command(Lang.tr("vault.apps"), Command.SCREEN, 4);
     addComponents();
     loadSettings();
     addCommand(Commands.formSave());
+    addCommand(vaultAppsCommand);
   }
 
   protected void handleCommand(Command c, Displayable d) {
     if (c == Commands.formSave()) {
       saveSettings();
+    } else if (c == vaultAppsCommand) {
+      AppVaultScreen.open(navigator);
     }
   }
 

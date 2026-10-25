@@ -433,6 +433,8 @@
   },
   "vault": {
     "title": "Kasa",
+    "apps": "Uygulama kasası",
+    "apps_instructions": "Kasa parolasıyla açılması gereken uygulamaları seçin. [x] = kilitli",
     "open": "Kasa",
     "protect": "Kasaya taşı",
     "remove": "Kasadan çıkar",

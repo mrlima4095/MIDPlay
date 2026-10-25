@@ -318,6 +318,66 @@ public class SettingsManager {
     saveSetting("vaultPasswordHash", hash == null ? "" : hash);
   }
 
+  /** Whether the subapp keyed by {@code key} requires the vault password before opening. */
+  public boolean isVaultAppLocked(String key) {
+    if (key == null || key.length() == 0) {
+      return false;
+    }
+    try {
+      String locked = settings().getString("vaultLockedApps", "");
+      return ("," + locked + ",").indexOf("," + key + ",") >= 0;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  /** Locks or unlocks a subapp, keeping the remaining locked apps untouched. */
+  public void setVaultAppLocked(String key, boolean locked) throws RecordStoreException {
+    if (key == null || key.length() == 0) {
+      return;
+    }
+    String current;
+    try {
+      current = settings().getString("vaultLockedApps", "");
+    } catch (Exception e) {
+      current = "";
+    }
+    saveSetting("vaultLockedApps", locked ? addLockedApp(current, key) : removeLockedApp(current, key));
+  }
+
+  private static String addLockedApp(String list, String key) {
+    if (list == null) {
+      list = "";
+    }
+    if (("," + list + ",").indexOf("," + key + ",") >= 0) {
+      return list;
+    }
+    return list.length() == 0 ? key : list + "," + key;
+  }
+
+  private static String removeLockedApp(String list, String key) {
+    if (list == null || list.length() == 0) {
+      return "";
+    }
+    StringBuffer result = new StringBuffer();
+    int start = 0;
+    while (start <= list.length()) {
+      int comma = list.indexOf(',', start);
+      String token = comma < 0 ? list.substring(start) : list.substring(start, comma);
+      if (token.length() > 0 && !token.equals(key)) {
+        if (result.length() > 0) {
+          result.append(',');
+        }
+        result.append(token);
+      }
+      if (comma < 0) {
+        break;
+      }
+      start = comma + 1;
+    }
+    return result.toString();
+  }
+
   public String getCurrentDownloadPath() {
     if (currentDownloadPath == null || currentDownloadPath.length() == 0) {
       currentDownloadPath = Configuration.DEFAULT_DOWNLOAD_PATH;
