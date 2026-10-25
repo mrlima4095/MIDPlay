@@ -3,7 +3,9 @@ package midplay.net;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.TimerTask;
+import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import midplay.util.Utils;
 
@@ -26,15 +28,26 @@ public class HttpTextOperation extends NetworkOperation {
   private final String url;
   private final Listener listener;
   private final int maxBytes;
+  private final byte[] postBody;
 
   public HttpTextOperation(String url, Listener listener) {
-    this(url, listener, DEFAULT_MAX_BYTES);
+    this(url, listener, DEFAULT_MAX_BYTES, null);
   }
 
   public HttpTextOperation(String url, Listener listener, int maxBytes) {
+    this(url, listener, maxBytes, null);
+  }
+
+  /** Sends {@code body} as a form-encoded POST instead of a GET. */
+  public HttpTextOperation(String url, String body, Listener listener) {
+    this(url, listener, DEFAULT_MAX_BYTES, body == null ? null : Utils.utf8ToBytes(body));
+  }
+
+  private HttpTextOperation(String url, Listener listener, int maxBytes, byte[] postBody) {
     this.url = url;
     this.listener = listener;
     this.maxBytes = maxBytes > 0 ? maxBytes : DEFAULT_MAX_BYTES;
+    this.postBody = postBody;
   }
 
   protected void execute() {
@@ -47,14 +60,33 @@ public class HttpTextOperation extends NetworkOperation {
         HttpConnection hcon = null;
         TimerTask watchdog = null;
         try {
-          hcon = Network.openConnection(current);
+          hcon =
+              Network.openConnection(
+                  current, postBody == null ? Connector.READ : Connector.READ_WRITE);
           if (hcon == null) {
             throw new IOException("Failed to open connection");
           }
           hcon.setRequestProperty("User-Agent", "MIDPlay/1.0 (MIDP-2.0; CLDC-1.1)");
-          hcon.setRequestMethod(HttpConnection.GET);
-          hcon.setRequestProperty("Accept", "text/html,application/xhtml+xml,text/plain,*/*");
+          if (postBody == null) {
+            hcon.setRequestMethod(HttpConnection.GET);
+          } else {
+            hcon.setRequestMethod(HttpConnection.POST);
+            hcon.setRequestProperty(
+                "Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            hcon.setRequestProperty("Content-Length", String.valueOf(postBody.length));
+          }
+          hcon.setRequestProperty(
+              "Accept", "text/html,application/xhtml+xml,application/json,text/plain,*/*");
           watchdog = Network.armPlaybackWatchdog(hcon, SOCKET_TIMEOUT_MS);
+          if (postBody != null && !isStopped()) {
+            OutputStream output = hcon.openOutputStream();
+            try {
+              output.write(postBody);
+              output.flush();
+            } finally {
+              Utils.closeQuietly(output);
+            }
+          }
           int code = hcon.getResponseCode();
           if (code >= 200 && code < 300) {
             String text = Utils.bytesToUtf8(readAll(hcon));

@@ -347,7 +347,11 @@
     "export_filename": "Nazwa pliku eksportu",
     "file_name": "Nazwa pliku",
     "delete_confirm": "Usunąć {0}?",
-    "deleted": "Notatka usunięta"
+    "deleted": "Notatka usunięta",
+    "translate": "Przetłumacz",
+    "show_original": "Pokaż oryginał",
+    "translating": "Tłumaczenie notatki...",
+    "translate_error": "Nie udało się przetłumaczyć notatki"
   },
   "bulk": {
     "notes_deleted": "Usunięto {0} notatek",

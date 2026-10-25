@@ -347,7 +347,11 @@
     "export_filename": "שם קובץ הייצוא",
     "file_name": "שם קובץ",
     "delete_confirm": "למחוק {0}?",
-    "deleted": "הפתק נמחק"
+    "deleted": "הפתק נמחק",
+    "translate": "תרגום",
+    "show_original": "הצג מקור",
+    "translating": "מתרגם פתק...",
+    "translate_error": "לא ניתן היה לתרגם את הפתק"
   },
   "bulk": {
     "notes_deleted": "נמחקו {0} הערות",

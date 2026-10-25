@@ -126,7 +126,11 @@
     "delete_selected": "Excluir notas selecionadas",
     "delete_selected_confirm": "Excluir as notas selecionadas?",
     "delete_confirm": "Excluir {0}?",
-    "deleted": "Nota excluída"
+    "deleted": "Nota excluída",
+    "translate": "Traduzir",
+    "show_original": "Ver original",
+    "translating": "Traduzindo nota...",
+    "translate_error": "Não foi possível traduzir a nota"
   },
   "open_uri": {
     "title": "Abrir...",

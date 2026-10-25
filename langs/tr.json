@@ -354,7 +354,11 @@
     "export_filename": "Dışa aktarma dosya adı",
     "file_name": "Dosya adı",
     "delete_confirm": "{0} silinsin mi?",
-    "deleted": "Not silindi"
+    "deleted": "Not silindi",
+    "translate": "Çevir",
+    "show_original": "Orijinali göster",
+    "translating": "Not çevriliyor...",
+    "translate_error": "Not çevrilemedi"
   },
   "bulk": {
     "notes_deleted": "{0} not silindi",

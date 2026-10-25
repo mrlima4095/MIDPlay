@@ -126,7 +126,11 @@
     "delete_selected": "Delete selected notes",
     "delete_selected_confirm": "Delete the selected notes?",
     "delete_confirm": "Delete {0}?",
-    "deleted": "Note deleted"
+    "deleted": "Note deleted",
+    "translate": "Translate",
+    "show_original": "Show original",
+    "translating": "Translating note...",
+    "translate_error": "Could not translate the note"
   },
   "open_uri": {
     "title": "Open...",

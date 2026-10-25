@@ -354,7 +354,11 @@
     "export_filename": "Tên tệp xuất",
     "file_name": "Tên tệp",
     "delete_confirm": "Xóa {0}?",
-    "deleted": "Đã xóa ghi chú"
+    "deleted": "Đã xóa ghi chú",
+    "translate": "Dịch",
+    "show_original": "Xem bản gốc",
+    "translating": "Đang dịch ghi chú...",
+    "translate_error": "Không thể dịch ghi chú"
   },
   "bulk": {
     "notes_deleted": "Đã xóa {0} ghi chú",

@@ -62,6 +62,7 @@ public class Configuration {
   public static final int REDDIT_POSTS_PER_PAGE_MAX = 25;
 
   public static final String DEFAULT_LYRICS_API_URL = "http://opentty.fun/lyrics.php";
+  public static final String DEFAULT_TRANSLATE_URL = "http://opentty.fun/translate.php";
 
   /**
    * Hosts whose song pages are recognized by the Open... screen and by links shared in subapps.
