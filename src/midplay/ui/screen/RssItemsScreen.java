@@ -98,6 +98,7 @@ public final class RssItemsScreen extends BaseList {
         new Runnable() {
           public void run() {
             loading = false;
+            refresh();
           }
         });
     MIDPlay.startOperation(
