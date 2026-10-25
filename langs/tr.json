@@ -637,6 +637,14 @@
     "link_error": "Bu Reddit bağlantısı açılamadı",
     "comments_pending": "Bu gönderinin yorumları henüz arşivlenmedi. Birazdan tekrar deneyin."
   },
+  "lyrics": {
+    "title": "Şarkı sözleri",
+    "command": "Sözler",
+    "loading": "Sözler yükleniyor...",
+    "not_found": "Sözler bulunamadı",
+    "error": "Sözler yüklenemedi",
+    "no_track": "Çalan bir şey yok"
+  },
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Hikâye, yazar veya etiket",

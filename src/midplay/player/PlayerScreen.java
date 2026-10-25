@@ -12,6 +12,7 @@ import midplay.model.Tracks;
 import midplay.store.Configuration;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
+import midplay.ui.screen.LyricsScreen;
 import midplay.ui.screen.PlaylistPickerScreen;
 import midplay.ui.screen.QueueTrackListScreen;
 import midplay.ui.screen.SleepTimerScreen;
@@ -147,6 +148,7 @@ public final class PlayerScreen extends Canvas
       Commands.playerVolume(),
       Commands.playerAddToPlaylist(),
       Commands.playerShowPlaylist(),
+      Commands.playerLyrics(),
       Commands.playerRepeat(),
       Commands.playerShuffle()
     };
@@ -503,6 +505,8 @@ public final class PlayerScreen extends Canvas
       addCurrentTrackToPlaylist();
     } else if (c == Commands.playerShowPlaylist()) {
       showCurrentPlaylist();
+    } else if (c == Commands.playerLyrics()) {
+      showLyrics();
     } else if (c == Commands.playerSleepTimer()) {
       showSleepTimerDialog();
     } else if (c == Commands.playerCancelTimer()) {
@@ -675,6 +679,10 @@ public final class PlayerScreen extends Canvas
         getPlayerGUI().adjustVolume(false);
         break;
     }
+  }
+
+  private void showLyrics() {
+    LyricsScreen.open(navigator, getPlayerGUI().getCurrentTrack());
   }
 
   private void handleBackCommand() {

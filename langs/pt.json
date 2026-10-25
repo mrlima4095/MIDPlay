@@ -637,6 +637,14 @@
     "link_error": "Não foi possível abrir este link do Reddit",
     "comments_pending": "Os comentários deste post ainda não foram arquivados. Tente de novo em instantes."
   },
+  "lyrics": {
+    "title": "Letra",
+    "command": "Letra",
+    "loading": "Buscando letra...",
+    "not_found": "Letra não encontrada",
+    "error": "Não foi possível carregar a letra",
+    "no_track": "Nada está tocando"
+  },
   "wattpad": {
     "title": "Wattpad",
     "search_field": "História, autor ou tag",

@@ -637,6 +637,14 @@
     "link_error": "Không thể mở liên kết Reddit này",
     "comments_pending": "Bình luận của bài này chưa được lưu trữ. Hãy thử lại sau giây lát."
   },
+  "lyrics": {
+    "title": "Lời bài hát",
+    "command": "Lời",
+    "loading": "Đang tải lời bài hát...",
+    "not_found": "Không tìm thấy lời bài hát",
+    "error": "Không thể tải lời bài hát",
+    "no_track": "Không có bài nào đang phát"
+  },
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Truyện, tác giả hoặc thẻ",

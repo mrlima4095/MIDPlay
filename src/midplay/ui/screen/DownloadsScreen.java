@@ -21,6 +21,7 @@ public final class DownloadsScreen extends BaseList {
   private int loadKey = 0;
   private final Command selectMultipleCommand =
       new Command(Lang.tr("action.select"), Command.SCREEN, 1);
+  private final Command lyricsCommand = Commands.playerLyrics();
   private final Command inProgressCommand =
       new Command(Lang.tr("download.queue"), Command.SCREEN, 7);
   private final Command reorderCommand =
@@ -36,6 +37,7 @@ public final class DownloadsScreen extends BaseList {
     addCommand(Commands.downloadDeleteAll());
     addCommand(Commands.downloadRefresh());
     addCommand(Commands.downloadLink());
+    addCommand(lyricsCommand);
     addCommand(selectMultipleCommand);
     addCommand(inProgressCommand);
     addCommand(reorderCommand);
@@ -136,6 +138,10 @@ public final class DownloadsScreen extends BaseList {
       refresh();
     } else if (c == Commands.downloadLink()) {
       navigator.forward(new LocalFileLinkScreen(navigator));
+    } else if (c == lyricsCommand) {
+      if (isValidSelection(selected, tracks.length)) {
+        LyricsScreen.open(navigator, tracks[selected]);
+      }
     } else if (c == selectMultipleCommand) {
       navigator.forward(
           new MultiTrackSelectScreen(
@@ -162,6 +168,7 @@ public final class DownloadsScreen extends BaseList {
     removeCommand(Commands.downloadDeleteAll());
     removeCommand(Commands.downloadRefresh());
     removeCommand(Commands.downloadLink());
+    removeCommand(lyricsCommand);
     removeCommand(selectMultipleCommand);
     removeCommand(inProgressCommand);
     removeCommand(reorderCommand);
@@ -218,6 +225,7 @@ public final class DownloadsScreen extends BaseList {
     addCommand(Commands.downloadDeleteAll());
     addCommand(Commands.downloadRefresh());
     addCommand(Commands.downloadLink());
+    addCommand(lyricsCommand);
     addCommand(selectMultipleCommand);
     addCommand(inProgressCommand);
     addCommand(reorderCommand);

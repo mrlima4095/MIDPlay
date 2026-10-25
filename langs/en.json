@@ -637,6 +637,14 @@
     "link_error": "Could not open this Reddit link",
     "comments_pending": "Comments for this post are not archived yet. Try again in a moment."
   },
+  "lyrics": {
+    "title": "Lyrics",
+    "command": "Lyrics",
+    "loading": "Loading lyrics...",
+    "not_found": "Lyrics not found",
+    "error": "Could not load the lyrics",
+    "no_track": "Nothing is playing"
+  },
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Story, author or tag",

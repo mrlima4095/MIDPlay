@@ -637,6 +637,14 @@
     "link_error": "Nie udało się otworzyć tego linku Reddita",
     "comments_pending": "Komentarze do tego posta nie zostały jeszcze zarchiwizowane. Spróbuj ponownie za chwilę."
   },
+  "lyrics": {
+    "title": "Tekst piosenki",
+    "command": "Tekst",
+    "loading": "Ładowanie tekstu...",
+    "not_found": "Nie znaleziono tekstu",
+    "error": "Nie udało się wczytać tekstu",
+    "no_track": "Nic nie jest odtwarzane"
+  },
   "wattpad": {
     "title": "Wattpad",
     "search_field": "Historia, autor lub tag",

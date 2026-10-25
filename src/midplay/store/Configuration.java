@@ -61,6 +61,8 @@ public class Configuration {
   public static final int REDDIT_POSTS_PER_PAGE_MIN = 1;
   public static final int REDDIT_POSTS_PER_PAGE_MAX = 25;
 
+  public static final String DEFAULT_LYRICS_API_URL = "http://opentty.fun/lyrics.php";
+
   public static final int REDDIT_TRANSLATE_OFF = 0;
   public static final int REDDIT_TRANSLATE_ON = 1;
   public static final int DEFAULT_REDDIT_AUTO_TRANSLATE = REDDIT_TRANSLATE_OFF;
