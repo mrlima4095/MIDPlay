@@ -81,7 +81,7 @@ public class Lang {
     "speedtest.upload", "speedtest.phase_ping", "speedtest.phase_download", "speedtest.phase_upload", "speedtest.done", "speedtest.error", "speedtest.run", "speedtest.waiting", "speedtest.start", "speedtest.last",
     "speedtest.ready", "storage.title", "storage.refresh", "storage.summary", "storage.available", "storage.empty", "storage.card", "storage.card_line", "storage.card_unavailable", "storage.clear_history",
     "storage.clear_confirm", "storage.history_cleared", "storage.group_playlists", "storage.group_notes", "storage.group_tasks", "storage.group_downloads", "storage.group_settings", "storage.group_history", "storage.group_wattpad", "storage.group_pinterest",
-    "storage.group_reddit", "storage.group_other"
+    "storage.group_reddit", "storage.group_other", "storage.rms"
   };
 
   private static class EN {
@@ -228,7 +228,7 @@ public class Lang {
       "No application data stored", "Memory card", "{0} free of {1}", "Card space unavailable", "Clear history",
       "Clear search history, recents and Open... history?", "History and cache cleared", "Playlists", "Notes", "Tasks",
       "Downloads", "Settings", "History", "Wattpad", "Pinterest",
-      "Reddit", "Other data"
+      "Reddit", "Other data", "RMS"
     };
   }
 
@@ -376,7 +376,7 @@ public class Lang {
       "לא נשמרו נתוני אפליקציה", "כרטיס זיכרון", "{0} פנויים מתוך {1}", "שטח הכרטיס אינו זמין", "נקה היסטוריה",
       "לנקות היסטוריית חיפושים, אחרונים והיסטוריית פתח...?", "ההיסטוריה והמטמון נוקו", "פלייליסטים", "הערות", "משימות",
       "הורדות", "הגדרות", "היסטוריה", "Wattpad", "Pinterest",
-      "Reddit", "נתונים אחרים"
+      "Reddit", "נתונים אחרים", "RMS"
     };
   }
 
@@ -524,7 +524,7 @@ public class Lang {
       "Brak danych aplikacji", "Karta pamięci", "{0} wolnych z {1}", "Miejsce na karcie niedostępne", "Wyczyść historię",
       "Wyczyścić historię wyszukiwań, ostatnie i historię Otwórz...?", "Historia i pamięć podręczna wyczyszczone", "Playlisty", "Notatki", "Zadania",
       "Pobrane", "Ustawienia", "Historia", "Wattpad", "Pinterest",
-      "Reddit", "Inne dane"
+      "Reddit", "Inne dane", "RMS"
     };
   }
 
@@ -672,7 +672,7 @@ public class Lang {
       "Nenhum dado do aplicativo armazenado", "Cartão de memória", "{0} livres de {1}", "Espaço do cartão indisponível", "Limpar históricos",
       "Limpar históricos de busca, recentes e do Abrir...?", "Históricos e cache limpos", "Playlists", "Notas", "Tarefas",
       "Downloads", "Configurações", "Históricos", "Wattpad", "Pinterest",
-      "Reddit", "Outros dados"
+      "Reddit", "Outros dados", "RMS"
     };
   }
 
@@ -820,7 +820,7 @@ public class Lang {
       "Uygulama verisi yok", "Hafıza kartı", "{1} alanın {0} kadarı boş", "Kart alanı kullanılamıyor", "Geçmişi temizle",
       "Arama geçmişi, son öğeler ve Aç... geçmişi temizlensin mi?", "Geçmiş ve önbellek temizlendi", "Çalma listeleri", "Notlar", "Görevler",
       "İndirilenler", "Ayarlar", "Geçmiş", "Wattpad", "Pinterest",
-      "Reddit", "Diğer veriler"
+      "Reddit", "Diğer veriler", "RMS"
     };
   }
 
@@ -968,7 +968,7 @@ public class Lang {
       "Không có dữ liệu ứng dụng", "Thẻ nhớ", "Còn trống {0} trong {1}", "Không xác định được dung lượng thẻ", "Xóa lịch sử",
       "Xóa lịch sử tìm kiếm, gần đây và lịch sử Mở...?", "Đã xóa lịch sử và bộ nhớ đệm", "Danh sách phát", "Ghi chú", "Nhiệm vụ",
       "Tải xuống", "Cài đặt", "Lịch sử", "Wattpad", "Pinterest",
-      "Reddit", "Dữ liệu khác"
+      "Reddit", "Dữ liệu khác", "RMS"
     };
   }
 

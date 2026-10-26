@@ -177,42 +177,34 @@ public final class StorageScreen extends BaseForm {
       }
     }
 
+    StringBuffer rms = new StringBuffer();
     if (areas == 0) {
-      append(new StringItem(null, Lang.tr("storage.empty")));
+      rms.append(Lang.tr("storage.empty"));
     } else {
       String summary = Lang.tr("storage.summary");
       summary = Utils.replace(summary, "{0}", Utils.formatDataSize(totalSize));
       summary = Utils.replace(summary, "{1}", Integer.toString(areas));
       summary = Utils.replace(summary, "{2}", Integer.toString(totalRecords));
-      append(new StringItem(null, summary));
+      rms.append(summary);
       if (available >= 0) {
-        append(
-            new StringItem(
-                null, Lang.tr("storage.available", Utils.formatDataSize(available))));
+        rms.append('\n').append(Lang.tr("storage.available", Utils.formatDataSize(available)));
       }
-      append(new StringItem(null, ""));
+      rms.append('\n');
       for (int g = 0; g < GROUP_COUNT; g++) {
         if (counts[g] == 0 && sizes[g] == 0) {
           continue;
         }
-        append(
-            new StringItem(
-                null,
-                Lang.tr(GROUP_NAMES[g])
-                    + ": "
-                    + Utils.formatDataSize(sizes[g])
-                    + " ("
-                    + counts[g]
-                    + ")"));
+        rms.append('\n')
+            .append(Lang.tr(GROUP_NAMES[g]))
+            .append(": ")
+            .append(Utils.formatDataSize(sizes[g]))
+            .append(" (")
+            .append(counts[g])
+            .append(')');
       }
     }
-
-    append(new StringItem(null, ""));
-    append(new StringItem(null, Lang.tr("storage.card")));
-    appendCard(
-        Lang.tr("settings.download_path"),
-        SettingsManager.getInstance().getCurrentDownloadPath());
-    appendCard(Lang.tr("settings.wattpad_path"), SettingsManager.getInstance().getWattpadPath());
+    append(new StringItem(Lang.tr("storage.rms"), rms.toString()));
+    append(new StringItem(Lang.tr("storage.card"), cardText()));
   }
 
   private static String[] listStoreNames() {
@@ -226,8 +218,12 @@ public final class StorageScreen extends BaseForm {
     return KNOWN_STORES;
   }
 
-  private void appendCard(String label, String path) {
-    String text;
+  /** Free/total space of the download folder, shown under the memory card title. */
+  private String cardText() {
+    String path = SettingsManager.getInstance().getCurrentDownloadPath();
+    if (path == null || path.length() == 0) {
+      return Lang.tr("storage.card_unavailable");
+    }
     FileConnection file = null;
     try {
       file = (FileConnection) Connector.open(path, Connector.READ);
@@ -235,12 +231,9 @@ public final class StorageScreen extends BaseForm {
         String line = Lang.tr("storage.card_line");
         line = Utils.replace(line, "{0}", Utils.formatDataSize(file.availableSize()));
         line = Utils.replace(line, "{1}", Utils.formatDataSize(file.totalSize()));
-        text = label + ": " + line;
-      } else {
-        text = label + ": " + Lang.tr("storage.card_unavailable");
+        return Lang.tr("settings.download_path") + ": " + line;
       }
     } catch (Throwable t) {
-      text = label + ": " + Lang.tr("storage.card_unavailable");
     } finally {
       if (file != null) {
         try {
@@ -249,7 +242,7 @@ public final class StorageScreen extends BaseForm {
         }
       }
     }
-    append(new StringItem(null, text));
+    return Lang.tr("storage.card_unavailable");
   }
 
   private static int groupOf(String name) {
