@@ -156,6 +156,11 @@ public final class LyricsApi {
     cache.put(key, entry == null ? MISSING : entry);
   }
 
+  /** Drops the in-memory lyrics cache (used by the hidden storage panel). */
+  public static void clearCache() {
+    cache.clear();
+  }
+
   private static String norm(String s) {
     return s == null ? "" : s.trim().toLowerCase();
   }

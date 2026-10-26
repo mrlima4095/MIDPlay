@@ -79,6 +79,13 @@ public final class OpenUriScreen extends BaseForm {
       navigator.forward(new SpeedTestScreen(navigator));
       return;
     }
+    if (uri.equalsIgnoreCase("rms")) {
+      // Hidden storage panel; kept in the history like the other diagnostic shortcuts.
+      UriHistoryManager.getInstance().record("rms");
+      refreshHistory();
+      navigator.forward(new StorageScreen(navigator));
+      return;
+    }
     if (MIDPlay.getInstance().openInternalUri(uri)) {
       UriHistoryManager.getInstance().record(uri);
       refreshHistory();

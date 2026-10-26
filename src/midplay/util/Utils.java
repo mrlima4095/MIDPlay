@@ -411,6 +411,25 @@ public class Utils {
     }
   }
 
+  /** Human readable data size, e.g. {@code 512 B}, {@code 12.3 KB}, {@code 1.4 GB}. */
+  public static String formatDataSize(long bytes) {
+    if (bytes < 1024L) {
+      return bytes + " B";
+    }
+    if (bytes < 1024L * 1024L) {
+      return oneDecimal(bytes, 1024L) + " KB";
+    }
+    if (bytes < 1024L * 1024L * 1024L) {
+      return oneDecimal(bytes, 1024L * 1024L) + " MB";
+    }
+    return oneDecimal(bytes, 1024L * 1024L * 1024L) + " GB";
+  }
+
+  private static String oneDecimal(long value, long unit) {
+    long tenths = (value * 10L + unit / 2L) / unit;
+    return (tenths / 10L) + "." + (tenths % 10L);
+  }
+
   public static void closePlayerQuietly(Player player, PlayerListener listener) {
     if (player == null) {
       return;
