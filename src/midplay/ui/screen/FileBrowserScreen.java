@@ -19,8 +19,10 @@ import midplay.store.Configuration;
 import midplay.store.SettingsManager;
 import midplay.ui.BaseList;
 import midplay.ui.Commands;
+import midplay.ui.FileTransferActions;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
+import midplay.util.FileTransfer;
 import midplay.util.Lang;
 import midplay.util.Utils;
 
@@ -59,6 +61,8 @@ public final class FileBrowserScreen extends BaseList {
   private final Command selectDirectoryCommand;
   private final Command renameCommand;
   private final Command deleteCommand;
+  private final Command copyCommand;
+  private final Command moveCommand;
   private final Command searchCommand;
   private final Command clearSearchCommand;
   private final Command selectMultipleCommand;
@@ -73,17 +77,34 @@ public final class FileBrowserScreen extends BaseList {
   }
 
   public FileBrowserScreen(Navigator navigator, DirectorySelectionListener listener) {
-    this(navigator, sessionStartPath(), listener);
+    this(navigator, sessionStartPath(), listener, "note.save_here");
+  }
+
+  public FileBrowserScreen(
+      Navigator navigator, DirectorySelectionListener listener, String selectLabelKey) {
+    this(navigator, sessionStartPath(), listener, selectLabelKey);
   }
 
   private FileBrowserScreen(
       Navigator navigator, String path, DirectorySelectionListener directoryListener) {
+    this(navigator, path, directoryListener, "note.save_here");
+  }
+
+  private FileBrowserScreen(
+      Navigator navigator,
+      String path,
+      DirectorySelectionListener directoryListener,
+      String selectLabelKey) {
     super(Lang.tr("menu.files"), navigator);
     directorySelectionListener = directoryListener;
     selectDirectoryCommand =
-        directoryListener == null ? null : new Command(Lang.tr("note.save_here"), Command.OK, 0);
+        directoryListener == null
+            ? null
+            : new Command(Lang.tr(selectLabelKey), Command.OK, 0);
     renameCommand = new Command(Lang.tr("files.rename"), Command.SCREEN, 6);
     deleteCommand = new Command(Lang.tr("files.delete"), Command.SCREEN, 7);
+    copyCommand = new Command(Lang.tr("files.copy_to"), Command.SCREEN, 3);
+    moveCommand = new Command(Lang.tr("files.move_to"), Command.SCREEN, 4);
     searchCommand = new Command(Lang.tr("files.search"), Command.SCREEN, 5);
     clearSearchCommand = new Command(Lang.tr("files.clear_search"), Command.SCREEN, 8);
     selectMultipleCommand = new Command(Lang.tr("files.select_multiple"), Command.SCREEN, 9);
@@ -102,6 +123,8 @@ public final class FileBrowserScreen extends BaseList {
     if (selectDirectoryCommand != null) {
       addCommand(selectDirectoryCommand);
     } else if (directorySelectionListener == null) {
+      addCommand(copyCommand);
+      addCommand(moveCommand);
       addCommand(selectMultipleCommand);
     }
     addCommand(gotoPathCommand);
@@ -274,6 +297,10 @@ public final class FileBrowserScreen extends BaseList {
       startLoad(0);
     } else if (c == selectMultipleCommand) {
       openMultiSelect();
+    } else if (c == copyCommand) {
+      transferSelected(false);
+    } else if (c == moveCommand) {
+      transferSelected(true);
     } else if (c == renameCommand) {
       promptRename();
     } else if (c == deleteCommand) {
@@ -341,6 +368,38 @@ public final class FileBrowserScreen extends BaseList {
     int index = getSelectedIndex();
     return isValidSelection(index, rowPaths.length)
         && (rowKinds[index] == KIND_FILE || rowKinds[index] == KIND_AUDIO);
+  }
+
+  private void transferSelected(final boolean move) {
+    if (!isSelectedFile()) {
+      return;
+    }
+    final String source = rowPaths[getSelectedIndex()];
+    navigator.forward(
+        new FileBrowserScreen(
+            navigator,
+            new FileBrowserScreen.DirectorySelectionListener() {
+              public void onDirectorySelected(String directory) {
+                navigator.back();
+                startTransfer(new String[] {source}, directory, move);
+              }
+            },
+            move ? "files.move_here" : "files.copy_here"));
+  }
+
+  private void startTransfer(String[] sources, String destination, final boolean move) {
+    FileTransferActions.start(
+        navigator,
+        sources,
+        destination,
+        move,
+        new FileTransferActions.Listener() {
+          public void onFinished(FileTransfer.Result result) {
+            refresh();
+            navigator.showAlert(
+                FileTransfer.describe(result, move), FileTransferActions.resultType(result));
+          }
+        });
   }
 
   private void promptRename() {

@@ -239,6 +239,11 @@ public class Navigator {
     Display.getDisplay(this.midlet).callSerially(r);
   }
 
+  /** The displayable currently shown, used to check that a screen is still on top. */
+  public Displayable getCurrent() {
+    return Display.getDisplay(this.midlet).getCurrent();
+  }
+
   public void showAlert(String message, AlertType type) {
     if (message == null) {
       return;

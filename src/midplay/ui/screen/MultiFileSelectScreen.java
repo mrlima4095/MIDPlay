@@ -12,8 +12,10 @@ import javax.microedition.lcdui.List;
 import midplay.model.Track;
 import midplay.store.Configuration;
 import midplay.ui.Commands;
+import midplay.ui.FileTransferActions;
 import midplay.ui.Navigator;
 import midplay.ui.PlayerNavHelper;
+import midplay.util.FileTransfer;
 import midplay.util.Lang;
 
 /** Multiple-selection actions for files in the current folder. */
@@ -28,6 +30,8 @@ public final class MultiFileSelectScreen extends List implements CommandListener
   private final Command addQueueCommand = new Command(Lang.tr("queue.add_to_queue"), Command.SCREEN, 3);
   private final Command addPlaylistCommand = new Command(Lang.tr("playlist.add_track"), Command.SCREEN, 4);
   private final Command deleteCommand = new Command(Lang.tr("files.delete"), Command.SCREEN, 5);
+  private final Command copyCommand = new Command(Lang.tr("files.copy_to"), Command.SCREEN, 6);
+  private final Command moveCommand = new Command(Lang.tr("files.move_to"), Command.SCREEN, 7);
 
   public MultiFileSelectScreen(
       Navigator navigator, String title, String[] paths, boolean[] audioFiles,
@@ -45,6 +49,8 @@ public final class MultiFileSelectScreen extends List implements CommandListener
     addCommand(deselectAllCommand);
     addCommand(addQueueCommand);
     addCommand(addPlaylistCommand);
+    addCommand(copyCommand);
+    addCommand(moveCommand);
     addCommand(deleteCommand);
     addCommand(Commands.back());
     setCommandListener(this);
@@ -65,9 +71,50 @@ public final class MultiFileSelectScreen extends List implements CommandListener
       Track[] tracks = selectedAudioTracks();
       if (tracks.length == 0) showNoAudioFiles();
       else navigator.forward(new PlaylistPickerScreen(navigator, tracks, this));
+    } else if (command == copyCommand) {
+      transferSelected(false);
+    } else if (command == moveCommand) {
+      transferSelected(true);
     } else if (command == deleteCommand) {
       confirmDeleteSelected();
     }
+  }
+
+  private void transferSelected(final boolean move) {
+    final String[] selected = selectedPaths();
+    if (selected.length == 0) {
+      navigator.showAlert(Lang.tr("bulk.select_empty"), AlertType.INFO);
+      return;
+    }
+    navigator.forward(
+        new FileBrowserScreen(
+            navigator,
+            new FileBrowserScreen.DirectorySelectionListener() {
+              public void onDirectorySelected(String directory) {
+                navigator.back();
+                startTransfer(selected, directory, move);
+              }
+            },
+            move ? "files.move_here" : "files.copy_here"));
+  }
+
+  private void startTransfer(String[] sources, String destination, final boolean move) {
+    FileTransferActions.start(
+        navigator,
+        sources,
+        destination,
+        move,
+        new FileTransferActions.Listener() {
+          public void onFinished(FileTransfer.Result result) {
+            String message = FileTransfer.describe(result, move);
+            AlertType type = FileTransferActions.resultType(result);
+            if (navigator.getCurrent() == MultiFileSelectScreen.this) {
+              navigator.backAndShowAlert(message, type);
+            } else {
+              navigator.showAlert(message, type);
+            }
+          }
+        });
   }
 
   private void setAllSelected(boolean selected) {
