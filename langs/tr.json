@@ -43,7 +43,16 @@
     "confirm": {
       "delete": "Bu dosya silinsin mi?",
       "delete_selected": "Seçili dosyalar silinsin mi?"
-    }
+    },
+    "copy_to": "Şuraya kopyala...",
+    "move_to": "Şuraya taşı...",
+    "copy_here": "Buraya kopyala",
+    "move_here": "Buraya taşı",
+    "copying": "Dosyalar kopyalanıyor...",
+    "moving": "Dosyalar taşınıyor...",
+    "copy_result": "{0} kopyalandı, {1} başarısız, {2} atlandı",
+    "move_result": "{0} taşındı, {1} başarısız, {2} atlandı",
+    "transfer_cancelled": "İptal edildi"
   },
   "language": {
     "en": "English",
@@ -793,5 +802,28 @@
     "start": "Testi başlat",
     "last": "Bu oturumdaki son test",
     "ready": "Başlamaya hazır"
+  },
+  "storage": {
+    "title": "Depolama",
+    "refresh": "Yenile",
+    "summary": "Toplam {0} • {1} alan • {2} kayıt",
+    "available": "Kullanılabilir: {0}",
+    "empty": "Uygulama verisi yok",
+    "card": "Hafıza kartı",
+    "card_line": "{1} alanın {0} kadarı boş",
+    "card_unavailable": "Kart alanı kullanılamıyor",
+    "clear_history": "Geçmişi temizle",
+    "clear_confirm": "Arama geçmişi, son öğeler ve Aç... geçmişi temizlensin mi?",
+    "history_cleared": "Geçmiş ve önbellek temizlendi",
+    "group_playlists": "Çalma listeleri",
+    "group_notes": "Notlar",
+    "group_tasks": "Görevler",
+    "group_downloads": "İndirilenler",
+    "group_settings": "Ayarlar",
+    "group_history": "Geçmiş",
+    "group_wattpad": "Wattpad",
+    "group_pinterest": "Pinterest",
+    "group_reddit": "Reddit",
+    "group_other": "Diğer veriler"
   }
 }

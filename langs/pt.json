@@ -43,7 +43,16 @@
     "confirm": {
       "delete": "Excluir este arquivo?",
       "delete_selected": "Excluir os arquivos selecionados?"
-    }
+    },
+    "copy_to": "Copiar para...",
+    "move_to": "Mover para...",
+    "copy_here": "Copiar aqui",
+    "move_here": "Mover aqui",
+    "copying": "Copiando arquivos...",
+    "moving": "Movendo arquivos...",
+    "copy_result": "{0} copiado(s), {1} falha(s), {2} ignorado(s)",
+    "move_result": "{0} movido(s), {1} falha(s), {2} ignorado(s)",
+    "transfer_cancelled": "Operação cancelada"
   },
   "bulk": {
     "select_empty": "Selecione pelo menos um item",
@@ -793,5 +802,28 @@
     "start": "Iniciar teste",
     "last": "Último teste desta sessão",
     "ready": "Pronto para iniciar"
+  },
+  "storage": {
+    "title": "Armazenamento",
+    "refresh": "Atualizar",
+    "summary": "{0} usados em {1} áreas • {2} registros",
+    "available": "Disponível: {0}",
+    "empty": "Nenhum dado do aplicativo armazenado",
+    "card": "Cartão de memória",
+    "card_line": "{0} livres de {1}",
+    "card_unavailable": "Espaço do cartão indisponível",
+    "clear_history": "Limpar históricos",
+    "clear_confirm": "Limpar históricos de busca, recentes e do Abrir...?",
+    "history_cleared": "Históricos e cache limpos",
+    "group_playlists": "Playlists",
+    "group_notes": "Notas",
+    "group_tasks": "Tarefas",
+    "group_downloads": "Downloads",
+    "group_settings": "Configurações",
+    "group_history": "Históricos",
+    "group_wattpad": "Wattpad",
+    "group_pinterest": "Pinterest",
+    "group_reddit": "Reddit",
+    "group_other": "Outros dados"
   }
 }

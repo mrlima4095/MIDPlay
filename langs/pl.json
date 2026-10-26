@@ -43,7 +43,16 @@
     "confirm": {
       "delete": "Usunąć ten plik?",
       "delete_selected": "Usunąć wybrane pliki?"
-    }
+    },
+    "copy_to": "Kopiuj do...",
+    "move_to": "Przenieś do...",
+    "copy_here": "Kopiuj tutaj",
+    "move_here": "Przenieś tutaj",
+    "copying": "Kopiowanie plików...",
+    "moving": "Przenoszenie plików...",
+    "copy_result": "Skopiowano: {0}, błędy: {1}, pominięto: {2}",
+    "move_result": "Przeniesiono: {0}, błędy: {1}, pominięto: {2}",
+    "transfer_cancelled": "Anulowano"
   },
   "language": {
     "en": "English",
@@ -793,5 +802,28 @@
     "start": "Rozpocznij test",
     "last": "Ostatni test w tej sesji",
     "ready": "Gotowy do rozpoczęcia"
+  },
+  "storage": {
+    "title": "Pamięć",
+    "refresh": "Odśwież",
+    "summary": "{0} w {1} obszarach • {2} rekordów",
+    "available": "Dostępne: {0}",
+    "empty": "Brak danych aplikacji",
+    "card": "Karta pamięci",
+    "card_line": "{0} wolnych z {1}",
+    "card_unavailable": "Miejsce na karcie niedostępne",
+    "clear_history": "Wyczyść historię",
+    "clear_confirm": "Wyczyścić historię wyszukiwań, ostatnie i historię Otwórz...?",
+    "history_cleared": "Historia i pamięć podręczna wyczyszczone",
+    "group_playlists": "Playlisty",
+    "group_notes": "Notatki",
+    "group_tasks": "Zadania",
+    "group_downloads": "Pobrane",
+    "group_settings": "Ustawienia",
+    "group_history": "Historia",
+    "group_wattpad": "Wattpad",
+    "group_pinterest": "Pinterest",
+    "group_reddit": "Reddit",
+    "group_other": "Inne dane"
   }
 }

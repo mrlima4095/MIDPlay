@@ -43,7 +43,16 @@
     "confirm": {
       "delete": "למחוק קובץ זה?",
       "delete_selected": "למחוק את הקבצים הנבחרים?"
-    }
+    },
+    "copy_to": "העתק אל...",
+    "move_to": "העבר אל...",
+    "copy_here": "העתק לכאן",
+    "move_here": "העבר לכאן",
+    "copying": "מעתיק קבצים...",
+    "moving": "מעביר קבצים...",
+    "copy_result": "{0} הועתקו, {1} נכשלו, {2} דולגו",
+    "move_result": "{0} הועברו, {1} נכשלו, {2} דולגו",
+    "transfer_cancelled": "הפעולה בוטלה"
   },
   "language": {
     "en": "English",
@@ -793,5 +802,28 @@
     "start": "התחל בדיקה",
     "last": "הבדיקה האחרונה בהפעלה זו",
     "ready": "מוכן להתחלה"
+  },
+  "storage": {
+    "title": "אחסון",
+    "refresh": "רענן",
+    "summary": "{0} בשימוש ב-{1} אזורים • {2} רשומות",
+    "available": "זמין: {0}",
+    "empty": "לא נשמרו נתוני אפליקציה",
+    "card": "כרטיס זיכרון",
+    "card_line": "{0} פנויים מתוך {1}",
+    "card_unavailable": "שטח הכרטיס אינו זמין",
+    "clear_history": "נקה היסטוריה",
+    "clear_confirm": "לנקות היסטוריית חיפושים, אחרונים והיסטוריית פתח...?",
+    "history_cleared": "ההיסטוריה והמטמון נוקו",
+    "group_playlists": "פלייליסטים",
+    "group_notes": "הערות",
+    "group_tasks": "משימות",
+    "group_downloads": "הורדות",
+    "group_settings": "הגדרות",
+    "group_history": "היסטוריה",
+    "group_wattpad": "Wattpad",
+    "group_pinterest": "Pinterest",
+    "group_reddit": "Reddit",
+    "group_other": "נתונים אחרים"
   }
 }

@@ -43,7 +43,16 @@
     "confirm": {
       "delete": "Xóa tệp này?",
       "delete_selected": "Xóa các tệp đã chọn?"
-    }
+    },
+    "copy_to": "Sao chép đến...",
+    "move_to": "Di chuyển đến...",
+    "copy_here": "Sao chép vào đây",
+    "move_here": "Di chuyển vào đây",
+    "copying": "Đang sao chép tệp...",
+    "moving": "Đang di chuyển tệp...",
+    "copy_result": "Đã sao chép {0}, lỗi {1}, bỏ qua {2}",
+    "move_result": "Đã di chuyển {0}, lỗi {1}, bỏ qua {2}",
+    "transfer_cancelled": "Đã hủy"
   },
   "language": {
     "en": "English",
@@ -793,5 +802,28 @@
     "start": "Bắt đầu kiểm tra",
     "last": "Lần kiểm tra gần nhất trong phiên này",
     "ready": "Sẵn sàng bắt đầu"
+  },
+  "storage": {
+    "title": "Bộ nhớ",
+    "refresh": "Làm mới",
+    "summary": "Đã dùng {0} trong {1} mục • {2} bản ghi",
+    "available": "Còn trống: {0}",
+    "empty": "Không có dữ liệu ứng dụng",
+    "card": "Thẻ nhớ",
+    "card_line": "Còn trống {0} trong {1}",
+    "card_unavailable": "Không xác định được dung lượng thẻ",
+    "clear_history": "Xóa lịch sử",
+    "clear_confirm": "Xóa lịch sử tìm kiếm, gần đây và lịch sử Mở...?",
+    "history_cleared": "Đã xóa lịch sử và bộ nhớ đệm",
+    "group_playlists": "Danh sách phát",
+    "group_notes": "Ghi chú",
+    "group_tasks": "Nhiệm vụ",
+    "group_downloads": "Tải xuống",
+    "group_settings": "Cài đặt",
+    "group_history": "Lịch sử",
+    "group_wattpad": "Wattpad",
+    "group_pinterest": "Pinterest",
+    "group_reddit": "Reddit",
+    "group_other": "Dữ liệu khác"
   }
 }

@@ -43,7 +43,16 @@
     "confirm": {
       "delete": "Delete this file?",
       "delete_selected": "Delete the selected files?"
-    }
+    },
+    "copy_to": "Copy to...",
+    "move_to": "Move to...",
+    "copy_here": "Copy here",
+    "move_here": "Move here",
+    "copying": "Copying files...",
+    "moving": "Moving files...",
+    "copy_result": "{0} copied, {1} failed, {2} skipped",
+    "move_result": "{0} moved, {1} failed, {2} skipped",
+    "transfer_cancelled": "Cancelled"
   },
   "bulk": {
     "select_empty": "Select at least one item",
@@ -793,5 +802,28 @@
     "start": "Start test",
     "last": "Last test this session",
     "ready": "Ready to start"
+  },
+  "storage": {
+    "title": "Storage",
+    "refresh": "Refresh",
+    "summary": "{0} used in {1} areas • {2} records",
+    "available": "Available: {0}",
+    "empty": "No application data stored",
+    "card": "Memory card",
+    "card_line": "{0} free of {1}",
+    "card_unavailable": "Card space unavailable",
+    "clear_history": "Clear history",
+    "clear_confirm": "Clear search history, recents and Open... history?",
+    "history_cleared": "History and cache cleared",
+    "group_playlists": "Playlists",
+    "group_notes": "Notes",
+    "group_tasks": "Tasks",
+    "group_downloads": "Downloads",
+    "group_settings": "Settings",
+    "group_history": "History",
+    "group_wattpad": "Wattpad",
+    "group_pinterest": "Pinterest",
+    "group_reddit": "Reddit",
+    "group_other": "Other data"
   }
 }
