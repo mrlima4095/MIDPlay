@@ -24,13 +24,25 @@ public class Track extends Base {
     if (track == null) {
       return false;
     }
-    String thisKey = this.getKey();
-    if (thisKey != null && thisKey.length() > 0 && thisKey.equals(track.getKey())) {
-      return true;
+    String thisKey = trimToEmpty(this.getKey());
+    String otherKey = trimToEmpty(track.getKey());
+    if (thisKey.length() > 0 && otherKey.length() > 0) {
+      return thisKey.equals(otherKey);
+    }
+    // Local files have no catalog key, and two different files can share the same name, artist
+    // and duration, so the path is the only reliable identity for them.
+    String thisUrl = trimToEmpty(this.getUrl());
+    String otherUrl = trimToEmpty(track.getUrl());
+    if (thisUrl.length() > 0 && otherUrl.length() > 0) {
+      return thisUrl.equals(otherUrl);
     }
     return equalsNullable(this.getName(), track.getName())
         && equalsNullable(this.getArtist(), track.getArtist())
         && this.getDuration() == track.getDuration();
+  }
+
+  private static String trimToEmpty(String value) {
+    return value == null ? "" : value.trim();
   }
 
   public static Track fromJSON(String jsonString) {

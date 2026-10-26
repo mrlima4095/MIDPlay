@@ -102,7 +102,11 @@ public class RecordStoreManager {
     return recordStore.enumerateRecords(null, null, false);
   }
 
-  public synchronized void forEachRecord(RecordHandler handler) {
+  /**
+   * Visits every record. Returns false when the store itself could not be read, so callers never
+   * mistake an unreadable store for an empty one and overwrite good data with a partial list.
+   */
+  public synchronized boolean forEachRecord(RecordHandler handler) {
     try {
       RecordEnumeration enumeration = enumerateRecords();
       try {
@@ -119,7 +123,13 @@ public class RecordStoreManager {
       } finally {
         enumeration.destroy();
       }
-    } catch (RecordStoreException e) {
+      return true;
+    } catch (Exception e) {
+      // Some device implementations leave the RecordStore unusable after an error (including
+      // runtime exceptions such as ArrayIndexOutOfBoundsException). Close it so the next call
+      // opens a fresh instance instead of keeping the whole app broken until a restart.
+      closeRecordStore();
+      return false;
     }
   }
 
