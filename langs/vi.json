@@ -827,5 +827,15 @@
     "group_reddit": "Reddit",
     "group_other": "Dữ liệu khác",
     "rms": "RMS"
+  },
+  "discord": {
+    "import_token_title": "Nhập token",
+    "import_token_prompt": "Bạn muốn nhập token từ đâu?",
+    "import_from_files": "Từ tệp",
+    "import_from_notes": "Từ ghi chú MIDPlay",
+    "import_token_note": "Nhập token từ ghi chú MIDPlay",
+    "import_token_empty": "Ghi chú đã chọn trống",
+    "import_token_done": "Đã nhập token",
+    "no_notes": "Không tìm thấy ghi chú"
   }
 }

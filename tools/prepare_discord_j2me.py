@@ -72,6 +72,54 @@ RESOURCE_NAMES = (
     "en-compact.json",
 )
 
+# Lets the login screen import a token from the MIDPlay notepad. It is written
+# next to the upstream sources so it can reuse Discord's ListScreen and Dialog.
+TOKEN_NOTE_PICKER = """package discordj2me;
+
+import javax.microedition.lcdui.*;
+import midplay.store.NotesManager;
+import midplay.store.NotesManager.Note;
+import midplay.util.Lang;
+
+/** Imports a Discord token from a saved MIDPlay note. */
+public class TokenNotePicker extends ListScreen implements CommandListener {
+    private final Note[] notes;
+    private final Object returnTo;
+
+    private TokenNotePicker(Note[] notes, Object returnTo) {
+        super(Lang.tr("discord.import_token_note"), true, false, false);
+        this.notes = notes;
+        this.returnTo = returnTo;
+        for (int i = 0; i < notes.length; i++) {
+            String title = notes[i].title == null ? "" : notes[i].title;
+            append(title, null, null, null);
+        }
+        setCommandListener(this);
+    }
+
+    public static void open(Object returnTo) {
+        Note[] notes = NotesManager.getInstance().getNotes();
+        if (notes.length == 0) {
+            App.error(Lang.tr("discord.no_notes"), returnTo);
+            return;
+        }
+        if (returnTo == null) returnTo = MainMenu.get(false);
+        App.disp.setCurrent(new TokenNotePicker(notes, returnTo));
+    }
+
+    public void commandAction(Command c, Displayable d) {
+        if (c == SELECT_COMMAND) {
+            int index = getSelectedIndex();
+            if (index >= 0 && index < notes.length) {
+                App.importTokenFromText(notes[index].text, returnTo);
+            }
+        } else if (c == BACK_COMMAND) {
+            App.disp.setCurrent(returnTo);
+        }
+    }
+}
+"""
+
 HOST_FIELDS = """    public static App instance;
 
     private static MIDlet host;
@@ -131,6 +179,25 @@ HOST_FIELDS = """    public static App instance;
 
     public void notifyDestroyed() {
         exit();
+    }
+
+    /** Imports a token from a MIDPlay note and returns to the login form. */
+    public static void importTokenFromText(String text, Object returnTo) {
+        String token = text == null ? "" : text.trim();
+        if (token.length() == 0) {
+            disp.setCurrent(new Dialog(
+                midplay.util.Lang.tr("discord.import_token_title"),
+                midplay.util.Lang.tr("discord.import_token_empty"),
+                returnTo
+            ));
+            return;
+        }
+        Settings.token = Util.stringToLength(token, 200);
+        disp.setCurrent(new Dialog(
+            midplay.util.Lang.tr("discord.import_token_title"),
+            midplay.util.Lang.tr("discord.import_token_done"),
+            returnTo
+        ));
     }
 """
 
@@ -247,6 +314,125 @@ def patch_app(text):
     return text
 
 
+def patch_login_form(text):
+    """Offer file and MIDPlay-note sources when importing a login token."""
+    field = "    private Command importTokenCommand;\n"
+    if field not in text:
+        raise SystemExit("Discord LoginForm import token field changed upstream")
+    text = text.replace(
+        field,
+        field
+        + "    private Command importTokenFilesCommand;\n"
+        + "    private Command importTokenNotesCommand;\n"
+        + "    private Command importTokenCancelCommand;\n",
+        1,
+    )
+
+    # The import button was only created when JSR-75 was present. Notes live in
+    # RMS, so keep the button available on every device.
+    start_marker = (
+        "        if (Util.supportsFileConn) {\n"
+        "            importTokenCommand = Locale.createCommand(IMPORT_TOKEN, Command.ITEM, 3);"
+    )
+    start = text.find(start_marker)
+    if start == -1:
+        raise SystemExit("Discord LoginForm import token setup changed upstream")
+    end = text.find("\n        }\n", start)
+    if end == -1:
+        raise SystemExit("Discord LoginForm import token setup has no end")
+    end += len("\n        }\n")
+    block = text[start:end]
+    inner = block.split("\n", 1)[1].rsplit("\n        }\n", 1)[0]
+    dedented = "\n".join(line[4:] if line.startswith("    ") else line for line in inner.splitlines())
+    text = text[:start] + dedented + "\n" + text[end:]
+
+    old_help = (
+        "        if (Util.supportsFileConn) {\n"
+        "            append(Locale.get(TOKEN_IMPORT_HELP_WITH_FC));\n"
+        "            append(importTokenButton);\n"
+        "        } else {\n"
+        "            append(Locale.get(TOKEN_IMPORT_HELP));\n"
+        "        }\n"
+    )
+    new_help = (
+        "        if (Util.supportsFileConn) {\n"
+        "            append(Locale.get(TOKEN_IMPORT_HELP_WITH_FC));\n"
+        "        } else {\n"
+        "            append(Locale.get(TOKEN_IMPORT_HELP));\n"
+        "        }\n"
+        "        append(importTokenButton);\n"
+    )
+    if old_help not in text:
+        raise SystemExit("Discord LoginForm import token help changed upstream")
+    text = text.replace(old_help, new_help, 1)
+
+    quit_handler = (
+        "        else if (c == quitCommand) {\n"
+        "            App.instance.notifyDestroyed();\n"
+        "        }\n"
+    )
+    prompt_handlers = (
+        quit_handler
+        + "        else if (c == importTokenFilesCommand) {\n"
+        + "            App.disp.setCurrent(new TokenFilePicker());\n"
+        + "        }\n"
+        + "        else if (c == importTokenNotesCommand) {\n"
+        + "            TokenNotePicker.open(this);\n"
+        + "        }\n"
+        + "        else if (c == importTokenCancelCommand) {\n"
+        + "            App.disp.setCurrent(this);\n"
+        + "        }\n"
+    )
+    if quit_handler not in text:
+        raise SystemExit("Discord LoginForm quit handler changed upstream")
+    text = text.replace(quit_handler, prompt_handlers, 1)
+
+    old_item_handler = (
+        "        else {\n"
+        "            // import token command\n"
+        "            App.disp.setCurrent(new TokenFilePicker());\n"
+        "        }\n"
+    )
+    new_item_handler = (
+        "        else if (c == importTokenCommand) {\n"
+        "            showImportTokenPrompt();\n"
+        "        }\n"
+    )
+    if old_item_handler not in text:
+        raise SystemExit("Discord LoginForm item handler changed upstream")
+    text = text.replace(old_item_handler, new_item_handler, 1)
+
+    anchor = "    private void showTokenEntry() {"
+    if anchor not in text:
+        raise SystemExit("Discord LoginForm token entry method changed upstream")
+    prompt = """    private void showImportTokenPrompt() {
+        Dialog d = new Dialog(
+            midplay.util.Lang.tr("discord.import_token_title"),
+            midplay.util.Lang.tr("discord.import_token_prompt")
+        );
+        if (Util.supportsFileConn) {
+            importTokenFilesCommand = new Command(
+                midplay.util.Lang.tr("discord.import_from_files"), Command.OK, 1
+            );
+            d.addCommand(importTokenFilesCommand);
+        }
+        importTokenNotesCommand = new Command(
+            midplay.util.Lang.tr("discord.import_from_notes"), Command.OK, 2
+        );
+        importTokenCancelCommand = new Command(
+            midplay.util.Lang.tr("action.cancel"), Command.BACK, 3
+        );
+        d.addCommand(importTokenNotesCommand);
+        d.addCommand(importTokenCancelCommand);
+        d.setCommandListener(this);
+        App.disp.setCurrent(d);
+    }
+
+"""
+    text = text.replace(anchor, prompt + anchor, 1)
+    return text
+
+
 def patch_my_display(text):
     """Keep background screens from taking over the host once Discord is closed."""
     anchor = "    public int getColor(int colorSpecifier) {"
@@ -311,11 +497,14 @@ def main():
         text = rewrite_rms_names(text)
         if java_file.name == "App.java":
             text = patch_app(text)
+        elif java_file.name == "LoginForm.java":
+            text = patch_login_form(text)
         elif java_file.name == "MyDisplay.java":
             text = patch_my_display(text)
         (app_out / java_file.name).write_text(text, encoding="utf-8")
 
     (app_out / "DirectFontUtil.java").write_text(DIRECT_FONT_STUB, encoding="utf-8")
+    (app_out / "TokenNotePicker.java").write_text(TOKEN_NOTE_PICKER, encoding="utf-8")
 
     json_src = root / "src" / "cc" / "nnproject" / "json"
     for java_file in sorted(json_src.glob("*.java")):

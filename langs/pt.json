@@ -827,5 +827,15 @@
     "group_reddit": "Reddit",
     "group_other": "Outros dados",
     "rms": "RMS"
+  },
+  "discord": {
+    "import_token_title": "Importar token",
+    "import_token_prompt": "De onde você quer importar o token?",
+    "import_from_files": "Dos arquivos",
+    "import_from_notes": "Das notas do MIDPlay",
+    "import_token_note": "Importar token de nota do MIDPlay",
+    "import_token_empty": "A nota selecionada está vazia",
+    "import_token_done": "Token importado",
+    "no_notes": "Nenhuma nota encontrada"
   }
 }

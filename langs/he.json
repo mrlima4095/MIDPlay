@@ -827,5 +827,15 @@
     "group_reddit": "Reddit",
     "group_other": "נתונים אחרים",
     "rms": "RMS"
+  },
+  "discord": {
+    "import_token_title": "ייבוא טוקן",
+    "import_token_prompt": "מאיפה לייבא את הטוקן?",
+    "import_from_files": "מקבצים",
+    "import_from_notes": "מהפתקים של MIDPlay",
+    "import_token_note": "ייבוא טוקן מפתק MIDPlay",
+    "import_token_empty": "הפתק שנבחר ריק",
+    "import_token_done": "הטוקן יובא",
+    "no_notes": "לא נמצאו פתקים"
   }
 }

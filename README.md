@@ -28,7 +28,7 @@ This fork builds on upstream MIDPlay 1.7.1:
 - **Open...** — open any URI from one screen, with history, provider links and an **Economy Mode** that pauses background tasks.
 - **Embedded MPGram** — a Telegram client inside the app. Return to MIDPlay without stopping playback, send notes to chats, import an MPGram session from a note, and share links from the other subapps.
 - **Embedded GitHub client** — browse GitHub inside MIDPlay.
-- **Embedded Discord client** — read and send Discord messages, browse servers and DMs, and receive live updates while MIDPlay keeps running in the background.
+- **Embedded Discord client** — read and send Discord messages, browse servers and DMs, and receive live updates while MIDPlay keeps running in the background. The login token can be imported from a file or a MIDPlay note.
 - **Wattpad** — search stories and authors, keep a reading library, download whole stories for offline reading, and resume where you left off, with archive and mature-content filters.
 - **Pinterest** — search pins, boards and users, save favorites into local folders, import a whole board, and download images.
 - **Reddit** — browse and search subreddits, users and posts, read comments, follow subreddits and users, save favorites, and optionally translate posts and comments. Uses the Arctic Shift archive, so no Reddit login is required.

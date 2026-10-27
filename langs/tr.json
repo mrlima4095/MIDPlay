@@ -827,5 +827,15 @@
     "group_reddit": "Reddit",
     "group_other": "Diğer veriler",
     "rms": "RMS"
+  },
+  "discord": {
+    "import_token_title": "Token içe aktar",
+    "import_token_prompt": "Tokenı nereden içe aktarmak istiyorsunuz?",
+    "import_from_files": "Dosyalardan",
+    "import_from_notes": "MIDPlay notlarından",
+    "import_token_note": "MIDPlay notundan token içe aktar",
+    "import_token_empty": "Seçilen not boş",
+    "import_token_done": "Token içe aktarıldı",
+    "no_notes": "Not bulunamadı"
   }
 }
