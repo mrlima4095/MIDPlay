@@ -144,11 +144,21 @@ HOST_FIELDS = """    private static MIDlet host;
             if (Settings.useGateway && !gatewayActive()) startGateway();
             if (lastScreen != null) {
                 disp.restore(lastScreen);
+            } else if (Settings.token == null || Settings.token.trim().length() == 0) {
+                disp.setCurrent(new LoginForm());
             } else {
                 disp.setCurrent(MainMenu.get(false));
             }
         }
-        startNowPlayingWatcher();
+    }
+
+    /**
+     * Loads Discord settings, theme, fonts and the saved session during host
+     * boot without taking over the host display.
+     */
+    public static void warmUp(MIDlet app) {
+        host = app;
+        if (instance == null) new App().startApp();
     }
 
     /** Opens the channel where a host-side notification occurred. */
@@ -169,8 +179,9 @@ HOST_FIELDS = """    private static MIDlet host;
         }
         lastScreen = screen;
         active = false;
-        // Keep the gateway alive so Discord notifications can still reach the
-        // host while the user is on another MIDPlay screen or subapp.
+        // Normally keep the gateway alive so Discord notifications can still
+        // reach the host. Economy mode must not leave anything in background.
+        if (economyMode) stopGateway();
         if (exitHandler != null) {
             Runnable handler = exitHandler;
             exitHandler = null;

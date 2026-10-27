@@ -5,9 +5,6 @@ import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Form;
-import midplay.model.Track;
-import midplay.player.PlayerGUI;
-import midplay.player.PlayerScreen;
 import midplay.store.NotesManager;
 import midplay.util.Lang;
 
@@ -68,29 +65,23 @@ public final class DiscordHostBridge implements discordj2me.HostBridge {
     }
   }
 
-  public String nowPlaying() {
-    PlayerScreen screen = MIDPlay.getPlayerScreen();
-    if (screen == null) {
-      return null;
+  public String nowPlayingLabel() {
+    return Lang.tr("menu.now_playing");
+  }
+
+  public void openNowPlaying() {
+    MIDPlay midlet = MIDPlay.getInstance();
+    if (midlet == null) {
+      return;
     }
-    PlayerGUI gui = screen.getPlayerGUI();
-    if (gui == null) {
-      return null;
+    // Leave Discord first so its screens stop owning the display and its
+    // command does not fight with the host player.
+    try {
+      discordj2me.App.exit();
+    } catch (Throwable ignored) {
+      // The Discord app may not have been initialized yet.
     }
-    Track track = gui.getCurrentTrack();
-    if (track == null) {
-      return null;
-    }
-    String title = track.getDisplayTitle(Lang.tr("details.unknown_artist"));
-    if (title.length() == 0) {
-      return null;
-    }
-    StringBuffer line = new StringBuffer();
-    for (int i = 0; i < title.length(); i++) {
-      char c = title.charAt(i);
-      line.append(c == '\n' || c == '\r' ? ' ' : c);
-    }
-    return Lang.tr("menu.now_playing") + ": " + line.toString();
+    midlet.openNowPlayingFromDiscord();
   }
 
   private static final class DiscordNotificationForm extends Form implements CommandListener {

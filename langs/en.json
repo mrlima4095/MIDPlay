@@ -319,6 +319,7 @@
     "check_update": "Check for Updates",
     "save_last_session": "Save Last Session",
     "mpgram_auto_login": "Prepare MPGram automatically",
+    "discord_auto_prepare": "Prepare Discord automatically",
     "options": "Options",
     "theme_mode": "Appearance",
     "theme_color": "Theme Color",

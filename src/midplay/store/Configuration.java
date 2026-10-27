@@ -133,6 +133,8 @@ public class Configuration {
   public static final int SAVE_LAST_SESSION_ON = 1;
   public static final int MPGRAM_AUTO_LOGIN_OFF = 0;
   public static final int MPGRAM_AUTO_LOGIN_ON = 1;
+  public static final int DISCORD_AUTO_PREPARE_OFF = 0;
+  public static final int DISCORD_AUTO_PREPARE_ON = 1;
 
   public static final String PLAYER_METHOD_PASS_INPUTSTREAM = "pass_inputstream";
   public static final String PLAYER_METHOD_PASS_URL = "pass_url";

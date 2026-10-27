@@ -36,6 +36,7 @@ public final class SettingsScreen extends BaseForm {
   private int autoUpdateIndex;
   private int saveLastSessionIndex;
   private int mpgramAutoLoginIndex;
+  private int discordAutoPrepareIndex;
   private int blackberryWifiIndex = -1;
   private int thumbnailsIndex;
 
@@ -47,6 +48,7 @@ public final class SettingsScreen extends BaseForm {
   private int currentBlackberryWifi;
   private int currentSaveLastSession;
   private int currentMpgramAutoLogin;
+  private int currentDiscordAutoPrepare;
   private int currentThumbnails;
   private String currentPlayerMethod;
   private String currentDownloadPath;
@@ -124,6 +126,10 @@ public final class SettingsScreen extends BaseForm {
         != togglesGroup.isSelected(mpgramAutoLoginIndex)) {
       return true;
     }
+    if ((currentDiscordAutoPrepare == Configuration.DISCORD_AUTO_PREPARE_ON)
+        != togglesGroup.isSelected(discordAutoPrepareIndex)) {
+      return true;
+    }
     if ((currentThumbnails == Configuration.THUMBNAILS_ON)
         != togglesGroup.isSelected(thumbnailsIndex)) {
       return true;
@@ -163,6 +169,7 @@ public final class SettingsScreen extends BaseForm {
     autoUpdateIndex = togglesGroup.append(Lang.tr("settings.check_update"), null);
     saveLastSessionIndex = togglesGroup.append(Lang.tr("settings.save_last_session"), null);
     mpgramAutoLoginIndex = togglesGroup.append(Lang.tr("settings.mpgram_auto_login"), null);
+    discordAutoPrepareIndex = togglesGroup.append(Lang.tr("settings.discord_auto_prepare"), null);
     thumbnailsIndex = togglesGroup.append(Lang.tr("settings.load_thumbnails"), null);
     if (Utils.isBlackberry) {
       blackberryWifiIndex = togglesGroup.append(Lang.tr("settings.use_wifi"), null);
@@ -211,6 +218,7 @@ public final class SettingsScreen extends BaseForm {
     currentBlackberryWifi = settingsManager.getCurrentBlackberryWifi();
     currentSaveLastSession = settingsManager.getCurrentSaveLastSession();
     currentMpgramAutoLogin = settingsManager.getCurrentMpgramAutoLogin();
+    currentDiscordAutoPrepare = settingsManager.getCurrentDiscordAutoPrepare();
     currentThumbnails = settingsManager.getCurrentThumbnails();
     currentPlayerMethod = settingsManager.getCurrentPlayerMethod();
     currentDownloadPath = settingsManager.getCurrentDownloadPath();
@@ -230,6 +238,9 @@ public final class SettingsScreen extends BaseForm {
         saveLastSessionIndex, currentSaveLastSession == Configuration.SAVE_LAST_SESSION_ON);
     togglesGroup.setSelectedIndex(
         mpgramAutoLoginIndex, currentMpgramAutoLogin == Configuration.MPGRAM_AUTO_LOGIN_ON);
+    togglesGroup.setSelectedIndex(
+        discordAutoPrepareIndex,
+        currentDiscordAutoPrepare == Configuration.DISCORD_AUTO_PREPARE_ON);
     togglesGroup.setSelectedIndex(
         thumbnailsIndex, currentThumbnails == Configuration.THUMBNAILS_ON);
     if (blackberryWifiIndex >= 0) {
@@ -274,6 +285,10 @@ public final class SettingsScreen extends BaseForm {
           togglesGroup.isSelected(mpgramAutoLoginIndex)
               ? Configuration.MPGRAM_AUTO_LOGIN_ON
               : Configuration.MPGRAM_AUTO_LOGIN_OFF;
+      int selectedDiscordAutoPrepare =
+          togglesGroup.isSelected(discordAutoPrepareIndex)
+              ? Configuration.DISCORD_AUTO_PREPARE_ON
+              : Configuration.DISCORD_AUTO_PREPARE_OFF;
       int selectedThumbnails =
           togglesGroup.isSelected(thumbnailsIndex)
               ? Configuration.THUMBNAILS_ON
@@ -310,6 +325,10 @@ public final class SettingsScreen extends BaseForm {
       if (currentMpgramAutoLogin != selectedMpgramAutoLogin) {
         hasChanges = true;
         settingsManager.saveMpgramAutoLogin(selectedMpgramAutoLogin);
+      }
+      if (currentDiscordAutoPrepare != selectedDiscordAutoPrepare) {
+        hasChanges = true;
+        settingsManager.saveDiscordAutoPrepare(selectedDiscordAutoPrepare);
       }
       if (currentThumbnails != selectedThumbnails) {
         hasChanges = true;

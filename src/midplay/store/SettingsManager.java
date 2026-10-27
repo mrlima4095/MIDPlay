@@ -27,6 +27,7 @@ public class SettingsManager {
   private static int currentBlackberryWifi;
   private static int currentSaveLastSession;
   private static int currentMpgramAutoLogin;
+  private static int currentDiscordAutoPrepare;
   private static int currentThumbnails;
   private static boolean currentEqEnabled;
   private static int currentEqPreset; // -1 = manual/custom levels
@@ -139,6 +140,8 @@ public class SettingsManager {
         settings.getInt("saveLastSession", Configuration.SAVE_LAST_SESSION_OFF);
     currentMpgramAutoLogin =
         settings.getInt("mpgramAutoLogin", Configuration.MPGRAM_AUTO_LOGIN_OFF);
+    currentDiscordAutoPrepare =
+        settings.getInt("discordAutoPrepare", Configuration.DISCORD_AUTO_PREPARE_OFF);
     currentThumbnails = settings.getInt("thumbnails", Configuration.THUMBNAILS_ON);
     currentEqEnabled = settings.getBoolean("eqEnabled", false);
     currentEqPreset = settings.getInt("eqPreset", -1);
@@ -196,6 +199,7 @@ public class SettingsManager {
     settings.put("blackberryWifi", Configuration.BLACKBERRY_WIFI_ON);
     settings.put("saveLastSession", Configuration.SAVE_LAST_SESSION_OFF);
     settings.put("mpgramAutoLogin", Configuration.MPGRAM_AUTO_LOGIN_OFF);
+    settings.put("discordAutoPrepare", Configuration.DISCORD_AUTO_PREPARE_OFF);
     settings.put("thumbnails", Configuration.THUMBNAILS_ON);
     settings.put("eqEnabled", false);
     settings.put("eqPreset", -1);
@@ -294,6 +298,11 @@ public class SettingsManager {
   public void saveMpgramAutoLogin(int mpgramAutoLogin) throws RecordStoreException {
     saveSetting("mpgramAutoLogin", mpgramAutoLogin);
     currentMpgramAutoLogin = mpgramAutoLogin;
+  }
+
+  public void saveDiscordAutoPrepare(int discordAutoPrepare) throws RecordStoreException {
+    saveSetting("discordAutoPrepare", discordAutoPrepare);
+    currentDiscordAutoPrepare = discordAutoPrepare;
   }
 
   public void savePlayerMethod(String playerMethod) throws RecordStoreException {
@@ -681,6 +690,10 @@ public class SettingsManager {
 
   public int getCurrentMpgramAutoLogin() {
     return currentMpgramAutoLogin;
+  }
+
+  public int getCurrentDiscordAutoPrepare() {
+    return currentDiscordAutoPrepare;
   }
 
   public String getCurrentPlayerMethod() {

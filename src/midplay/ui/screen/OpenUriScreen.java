@@ -133,6 +133,10 @@ public final class OpenUriScreen extends BaseForm {
       MP.setEconomyMode(enable);
     } catch (Throwable t) {
     }
+    try {
+      discordj2me.App.setEconomyMode(enable);
+    } catch (Throwable t) {
+    }
     updateEconomyCommand();
     navigator.showAlert(
         Lang.tr(enable ? "open_uri.economy_enabled" : "open_uri.economy_disabled"),

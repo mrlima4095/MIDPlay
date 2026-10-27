@@ -92,6 +92,11 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     playerScreen = ps;
   }
 
+  /** Opens the player canvas after a command issued from an embedded subapp. */
+  public void openNowPlayingFromDiscord() {
+    PlayerNavHelper.showNowPlaying(navigator);
+  }
+
   public static MIDPlay getInstance() {
     return instance;
   }
@@ -451,8 +456,22 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     } catch (Throwable t) {
     }
     try {
+      if (settingsManager.getCurrentDiscordAutoPrepare()
+          == Configuration.DISCORD_AUTO_PREPARE_ON) {
+        navigator.callSerially(
+            new Runnable() {
+              public void run() {
+                discordj2me.App.setHostBridge(DiscordHostBridge.getInstance());
+                discordj2me.App.warmUp(MIDPlay.this);
+              }
+            });
+      }
+    } catch (Throwable t) {
+    }
+    try {
       if (settingsManager.getEconomyMode() == Configuration.ECONOMY_MODE_ON) {
         MP.setEconomyMode(true);
+        discordj2me.App.setEconomyMode(true);
       }
     } catch (Throwable t) {
     }
