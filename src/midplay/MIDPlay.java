@@ -380,6 +380,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   }
 
   private void openDiscordJ2ME() {
+    discordj2me.App.setHostBridge(DiscordHostBridge.getInstance());
     discordj2me.App.open(
         this,
         new Runnable() {

@@ -836,6 +836,9 @@
     "import_token_note": "MIDPlay notundan token içe aktar",
     "import_token_empty": "Seçilen not boş",
     "import_token_done": "Token içe aktarıldı",
-    "no_notes": "Not bulunamadı"
+    "no_notes": "Not bulunamadı",
+    "notification_title": "Yeni Discord mesajı",
+    "open_in_discord": "Discord'da aç",
+    "notification_close": "Kapat"
   }
 }

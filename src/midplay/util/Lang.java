@@ -82,7 +82,7 @@ public class Lang {
     "speedtest.last", "speedtest.ready", "storage.title", "storage.refresh", "storage.summary", "storage.available", "storage.empty", "storage.card", "storage.card_line", "storage.card_unavailable",
     "storage.clear_history", "storage.clear_confirm", "storage.history_cleared", "storage.group_playlists", "storage.group_notes", "storage.group_tasks", "storage.group_downloads", "storage.group_settings", "storage.group_history", "storage.group_wattpad",
     "storage.group_pinterest", "storage.group_reddit", "storage.group_other", "storage.rms", "discord.import_token_title", "discord.import_token_prompt", "discord.import_from_files", "discord.import_from_notes", "discord.import_token_note", "discord.import_token_empty",
-    "discord.import_token_done", "discord.no_notes"
+    "discord.import_token_done", "discord.no_notes", "discord.notification_title", "discord.open_in_discord", "discord.notification_close"
   };
 
   private static class EN {
@@ -231,7 +231,7 @@ public class Lang {
       "Tasks", "Downloads", "Settings", "History", "Wattpad",
       "Pinterest", "Reddit", "Other data", "RMS", "Import token",
       "Where do you want to import the token from?", "From files", "From MIDPlay notes", "Import token from MIDPlay note", "The selected note is empty",
-      "Token imported", "No notes found"
+      "Token imported", "No notes found", "New Discord message", "Open in Discord", "Close"
     };
   }
 
@@ -381,7 +381,7 @@ public class Lang {
       "משימות", "הורדות", "הגדרות", "היסטוריה", "Wattpad",
       "Pinterest", "Reddit", "נתונים אחרים", "RMS", "ייבוא טוקן",
       "מאיפה לייבא את הטוקן?", "מקבצים", "מהפתקים של MIDPlay", "ייבוא טוקן מפתק MIDPlay", "הפתק שנבחר ריק",
-      "הטוקן יובא", "לא נמצאו פתקים"
+      "הטוקן יובא", "לא נמצאו פתקים", "הודעת Discord חדשה", "פתח ב-Discord", "סגור"
     };
   }
 
@@ -531,7 +531,7 @@ public class Lang {
       "Zadania", "Pobrane", "Ustawienia", "Historia", "Wattpad",
       "Pinterest", "Reddit", "Inne dane", "RMS", "Importuj token",
       "Skąd chcesz zaimportować token?", "Z plików", "Z notatek MIDPlay", "Importuj token z notatki MIDPlay", "Wybrana notatka jest pusta",
-      "Token zaimportowany", "Nie znaleziono notatek"
+      "Token zaimportowany", "Nie znaleziono notatek", "Nowa wiadomość na Discordzie", "Otwórz w Discordzie", "Zamknij"
     };
   }
 
@@ -681,7 +681,7 @@ public class Lang {
       "Tarefas", "Downloads", "Configurações", "Históricos", "Wattpad",
       "Pinterest", "Reddit", "Outros dados", "RMS", "Importar token",
       "De onde você quer importar o token?", "Dos arquivos", "Das notas do MIDPlay", "Importar token de nota do MIDPlay", "A nota selecionada está vazia",
-      "Token importado", "Nenhuma nota encontrada"
+      "Token importado", "Nenhuma nota encontrada", "Nova mensagem no Discord", "Abrir no Discord", "Fechar"
     };
   }
 
@@ -831,7 +831,7 @@ public class Lang {
       "Görevler", "İndirilenler", "Ayarlar", "Geçmiş", "Wattpad",
       "Pinterest", "Reddit", "Diğer veriler", "RMS", "Token içe aktar",
       "Tokenı nereden içe aktarmak istiyorsunuz?", "Dosyalardan", "MIDPlay notlarından", "MIDPlay notundan token içe aktar", "Seçilen not boş",
-      "Token içe aktarıldı", "Not bulunamadı"
+      "Token içe aktarıldı", "Not bulunamadı", "Yeni Discord mesajı", "Discord'da aç", "Kapat"
     };
   }
 
@@ -981,7 +981,7 @@ public class Lang {
       "Nhiệm vụ", "Tải xuống", "Cài đặt", "Lịch sử", "Wattpad",
       "Pinterest", "Reddit", "Dữ liệu khác", "RMS", "Nhập token",
       "Bạn muốn nhập token từ đâu?", "Từ tệp", "Từ ghi chú MIDPlay", "Nhập token từ ghi chú MIDPlay", "Ghi chú đã chọn trống",
-      "Đã nhập token", "Không tìm thấy ghi chú"
+      "Đã nhập token", "Không tìm thấy ghi chú", "Tin nhắn Discord mới", "Mở trong Discord", "Đóng"
     };
   }
 

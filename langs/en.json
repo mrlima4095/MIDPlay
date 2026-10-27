@@ -836,6 +836,9 @@
     "import_token_note": "Import token from MIDPlay note",
     "import_token_empty": "The selected note is empty",
     "import_token_done": "Token imported",
-    "no_notes": "No notes found"
+    "no_notes": "No notes found",
+    "notification_title": "New Discord message",
+    "open_in_discord": "Open in Discord",
+    "notification_close": "Close"
   }
 }

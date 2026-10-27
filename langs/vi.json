@@ -836,6 +836,9 @@
     "import_token_note": "Nhập token từ ghi chú MIDPlay",
     "import_token_empty": "Ghi chú đã chọn trống",
     "import_token_done": "Đã nhập token",
-    "no_notes": "Không tìm thấy ghi chú"
+    "no_notes": "Không tìm thấy ghi chú",
+    "notification_title": "Tin nhắn Discord mới",
+    "open_in_discord": "Mở trong Discord",
+    "notification_close": "Đóng"
   }
 }

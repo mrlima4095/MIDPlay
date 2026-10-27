@@ -836,6 +836,9 @@
     "import_token_note": "Importuj token z notatki MIDPlay",
     "import_token_empty": "Wybrana notatka jest pusta",
     "import_token_done": "Token zaimportowany",
-    "no_notes": "Nie znaleziono notatek"
+    "no_notes": "Nie znaleziono notatek",
+    "notification_title": "Nowa wiadomość na Discordzie",
+    "open_in_discord": "Otwórz w Discordzie",
+    "notification_close": "Zamknij"
   }
 }

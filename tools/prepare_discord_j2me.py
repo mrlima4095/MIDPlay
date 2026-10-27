@@ -28,6 +28,7 @@ DEFINES = {
     "PASSWORD_LOGIN",
     "NO_BLUETOOTH",
     "NO_HTTP_BLUETOOTH_SUPPORT",
+    "EMBEDDED_HOST",
 }
 
 STORE_NAMES = (
@@ -70,6 +71,7 @@ RESOURCE_NAMES = (
     "notify.mid",
     "en.json",
     "en-compact.json",
+    "pt-BR.json",
 )
 
 # Lets the login screen import a token from the MIDPlay notepad. It is written
@@ -120,9 +122,7 @@ public class TokenNotePicker extends ListScreen implements CommandListener {
 }
 """
 
-HOST_FIELDS = """    public static App instance;
-
-    private static MIDlet host;
+HOST_FIELDS = """    private static MIDlet host;
     private static Runnable exitHandler;
 
     /** True while Discord owns the screen. Background threads must not override the host. */
@@ -148,6 +148,15 @@ HOST_FIELDS = """    public static App instance;
                 disp.setCurrent(MainMenu.get(false));
             }
         }
+        startNowPlayingWatcher();
+    }
+
+    /** Opens the channel where a host-side notification occurred. */
+    public static void openNotification(MIDlet app, Runnable onExit, String guildID, String channelID) {
+        open(app, onExit);
+        if (Settings.token != null && Settings.token.trim().length() != 0) {
+            viewNotification(guildID, channelID);
+        }
     }
 
     /** Leaves Discord and shows the host MIDlet again. */
@@ -160,7 +169,8 @@ HOST_FIELDS = """    public static App instance;
         }
         lastScreen = screen;
         active = false;
-        if (gateway != null) gateway.stop = true;
+        // Keep the gateway alive so Discord notifications can still reach the
+        // host while the user is on another MIDPlay screen or subapp.
         if (exitHandler != null) {
             Runnable handler = exitHandler;
             exitHandler = null;
@@ -302,10 +312,10 @@ def patch_app(text):
         raise SystemExit("Discord App class declaration changed upstream")
     text = text.replace(old_class, "public class App implements Strings {")
 
-    old_fields = "    public static App instance;\n\n    private boolean started = false;\n"
+    old_fields = "    private boolean started = false;\n"
     if old_fields not in text:
         raise SystemExit("Discord App field block changed upstream")
-    text = text.replace(old_fields, HOST_FIELDS)
+    text = text.replace(old_fields, HOST_FIELDS, 1)
 
     old_display = "disp = new MyDisplay(Display.getDisplay(this));"
     if old_display not in text:
@@ -519,10 +529,13 @@ def main():
         if asset.is_file():
             shutil.copy2(asset, res_out / asset.name)
 
-    locale = strip_jsonc((root / "language" / "en.jsonc").read_text(encoding="utf-8"))
-    (res_out / "en.json").write_text(
-        json.dumps(locale, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
-    )
+    for language in ("en", "pt-BR"):
+        locale = strip_jsonc(
+            (root / "language" / (language + ".jsonc")).read_text(encoding="utf-8")
+        )
+        (res_out / (language + ".json")).write_text(
+            json.dumps(locale, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
+        )
 
 
 if __name__ == "__main__":

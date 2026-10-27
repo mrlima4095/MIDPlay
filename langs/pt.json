@@ -836,6 +836,9 @@
     "import_token_note": "Importar token de nota do MIDPlay",
     "import_token_empty": "A nota selecionada está vazia",
     "import_token_done": "Token importado",
-    "no_notes": "Nenhuma nota encontrada"
+    "no_notes": "Nenhuma nota encontrada",
+    "notification_title": "Nova mensagem no Discord",
+    "open_in_discord": "Abrir no Discord",
+    "notification_close": "Fechar"
   }
 }

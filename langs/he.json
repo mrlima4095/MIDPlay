@@ -836,6 +836,9 @@
     "import_token_note": "ייבוא טוקן מפתק MIDPlay",
     "import_token_empty": "הפתק שנבחר ריק",
     "import_token_done": "הטוקן יובא",
-    "no_notes": "לא נמצאו פתקים"
+    "no_notes": "לא נמצאו פתקים",
+    "notification_title": "הודעת Discord חדשה",
+    "open_in_discord": "פתח ב-Discord",
+    "notification_close": "סגור"
   }
 }
