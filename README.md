@@ -2,7 +2,7 @@
 
 ![AppIcon](/res/Icon.png)
 
-An online music player and offline toolkit for J2ME (Java ME) devices — CLDC 1.1 / MIDP 2.0. It streams from several sources, keeps a local library, and embeds companion apps (Telegram, GitHub, Wattpad, Pinterest, Reddit) while playback continues in the background.
+An online music player and offline toolkit for J2ME (Java ME) devices — CLDC 1.1 / MIDP 2.0. It streams from several sources, keeps a local library, and embeds companion apps (Telegram, GitHub, Discord, Wattpad, Pinterest, Reddit) while playback continues in the background.
 
 ## Features
 
@@ -28,6 +28,7 @@ This fork builds on upstream MIDPlay 1.7.1:
 - **Open...** — open any URI from one screen, with history, provider links and an **Economy Mode** that pauses background tasks.
 - **Embedded MPGram** — a Telegram client inside the app. Return to MIDPlay without stopping playback, send notes to chats, import an MPGram session from a note, and share links from the other subapps.
 - **Embedded GitHub client** — browse GitHub inside MIDPlay.
+- **Embedded Discord client** — read and send Discord messages, browse servers and DMs, and receive live updates while MIDPlay keeps running in the background.
 - **Wattpad** — search stories and authors, keep a reading library, download whole stories for offline reading, and resume where you left off, with archive and mature-content filters.
 - **Pinterest** — search pins, boards and users, save favorites into local folders, import a whole board, and download images.
 - **Reddit** — browse and search subreddits, users and posts, read comments, follow subreddits and users, save favorites, and optionally translate posts and comments. Uses the Arctic Shift archive, so no Reddit login is required.
@@ -42,6 +43,7 @@ This fork builds on upstream MIDPlay 1.7.1:
 - Network connectivity for streaming and online services
 - JSR-75 (FileConnection) for downloads, the file explorer and offline story reading
 - JSR-234 (AMMS) for the equalizer — optional
+- Socket connectivity for Discord live updates — optional, requested with `MIDlet-Permissions-Opt`
 
 ## Install
 
@@ -56,7 +58,7 @@ git submodule update --init --recursive
 ./build.sh
 ```
 
-Requires **JDK 8** (the last toolchain that emits CLDC-compatible bytecode) and **Python 3** for the embedded MPGram and GitHub sources. ProGuard is bundled in `lib/`, so no separate install is needed. Output: `dist/MIDPlay.jar` + `dist/MIDPlay.jad`.
+Requires **JDK 8** (the last toolchain that emits CLDC-compatible bytecode) and **Python 3** for the embedded MPGram, GitHub and Discord sources. ProGuard is bundled in `lib/`, so no separate install is needed. Output: `dist/MIDPlay.jar` + `dist/MIDPlay.jad`.
 
 The script compiles with `-source/-target 1.3` against the CLDC/MIDP bootclasspath, packages the MIDlet, runs ProGuard with `-microedition` (shrink, obfuscate and preverify), then writes the JAD with the final JAR size. Set `JAVA8_HOME` if JDK 8 is not auto-detected.
 
@@ -72,7 +74,7 @@ See `build.sh` for the full pipeline and `tools/` for the subapp preparation scr
 
 - Java ME, MIDP 2.0 / CLDC 1.1, JSR-75 (FileConnection) and JSR-234 (AMMS)
 - Record Management System (RMS) with a small JSON layer for local storage
-- Embedded [MPGram client](https://github.com/shinovon/mpgram-client) and [GitHub-j2me](https://github.com/mrlima4095/GitHub-j2me) as git submodules
+- Embedded [MPGram client](https://github.com/shinovon/mpgram-client), [GitHub-j2me](https://github.com/mrlima4095/GitHub-j2me) and [Discord for J2ME](https://github.com/mrlima4095/discord-j2me) as git submodules
 - REST endpoints for streaming, lyrics, translation and the Reddit/Pinterest proxies
 
 Third-party notices are listed in [`res/THIRD_PARTY_NOTICES.txt`](/res/THIRD_PARTY_NOTICES.txt).
@@ -85,7 +87,7 @@ Third-party notices are listed in [`res/THIRD_PARTY_NOTICES.txt`](/res/THIRD_PAR
 
 ## Credits
 
-Upstream MIDPlay by Duy Pham, with contributions from symbuzzer, GoldenDragon, Spajciuch and gtrxAC. MPGram by Arman Jussupgaliyev.
+Upstream MIDPlay by Duy Pham, with contributions from symbuzzer, GoldenDragon, Spajciuch and gtrxAC. MPGram by Arman Jussupgaliyev. Discord for J2ME by gtrxAC.
 
 ## License
 
