@@ -125,6 +125,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     registerMenuAction(Configuration.MENU_EQUALIZER);
     registerMenuAction(Configuration.MENU_MPGRAM);
     registerMenuAction(Configuration.MENU_GITHUB);
+    registerMenuAction(Configuration.MENU_DISCORD);
     registerMenuAction(Configuration.MENU_NOTES);
     registerMenuAction(Configuration.MENU_TASKS);
     registerMenuAction(Configuration.MENU_WATTPAD);
@@ -312,6 +313,9 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     if (key.equalsIgnoreCase("playing")) {
       return Configuration.MENU_NOW_PLAYING;
     }
+    if (key.equalsIgnoreCase("discord")) {
+      return Configuration.MENU_DISCORD;
+    }
     return null;
   }
 
@@ -344,6 +348,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       openMPGram();
     } else if (Configuration.MENU_GITHUB.equals(key)) {
       openGitHubJ2ME();
+    } else if (Configuration.MENU_DISCORD.equals(key)) {
+      openDiscordJ2ME();
     } else if (Configuration.MENU_NOTES.equals(key)) {
       goToNotesScreen();
     } else if (Configuration.MENU_TASKS.equals(key)) {
@@ -365,6 +371,16 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
 
   private void openGitHubJ2ME() {
     GH.open(
+        this,
+        new Runnable() {
+          public void run() {
+            Display.getDisplay(MIDPlay.this).setCurrent(mainMenu);
+          }
+        });
+  }
+
+  private void openDiscordJ2ME() {
+    discordj2me.App.open(
         this,
         new Runnable() {
           public void run() {

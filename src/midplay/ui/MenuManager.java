@@ -69,11 +69,16 @@ public class MenuManager {
     // The RSS reader was removed from the app.
     removeMenuItem("menu.rss");
     boolean hadReddit = hasMenuItem(Configuration.MENU_REDDIT);
+    boolean hadDiscord = hasMenuItem(Configuration.MENU_DISCORD);
     ensureDefaultItemsPresent();
     // On upgrades, slot Reddit in right after Pinterest without touching the rest
     // of the user's custom arrangement.
     if (!hadReddit) {
       insertAfterAnchor(Configuration.MENU_REDDIT, Configuration.MENU_PINTEREST);
+    }
+    // Discord follows GitHub on first run after the update, same rule as above.
+    if (!hadDiscord) {
+      insertAfterAnchor(Configuration.MENU_DISCORD, Configuration.MENU_GITHUB);
     }
   }
 
@@ -169,7 +174,8 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_REDDIT, 13, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 14, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 15, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 16, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_DISCORD, 16, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 17, true));
     return defaultConfig;
   }
 

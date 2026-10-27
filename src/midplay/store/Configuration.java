@@ -39,6 +39,7 @@ public class Configuration {
   public static final String MENU_FILES = "menu.files";
   public static final String MENU_MPGRAM = "menu.mpgram";
   public static final String MENU_GITHUB = "menu.github";
+  public static final String MENU_DISCORD = "menu.discord";
   public static final String MENU_OPEN_URI = "menu.open_uri";
   public static final String MENU_NOTES = "menu.notes";
   public static final String MENU_TASKS = "menu.tasks";
@@ -171,6 +172,7 @@ public class Configuration {
   public static Image equalizerIcon;
   public static Image mpgramIcon;
   public static Image githubIcon;
+  public static Image discordIcon;
   public static Image notesIcon;
   public static Image tasksIcon;
   public static Image wattpadIcon;
@@ -212,6 +214,7 @@ public class Configuration {
     equalizerIcon = region(8, 36, 36);
     mpgramIcon = Utils.resizeImageToFit(Image.createImage("/m.png"), 36, 36);
     githubIcon = Utils.resizeImageToFit(Image.createImage("/g.png"), 36, 36);
+    discordIcon = Utils.resizeImageToFit(Image.createImage("/discord.png"), 36, 36);
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();
     wattpadIcon = Utils.resizeImageToFit(Image.createImage("/wattpad.png"), 36, 36);
