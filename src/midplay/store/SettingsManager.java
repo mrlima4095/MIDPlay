@@ -57,6 +57,8 @@ public class SettingsManager {
 
   private final JsonRecordStore storage;
   private JSONObject cachedSettings;
+  private boolean batching;
+  private boolean batchDirty;
 
   private JSONObject settings() {
     if (cachedSettings == null) {
@@ -227,13 +229,40 @@ public class SettingsManager {
     storage.save(settings.toString());
   }
 
+  /**
+   * Starts collecting setting changes. While a batch is active, saveSetting
+   * updates the in-memory document without writing it to RMS; endBatch writes
+   * the whole document once. Used by screens that change many settings at once.
+   */
+  public void beginBatch() {
+    batching = true;
+    batchDirty = false;
+  }
+
+  /** Writes all settings changed since beginBatch in a single RMS record update. */
+  public void endBatch() throws RecordStoreException {
+    if (!batching) return;
+    batching = false;
+    boolean dirty = batchDirty;
+    batchDirty = false;
+    if (dirty) saveJSON(settings());
+  }
+
+  private void persistSetting(JSONObject settings) throws RecordStoreException {
+    if (batching) {
+      batchDirty = true;
+    } else {
+      saveJSON(settings);
+    }
+  }
+
   private void saveSetting(String key, String value) throws RecordStoreException {
     JSONObject settings = settings();
     if (settings.has(key) && value != null && value.equals(settings.getString(key, ""))) {
       return;
     }
     settings.put(key, value);
-    saveJSON(settings);
+    persistSetting(settings);
   }
 
   private void saveSetting(String key, int value) throws RecordStoreException {
@@ -242,7 +271,7 @@ public class SettingsManager {
       return;
     }
     settings.put(key, value);
-    saveJSON(settings);
+    persistSetting(settings);
   }
 
   private void saveSetting(String key, JSONObject value) throws RecordStoreException {
@@ -257,7 +286,7 @@ public class SettingsManager {
       }
     }
     settings.put(key, value);
-    saveJSON(settings);
+    persistSetting(settings);
   }
 
   public void saveLanguage(String langCode) throws RecordStoreException {

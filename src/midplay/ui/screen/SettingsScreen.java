@@ -260,7 +260,10 @@ public final class SettingsScreen extends BaseForm {
   }
 
   private void saveSettings() {
+    boolean batchActive = false;
     try {
+      settingsManager.beginBatch();
+      batchActive = true;
       String selectedLang = getSelected(languageGroup, availableLanguages, "en");
       String selectedThemeMode =
           getSelected(themeModeGroup, Configuration.ALL_THEME_MODES, Configuration.THEME_LIGHT);
@@ -351,6 +354,9 @@ public final class SettingsScreen extends BaseForm {
         settingsManager.saveDownloadPath(selectedDownloadPath);
       }
 
+      settingsManager.endBatch();
+      batchActive = false;
+
       if (hasColorChange || hasModeChange) {
         hasChanges = true;
         handleThemeChanges(selectedThemeMode, selectedThemeColor, hasColorChange, hasModeChange);
@@ -361,6 +367,14 @@ public final class SettingsScreen extends BaseForm {
       }
     } catch (RecordStoreException e) {
       navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
+    } finally {
+      if (batchActive) {
+        try {
+          settingsManager.endBatch();
+        } catch (RecordStoreException ignored) {
+          // The outer error above already reports a failed save.
+        }
+      }
     }
   }
 
