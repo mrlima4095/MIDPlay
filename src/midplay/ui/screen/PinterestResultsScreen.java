@@ -26,9 +26,11 @@ public final class PinterestResultsScreen extends BaseList {
   public static final int SOURCE_USER_PINS = 2;
   public static final int SOURCE_USER_BOARDS = 3;
   public static final int SOURCE_BOARD_PINS = 4;
+  public static final int SOURCE_RELATED_PINS = 5;
 
   private final int source;
   private final String sourceId;
+  private final String sourceQuery;
   private final String sourceSlug;
   private final String sourceBoardId;
   private final Vector items;
@@ -56,7 +58,7 @@ public final class PinterestResultsScreen extends BaseList {
       String title,
       Vector items,
       String bookmark) {
-    this(navigator, source, sourceId, sourceSlug, "", title, items, bookmark);
+    this(navigator, source, sourceId, "", sourceSlug, "", title, items, bookmark);
   }
 
   public PinterestResultsScreen(
@@ -68,9 +70,23 @@ public final class PinterestResultsScreen extends BaseList {
       String title,
       Vector items,
       String bookmark) {
+    this(navigator, source, sourceId, "", sourceSlug, sourceBoardId, title, items, bookmark);
+  }
+
+  public PinterestResultsScreen(
+      Navigator navigator,
+      int source,
+      String sourceId,
+      String sourceQuery,
+      String sourceSlug,
+      String sourceBoardId,
+      String title,
+      Vector items,
+      String bookmark) {
     super(title, navigator);
     this.source = source;
     this.sourceId = sourceId == null ? "" : sourceId;
+    this.sourceQuery = sourceQuery == null ? "" : sourceQuery;
     this.sourceSlug = sourceSlug == null ? "" : sourceSlug;
     this.sourceBoardId = sourceBoardId == null ? "" : sourceBoardId;
     this.items = items == null ? new Vector() : items;
@@ -413,6 +429,9 @@ public final class PinterestResultsScreen extends BaseList {
     if (source == SOURCE_BOARD_PINS) {
       return PinterestApi.boardPinsUrl(sourceId, sourceSlug, sourceBoardId, bookmark);
     }
+    if (source == SOURCE_RELATED_PINS) {
+      return PinterestApi.relatedUrl(sourceId, sourceQuery, "", bookmark);
+    }
     return PinterestApi.searchPinsUrl(sourceId, bookmark);
   }
 
@@ -465,7 +484,8 @@ public final class PinterestResultsScreen extends BaseList {
     }
     String[] urls = new String[items.size()];
     int count = 0;
-    for (int i = 0; i < items.size() && count < PinterestApi.MAX_THUMBNAILS; i++) {
+    int limit = PinterestApi.maxThumbnails();
+    for (int i = 0; i < items.size() && count < limit; i++) {
       String[] item = (String[]) items.elementAt(i);
       String url = isBoards() ? item[PinterestApi.BOARD_COVER] : item[PinterestApi.PIN_IMAGE];
       if (url == null || url.length() == 0 || thumbCache.containsKey(url)) {

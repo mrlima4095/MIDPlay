@@ -7,10 +7,12 @@ import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.List;
 import midplay.MIDPlay;
 import midplay.net.HttpTextOperation;
 import midplay.net.WattpadApi;
+import midplay.net.WattpadThumbnailOperation;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
 import midplay.ui.BaseList;
@@ -38,8 +40,12 @@ public final class WattpadResultsScreen extends BaseList {
   private final Command moreCommand;
   private final Command sortCommand;
   private final Hashtable storyIds = new Hashtable();
+  private final Hashtable thumbCache = new Hashtable();
   private boolean hasMore;
   private boolean loading;
+  private boolean thumbsInFlight;
+  private int thumbToken;
+  private WattpadThumbnailOperation thumbOperation;
   private int offset;
   private int sortMode = SORT_RELEVANCE;
 
@@ -85,6 +91,7 @@ public final class WattpadResultsScreen extends BaseList {
       addCommand(sortCommand);
     }
     refresh();
+    loadThumbnails();
   }
 
   public WattpadResultsScreen(Navigator navigator, String query, Vector stories) {
@@ -93,8 +100,96 @@ public final class WattpadResultsScreen extends BaseList {
 
   protected void populateItems() {
     for (int i = 0; i < stories.size(); i++) {
-      append(labelFor((String[]) stories.elementAt(i)), null);
+      String[] story = (String[]) stories.elementAt(i);
+      String cover = coverUrl(story);
+      Image image =
+          cover == null || cover.length() == 0 ? null : (Image) thumbCache.get(cover);
+      append(labelFor(story), image);
     }
+  }
+
+  protected void showNotify() {
+    super.showNotify();
+    loadThumbnails();
+  }
+
+  protected void hideNotify() {
+    cancelThumbnails();
+    super.hideNotify();
+  }
+
+  private static String coverUrl(String[] story) {
+    return story.length > WattpadApi.STORY_COVER ? story[WattpadApi.STORY_COVER] : "";
+  }
+
+  private void loadThumbnails() {
+    if (thumbsInFlight) {
+      return;
+    }
+    String[] urls = new String[stories.size()];
+    int count = 0;
+    for (int i = 0; i < stories.size() && count < 12; i++) {
+      String url = coverUrl((String[]) stories.elementAt(i));
+      if (url.length() == 0 || thumbCache.containsKey(url)) {
+        continue;
+      }
+      urls[i] = url;
+      count++;
+    }
+    if (count == 0) {
+      return;
+    }
+    cancelThumbnails();
+    final int token = ++thumbToken;
+    thumbsInFlight = true;
+    thumbOperation =
+        new WattpadThumbnailOperation(
+            urls,
+            36,
+            new WattpadThumbnailOperation.Listener() {
+              public void onImage(final int index, final Image image) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        if (token != thumbToken || index < 0 || index >= stories.size()) {
+                          return;
+                        }
+                        String url = coverUrl((String[]) stories.elementAt(index));
+                        if (url.length() > 0) {
+                          thumbCache.put(url, image);
+                        }
+                        if (index < size()) {
+                          set(index, getString(index), image);
+                        }
+                      }
+                    });
+              }
+
+              public void onDone() {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        if (token == thumbToken) {
+                          thumbsInFlight = false;
+                        }
+                      }
+                    });
+              }
+
+              public void onError(Exception e) {
+                // A failed cover is ignored; the remaining rows still load.
+              }
+            });
+    thumbOperation.start();
+  }
+
+  private void cancelThumbnails() {
+    if (thumbOperation != null) {
+      thumbOperation.stop();
+      thumbOperation = null;
+    }
+    thumbsInFlight = false;
+    thumbToken++;
   }
 
   /** Row label: "Title - Author (47 ch.) [+18]". */
@@ -169,7 +264,9 @@ public final class WattpadResultsScreen extends BaseList {
   private void showStory(String[] story, String json) {
     Vector parts = WattpadApi.parseParts(json);
     if (parts.size() == 0) {
-      navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
+      String error = WattpadApi.parseError(json);
+      navigator.showAlert(
+          error.length() == 0 ? Lang.tr("wattpad.empty") : error, AlertType.ERROR);
       return;
     }
     // Keep the loading alert as the current view until forward() replaces it: forward() then

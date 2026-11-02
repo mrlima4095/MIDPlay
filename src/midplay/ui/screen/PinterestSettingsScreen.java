@@ -19,11 +19,13 @@ public final class PinterestSettingsScreen extends BaseForm {
   private final TextField apiUrlField;
   private final TextField imageProxyField;
   private final TextField pinsField;
+  private final TextField thumbnailsField;
   private final TextField pathField;
 
   private final String savedApiUrl;
   private final String savedImageProxy;
   private final int savedPins;
+  private final int savedThumbnails;
   private final String savedPath;
 
   public PinterestSettingsScreen(Navigator navigator) {
@@ -31,6 +33,7 @@ public final class PinterestSettingsScreen extends BaseForm {
     savedApiUrl = settings.getPinterestApiUrl();
     savedImageProxy = settings.getPinterestImageProxy();
     savedPins = settings.getPinterestPinsPerPage();
+    savedThumbnails = settings.getPinterestThumbnails();
     savedPath = settings.getPinterestPath();
 
     apiUrlField =
@@ -49,6 +52,14 @@ public final class PinterestSettingsScreen extends BaseForm {
             2,
             TextField.NUMERIC);
     append(pinsField);
+
+    thumbnailsField =
+        new TextField(
+            Lang.tr("pinterest.settings_thumbnails"),
+            Integer.toString(savedThumbnails),
+            2,
+            TextField.NUMERIC);
+    append(thumbnailsField);
 
     pathField =
         new TextField(Lang.tr("pinterest.settings_path"), savedPath, 256, TextField.URL);
@@ -85,6 +96,7 @@ public final class PinterestSettingsScreen extends BaseForm {
     return !savedApiUrl.equals(apiUrlField.getString().trim())
         || !savedImageProxy.equals(imageProxyField.getString().trim())
         || savedPins != parsePins(pinsField.getString())
+        || savedThumbnails != parseThumbnails(thumbnailsField.getString())
         || !savedPath.equals(pathField.getString().trim());
   }
 
@@ -92,6 +104,7 @@ public final class PinterestSettingsScreen extends BaseForm {
     String apiUrl = apiUrlField.getString().trim();
     String imageProxy = imageProxyField.getString().trim();
     int pins = parsePins(pinsField.getString());
+    int thumbnails = parseThumbnails(thumbnailsField.getString());
     String path = pathField.getString().trim();
     try {
       if (!apiUrl.equals(savedApiUrl)) {
@@ -103,12 +116,30 @@ public final class PinterestSettingsScreen extends BaseForm {
       if (pins != savedPins) {
         settings.savePinterestPinsPerPage(pins);
       }
+      if (thumbnails != savedThumbnails) {
+        settings.savePinterestThumbnails(thumbnails);
+      }
       if (!path.equals(savedPath)) {
         settings.savePinterestPath(path);
       }
       navigator.back();
     } catch (RecordStoreException e) {
       navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
+    }
+  }
+
+  private static int parseThumbnails(String value) {
+    try {
+      int parsed = Integer.parseInt(value.trim());
+      if (parsed < Configuration.PINTEREST_THUMBNAILS_MIN) {
+        return Configuration.PINTEREST_THUMBNAILS_MIN;
+      }
+      if (parsed > Configuration.PINTEREST_THUMBNAILS_MAX) {
+        return Configuration.PINTEREST_THUMBNAILS_MAX;
+      }
+      return parsed;
+    } catch (Exception e) {
+      return Configuration.DEFAULT_PINTEREST_THUMBNAILS;
     }
   }
 

@@ -84,6 +84,7 @@
     "tasks": "Zadania",
     "mpgram": "MPGram",
     "github": "GitHub",
+    "opentty": "OpenTTY",
     "open_uri": "Otwórz...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
@@ -560,7 +561,9 @@
     "settings_api_url": "Adres proxy (API)",
     "settings_image_proxy": "Adres proxy obrazów",
     "settings_pins_per_page": "Pinów na stronę",
-    "settings_path": "Folder pobierania"
+    "settings_path": "Folder pobierania",
+    "related": "Powiązane piny",
+    "settings_thumbnails": "Miniatury na stronę"
   },
   "reddit": {
     "title": "Reddit",
@@ -657,7 +660,13 @@
     "remove_selected_confirm": "Usunąć {0} zaznaczonych postów z zapisanych?",
     "removed_many": "Usunięto: {0}",
     "link_error": "Nie udało się otworzyć tego linku Reddita",
-    "comments_pending": "Komentarze do tego posta nie zostały jeszcze zarchiwizowane. Spróbuj ponownie za chwilę."
+    "comments_pending": "Komentarze do tego posta nie zostały jeszcze zarchiwizowane. Spróbuj ponownie za chwilę.",
+    "gallery": "Galeria",
+    "image_loading": "Ładowanie obrazu...",
+    "image_error": "Nie udało się wczytać obrazu",
+    "sort": "Sortuj",
+    "sort_old": "Najstarsze",
+    "top_posts": "Najpopularniejsze posty"
   },
   "lyrics": {
     "title": "Tekst piosenki",
@@ -787,7 +796,9 @@
     "remove_download": "Usuń pobrane",
     "remove_download_confirm": "Usunąć pobrane rozdziały {0}?",
     "download_removed": "Pobrane usunięto",
-    "offline": "offline"
+    "offline": "offline",
+    "continue_loading": "Wczytaj więcej stron",
+    "parse_error": "Nie udało się odczytać odpowiedzi Wattpada"
   },
   "speedtest": {
     "title": "Test prędkości sieci",
@@ -840,6 +851,10 @@
     "no_notes": "Nie znaleziono notatek",
     "notification_title": "Nowa wiadomość na Discordzie",
     "open_in_discord": "Otwórz w Discordzie",
-    "notification_close": "Zamknij"
+    "notification_close": "Zamknij",
+    "new_dm": "New DM",
+    "new_dm_id": "Username or user ID",
+    "new_dm_invalid": "Enter a username or a valid user ID",
+    "new_dm_not_found": "User not found. Check the username or use a numeric ID."
   }
 }

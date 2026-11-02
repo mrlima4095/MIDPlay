@@ -122,8 +122,97 @@ public class TokenNotePicker extends ListScreen implements CommandListener {
 }
 """
 
+NEW_DM_FORM = """package discordj2me;
+
+import javax.microedition.lcdui.*;
+import midplay.util.Lang;
+
+/** Asks for a Discord user ID and opens (or creates) that direct message. */
+public class NewDMForm extends Form implements CommandListener {
+    private final TextField idField;
+    private final Command okCommand;
+    private final Command backCommand;
+
+    public NewDMForm() {
+        super(Lang.tr("discord.new_dm"));
+        idField = new TextField(Lang.tr("discord.new_dm_id"), "", 32, TextField.ANY);
+        idField.setInitialInputMode("MIDP_LOWERCASE_LATIN");
+        okCommand = new Command(Lang.tr("action.ok"), Command.OK, 0);
+        backCommand = new Command(Lang.tr("action.back"), Command.BACK, 1);
+        append(idField);
+        addCommand(okCommand);
+        addCommand(backCommand);
+        setCommandListener(this);
+    }
+
+    public void commandAction(Command c, Displayable d) {
+        if (c == backCommand) {
+            App.openDMSelector(false, false);
+        } else if (c == okCommand) {
+            String value = idField.getString().trim();
+            if (value.length() == 0) {
+                App.error(Lang.tr("discord.new_dm_invalid"), this);
+                return;
+            }
+            if (isNumeric(value)) {
+                if (!isValidId(value)) {
+                    App.error(Lang.tr("discord.new_dm_invalid"), this);
+                    return;
+                }
+                HTTPThread h = new HTTPThread(HTTPThread.OPEN_DM_BY_ID);
+                h.dmUserId = value;
+                h.start();
+            } else {
+                HTTPThread h = new HTTPThread(HTTPThread.OPEN_DM_BY_USERNAME);
+                h.dmUsername = value;
+                h.start();
+            }
+        }
+    }
+
+    private static boolean isNumeric(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if (ch < '0' || ch > '9') return false;
+        }
+        return true;
+    }
+
+    private static boolean isValidId(String id) {
+        if (id.length() < 15 || id.length() > 25) return false;
+        for (int i = 0; i < id.length(); i++) {
+            char ch = id.charAt(i);
+            if (ch < '0' || ch > '9') return false;
+        }
+        return true;
+    }
+}
+"""
+
 HOST_FIELDS = """    private static MIDlet host;
     private static Runnable exitHandler;
+
+    /** Language selected in MIDPlay; embedded Discord follows it by default. */
+    static String hostLanguage;
+
+    public static void setHostLanguage(String code) {
+        if (code == null) {
+            hostLanguage = null;
+            return;
+        }
+        if (code.toLowerCase().startsWith("pt")) {
+            hostLanguage = "pt-BR";
+        } else if ("en".equals(code)) {
+            hostLanguage = "en-US";
+        } else {
+            hostLanguage = code;
+        }
+        if (instance != null && Settings.languageFollowsHost
+                && !hostLanguage.equals(Settings.language)) {
+            Settings.language = hostLanguage;
+            Locale.setLanguage();
+        }
+    }
 
     /** True while Discord owns the screen. Background threads must not override the host. */
     static volatile boolean active = false;
@@ -220,7 +309,203 @@ HOST_FIELDS = """    private static MIDlet host;
             returnTo
         ));
     }
+
+    /** True when the Discord client has been started in this process. */
+    public static boolean isRunning() {
+        return instance != null;
+    }
+
+    /**
+     * Stops background work and releases cached Discord data. The host screen is
+     * left untouched; the next open builds a fresh client from the saved settings.
+     */
+    public static void kill() {
+        if (instance == null) return;
+        HTTPQueue.releaseHtopState();
+        KeyRepeatThread.releaseHtopState();
+        stopGateway();
+        GatewayThread.releaseHtopState();
+        WrapperCanvas.releaseHtopState();
+        MyCanvas.releaseHtopState();
+        ChannelView.releaseHtopState();
+        ChannelViewItem.releaseHtopState();
+        Dialog.releaseHtopState();
+        ListScreen.releaseHtopState();
+        LoadingScreen.releaseHtopState();
+        FormattedStringPartEmoji.releaseHtopState();
+        FormattedStringParser.releaseHtopState();
+        MainMenu.releaseHtopState();
+        SettingsSectionScreen.releaseHtopState();
+        SoundSettingsScreen.releaseHtopState();
+        Settings.releaseHtopState();
+        Settings.hasFetchedProxylessEmojis = false;
+        try { Settings.save(); } catch (Throwable ignored) {}
+        Locale.releaseHtopState();
+        active = false;
+        lastScreen = null;
+        host = null;
+        exitHandler = null;
+        guilds = null;
+        selectedGuild = null;
+        guildSelector = null;
+        subscribedGuilds.removeAllElements();
+        unsortedGuilds = null;
+        channels = null;
+        selectedChannel = null;
+        channelSelector = null;
+        channelIsOpen = false;
+        threads = null;
+        threadSelector = null;
+        selectedChannelForThreads = null;
+        messages = null;
+        channelView = null;
+        typingUsers = null;
+        typingUserIDs = null;
+        attachmentView = null;
+        isDM = false;
+        dmChannels = null;
+        selectedDmChannel = null;
+        dmSelector = null;
+        uploadToken = null;
+        myUserId = null;
+        authorFont = null;
+        timestampFont = null;
+        messageFont = null;
+        titleFont = null;
+        ic = null;
+        IconCache.init();
+        NameColorCache.init();
+        disp = null;
+        instance = null;
+    }
 """
+
+
+RESET_METHODS = {
+    "WrapperCanvas.java": """    static void releaseHtopState() {
+        WrapperCanvas old = instance;
+        instance = null;
+        if (old != null) {
+            old.current = null;
+            if (old.commands != null) old.commands.removeAllElements();
+        }
+        ashaPlaceholderCommand = null;
+        isKeyPressed = false;
+        beginRepeatTime = 0;
+        isDraggingBack = false;
+    }""",
+    "MyCanvas.java": """    static void releaseHtopState() {
+        backgroundImageOrig = null;
+        backgroundImage = null;
+        backgroundImageWidth = 0;
+        backgroundImageHeight = 0;
+    }""",
+    "ChannelView.java": """    static void releaseHtopState() {
+        draftMessage = null;
+        messageBarLeft = null;
+        messageBarCenter = null;
+        messageBarRight = null;
+        messageBarAttachmentIcon = null;
+        messageBarEmojiIcon = null;
+        messageBarIconHash = 0;
+        messageBarHash = 0;
+    }""",
+    "ChannelViewItem.java": """    static void releaseHtopState() {
+        playButton = null;
+        fileIcon = null;
+        smallFont = null;
+        smallBoldFont = null;
+        unreadIndicatorImage = null;
+        smallFontSize = 0;
+    }""",
+    "Dialog.java": """    static void releaseHtopState() {
+        okLabel = null;
+        okLabelLong = null;
+        overlay = null;
+    }""",
+    "ListScreen.java": """    static void releaseHtopState() {
+        indicatorImage = null;
+    }""",
+    "LoadingScreen.java": """    static void releaseHtopState() {
+        phoneFrames = null;
+        bubbleFrames = null;
+        scale = 0;
+    }""",
+    "FormattedStringPartEmoji.java": """    static void releaseHtopState() {
+        emojiTable = null;
+        loadedEmoji = null;
+        loadedEmojiNames = null;
+        loadedSheet = null;
+        loadedSheetId = -1;
+    }""",
+    "FormattedStringParser.java": """    static void releaseHtopState() {
+        unicodeEmojis = null;
+        unicodeEmojiNames = null;
+    }""",
+    "Locale.java": """    static void releaseHtopState() {
+        strs = null;
+        defaultStrs = null;
+        version = 0;
+    }""",
+    "MainMenu.java": """    static void releaseHtopState() {
+        instance = null;
+        hasFavorites = false;
+    }""",
+    "SettingsSectionScreen.java": """    static void releaseHtopState() {
+        instance = null;
+        settings = null;
+    }""",
+    "SoundSettingsScreen.java": """    static void releaseHtopState() {
+        instance = null;
+    }""",
+    "Settings.java": """    static void releaseHtopState() {
+        if (loginRms != null) {
+            try { loginRms.closeRecordStore(); } catch (Throwable ignored) {}
+        }
+        loginRms = null;
+        loginData = null;
+        index = 0;
+    }""",
+    "GatewayThread.java": """    static void releaseHtopState() {
+        reconnectAttempts = 0;
+        if (player != null) {
+            try { player.stop(); } catch (Throwable ignored) {}
+            try { player.close(); } catch (Throwable ignored) {}
+            player = null;
+        }
+    }""",
+    "KeyRepeatThread.java": """    static void releaseHtopState() {
+        enabled = false;
+        activeKey = 0;
+        KeyRepeatThread old = instance;
+        instance = null;
+        if (old != null) old.interrupt();
+    }""",
+    "HTTPQueue.java": """    static void releaseHtopState() {
+        Vector items = new Vector();
+        synchronized (LOCK) {
+            for (int i = 0; i < queueItems.size(); i++) {
+                items.addElement(queueItems.elementAt(i));
+            }
+        }
+        for (int i = 0; i < items.size(); i++) {
+            HTTPQueue item = (HTTPQueue) items.elementAt(i);
+            item.canceled = true;
+            item.close();
+        }
+        synchronized (LOCK) {
+            queueItems.removeAllElements();
+            activeByThread.clear();
+        }
+    }""",
+}
+
+
+def append_release_method(text, method):
+    marker = text.rfind("\n}")
+    if marker == -1:
+        raise SystemExit("Could not append Discord cache release method")
+    return text[:marker] + "\n\n" + method + text[marker:]
 
 
 def preprocess(text):
@@ -492,6 +777,324 @@ def patch_my_display(text):
     return text
 
 
+def patch_settings(text):
+    """Let the embedded client follow MIDPlay's language until the user overrides it."""
+    field = "    static String language;\n"
+    if field not in text:
+        raise SystemExit("Discord Settings language field changed upstream")
+    text = text.replace(field, field + "    static boolean languageFollowsHost = true;\n", 1)
+
+    locale_load = "        Locale.setLanguage();\n    }\n"
+    if locale_load not in text:
+        raise SystemExit("Discord Settings language load changed upstream")
+    text = text.replace(
+        locale_load,
+        "        languageFollowsHost = getBoolRecord(true);\n"
+        "//#ifdef EMBEDDED_HOST\n"
+        "        if (languageFollowsHost && App.hostLanguage != null) {\n"
+        "            language = App.hostLanguage;\n"
+        "        }\n"
+        "        if (language != null) {\n"
+        "            language = Util.replace(language, \"_\", \"-\");\n"
+        "            if (language.toLowerCase().startsWith(\"pt\")) language = \"pt-BR\";\n"
+        "        }\n"
+        "//#endif\n"
+        "        Locale.setLanguage();\n"
+        "    }\n",
+        1,
+    )
+
+    password_save = "        setStringRecord(passwordLoginLastEmail);\n"
+    start = text.rfind(password_save)
+    if start == -1:
+        raise SystemExit("Discord Settings password save changed upstream")
+    end = text.find("\n    }\n", start)
+    if end == -1:
+        raise SystemExit("Discord Settings save method has no end")
+    text = (
+        text[:end]
+        + "\n        setBoolRecord(languageFollowsHost);"
+        + text[end:]
+    )
+    return text
+
+
+def patch_language_selector(text):
+    """Remember when the user picks a language inside Discord."""
+    select = (
+        "        if (c == SELECT_COMMAND) {\n"
+        "            Settings.language = Locale.langIds[getSelectedIndex()];\n"
+    )
+    if select not in text:
+        raise SystemExit("Discord LanguageSelector select handler changed upstream")
+    text = text.replace(
+        select,
+        select + "            Settings.languageFollowsHost = false;\n",
+        1,
+    )
+    return text
+
+
+def patch_dm_selector(text):
+    """Add a "New DM" command that opens a conversation by user ID."""
+    field = "    private Command searchCommand;\n"
+    if field not in text:
+        raise SystemExit("Discord DMSelector command fields changed upstream")
+    text = text.replace(field, field + "    private Command newDmCommand;\n", 1)
+
+    search_setup = '        searchCommand = Locale.createCommand(SEARCH, Command.SCREEN, 2);\n'
+    if search_setup not in text:
+        raise SystemExit("Discord DMSelector search command changed upstream")
+    text = text.replace(
+        search_setup,
+        search_setup
+        + '        newDmCommand = new Command(\n'
+        + '            midplay.util.Lang.tr("discord.new_dm"), Command.SCREEN, 1\n'
+        + '        );\n',
+        1,
+    )
+
+    add_commands = "        addCommand(searchCommand);\n        addCommand(refreshCommand);\n"
+    if add_commands not in text:
+        raise SystemExit("Discord DMSelector command registration changed upstream")
+    text = text.replace(
+        add_commands,
+        add_commands + "        addCommand(newDmCommand);\n",
+        1,
+    )
+
+    back_handler = (
+        "            App.disp.setCurrent(MainMenu.get(false));\n"
+        "        }\n"
+        "        if (c == searchCommand) {\n"
+    )
+    if back_handler not in text:
+        raise SystemExit("Discord DMSelector back handler changed upstream")
+    text = text.replace(
+        back_handler,
+        "            App.disp.setCurrent(MainMenu.get(false));\n"
+        "        }\n"
+        "        if (c == newDmCommand) {\n"
+        "            App.disp.setCurrent(new NewDMForm());\n"
+        "            return;\n"
+        "        }\n"
+        "        if (c == searchCommand) {\n",
+        1,
+    )
+    return text
+
+
+def patch_http_thread(text):
+    """Handle opening a direct message by user ID or by username."""
+    constant = "    static final int HTTP_QR_LOGIN_CHECK = 18;\n"
+    if constant not in text:
+        raise SystemExit("Discord HTTPThread action constants changed upstream")
+    text = text.replace(
+        constant,
+        constant
+        + "    static final int OPEN_DM_BY_ID = 19;\n"
+        + "    static final int OPEN_DM_BY_USERNAME = 20;\n",
+        1,
+    )
+
+    field = "    String channelID;\n"
+    if field not in text:
+        raise SystemExit("Discord HTTPThread notification fields changed upstream")
+    text = text.replace(
+        field,
+        field
+        + "\n    // Parameters for OPEN_DM_BY_ID and OPEN_DM_BY_USERNAME\n"
+        + "    String dmUserId;\n"
+        + "    String dmUsername;\n",
+        1,
+    )
+
+    form_anchor = "    private byte[] createFormPart("
+    if form_anchor not in text:
+        raise SystemExit("Discord HTTPThread form helper changed upstream")
+    helpers = """    private static String normalizeUsername(String value) {
+        String name = value == null ? "" : value.trim();
+        if (name.startsWith("@")) name = name.substring(1);
+        int hash = name.indexOf('#');
+        if (hash != -1) name = name.substring(0, hash);
+        return name.toLowerCase();
+    }
+
+    private static boolean usernameMatches(JSONObject user, String query) {
+        if (user == null) return false;
+        String username = user.getString("username", null);
+        if (username != null && username.toLowerCase().equals(query)) return true;
+        String global = user.getString("global_name", null);
+        if (global != null && global.toLowerCase().equals(query)) return true;
+        return false;
+    }
+
+    private static String encodeQuery(String value) {
+        StringBuffer result = new StringBuffer();
+        String hex = "0123456789ABCDEF";
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+                    || (ch >= '0' && ch <= '9') || ch == '-' || ch == '_'
+                    || ch == '.' || ch == '~') {
+                result.append(ch);
+            } else if (ch == ' ') {
+                result.append("%20");
+            } else {
+                result.append('%');
+                result.append(hex.charAt((ch >> 4) & 0xF));
+                result.append(hex.charAt(ch & 0xF));
+            }
+        }
+        return result.toString();
+    }
+
+    private void openDMById(String userId) throws Exception {
+        // Best effort: request the friendship straight from the user ID.
+        // Being already friends or having requests disabled must not stop the
+        // DM from opening.
+        try {
+            HTTP.apiRequest("PUT", "/users/@me/relationships/" + userId, "{}", false);
+        } catch (Throwable ignored) {
+        }
+
+        JSONObject request = new JSONObject();
+        request.put("recipient_id", userId);
+        DMChannel dm = new DMChannel(
+            JSON.getObject(HTTP.post("/users/@me/channels", request, false))
+        );
+
+        if (App.dmChannels == null) {
+            App.dmChannels = new DMChannel[] { dm };
+        } else {
+            boolean found = false;
+            for (int i = 0; i < App.dmChannels.length; i++) {
+                if (App.dmChannels[i].id.equals(dm.id)) {
+                    App.dmChannels[i] = dm;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                DMChannel[] grown = new DMChannel[App.dmChannels.length + 1];
+                grown[0] = dm;
+                System.arraycopy(App.dmChannels, 0, grown, 1, App.dmChannels.length);
+                App.dmChannels = grown;
+            }
+        }
+
+        // Reload the DM list from the server next time it opens, so the new
+        // conversation also appears there.
+        App.dmSelector = null;
+        App.isDM = true;
+        App.selectedDmChannel = dm;
+        App.dontShowLoadScreen = true;
+        new HTTPThread(HTTPThread.FETCH_MESSAGES).start();
+    }
+
+    private boolean searchGuildMembers(String guildID, String query) throws Exception {
+        JSONArray members = JSON.getArray(HTTP.get(
+            "/guilds/" + guildID + "/members/search?query=" + encodeQuery(query) + "&limit=10",
+            false
+        ));
+        for (int i = 0; i < members.size(); i++) {
+            JSONObject user = members.getObject(i).getObject("user", null);
+            if (!usernameMatches(user, query)) continue;
+            openDMById(user.getString("id"));
+            return true;
+        }
+        return false;
+    }
+
+    private void openDMByUsername(String value) throws Exception {
+        String query = normalizeUsername(value);
+        if (query.length() == 0) {
+            throw new Exception(midplay.util.Lang.tr("discord.new_dm_not_found"));
+        }
+
+        // If the conversation already exists, just open it.
+        if (App.dmChannels != null) {
+            for (int i = 0; i < App.dmChannels.length; i++) {
+                DMChannel ch = App.dmChannels[i];
+                if (ch.isGroup) continue;
+                boolean match = ch.name != null && ch.name.toLowerCase().equals(query);
+                if (!match && ch.username != null && ch.username.toLowerCase().equals(query)) {
+                    match = true;
+                }
+                if (!match) continue;
+                App.dmSelector = null;
+                App.isDM = true;
+                App.selectedDmChannel = ch;
+                App.dontShowLoadScreen = true;
+                new HTTPThread(HTTPThread.FETCH_MESSAGES).start();
+                return;
+            }
+        }
+
+        // Friends and pending requests include the user object inline.
+        try {
+            JSONArray relationships = JSON.getArray(HTTP.get("/users/@me/relationships", false));
+            for (int i = 0; i < relationships.size(); i++) {
+                JSONObject relationship = relationships.getObject(i);
+                JSONObject user = relationship.getObject("user", null);
+                if (!usernameMatches(user, query)) continue;
+                openDMById(user.getString("id", relationship.getString("id", null)));
+                return;
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // Fall back to searching members of the servers we are in.
+        if (App.guilds != null) {
+            for (int i = 0; i < App.guilds.length; i++) {
+                try {
+                    if (searchGuildMembers(App.guilds[i].id, query)) return;
+                } catch (Throwable ignored) {
+                }
+            }
+        } else {
+            try {
+                JSONArray guilds = JSON.getArray(HTTP.get("/users/@me/guilds", false));
+                for (int i = 0; i < guilds.size(); i++) {
+                    try {
+                        if (searchGuildMembers(guilds.getObject(i).getString("id"), query)) return;
+                    } catch (Throwable ignored) {
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+
+        throw new Exception(midplay.util.Lang.tr("discord.new_dm_not_found"));
+    }
+
+"""
+    text = text.replace(form_anchor, helpers + form_anchor, 1)
+
+    qr_case = (
+        "                    if (prevScreen instanceof QRLoginScreen) {\n"
+        "                        ((QRLoginScreen) prevScreen).tokenCallback();\n"
+        "                    }\n"
+        "                    break;\n"
+        "                }\n"
+    )
+    if qr_case not in text:
+        raise SystemExit("Discord HTTPThread QR login case changed upstream")
+    new_case = """                case OPEN_DM_BY_ID: {
+                    openDMById(dmUserId);
+                    break;
+                }
+
+                case OPEN_DM_BY_USERNAME: {
+                    openDMByUsername(dmUsername);
+                    break;
+                }
+
+"""
+    text = text.replace(qr_case, qr_case + new_case, 1)
+    return text
+
+
 def main():
     if len(sys.argv) != 3:
         raise SystemExit("Usage: prepare_discord_j2me.py <source-dir> <output-dir>")
@@ -522,10 +1125,22 @@ def main():
             text = patch_login_form(text)
         elif java_file.name == "MyDisplay.java":
             text = patch_my_display(text)
+        elif java_file.name == "Settings.java":
+            text = patch_settings(text)
+        elif java_file.name == "LanguageSelector.java":
+            text = patch_language_selector(text)
+        elif java_file.name == "DMSelector.java":
+            text = patch_dm_selector(text)
+        elif java_file.name == "HTTPThread.java":
+            text = patch_http_thread(text)
+        reset_method = RESET_METHODS.get(java_file.name)
+        if reset_method:
+            text = append_release_method(text, reset_method)
         (app_out / java_file.name).write_text(text, encoding="utf-8")
 
     (app_out / "DirectFontUtil.java").write_text(DIRECT_FONT_STUB, encoding="utf-8")
     (app_out / "TokenNotePicker.java").write_text(TOKEN_NOTE_PICKER, encoding="utf-8")
+    (app_out / "NewDMForm.java").write_text(NEW_DM_FORM, encoding="utf-8")
 
     json_src = root / "src" / "cc" / "nnproject" / "json"
     for java_file in sorted(json_src.glob("*.java")):

@@ -22,6 +22,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+MPGram compression support
+Copyright (C) 1999-2004 Free Software Foundation, Inc.
+
+The embedded GNU Classpath zip sources are GPLv2-or-later with the linking
+exception included in their source headers. Their notices are preserved in the
+compiled source distribution at third_party/mpgram/src/zip.
+
+JSR-135 RecordControl API stub
+Copyright 2019 Nikita Shakarun
+Source: https://github.com/nikita36078/J2ME-Loader
+Licensed under the Apache License, Version 2.0.
+
+Subapp brand icons
+The Reddit (Snoo) and Pinterest (P) marks are trademarks of their respective
+owners, sourced from their official site favicons. The Wattpad "W" logomark is a
+trademark of Wattpad Corp, derived from the Wikimedia Commons artwork
+"Wattpad Logomark Orange (RGB HR).png". The Discord logo is a trademark of
+Discord Inc. They are used here only to identify the corresponding third-party
+services.
+
 Discord for J2ME
 Copyright (c) 2024-2026 gtrxAC
 Source: https://github.com/mrlima4095/discord-j2me
@@ -46,22 +66,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-MPGram compression support
-Copyright (C) 1999-2004 Free Software Foundation, Inc.
+OpenTTY
+Copyright (c) 2024 Mr. Lima
+Source: https://github.com/mrlima4095/OpenTTY-J2ME
 
-The embedded GNU Classpath zip sources are GPLv2-or-later with the linking
-exception included in their source headers. Their notices are preserved in the
-compiled source distribution at third_party/mpgram/src/zip.
+The embedded OpenTTY sources are used under the MIT License:
 
-JSR-135 RecordControl API stub
-Copyright 2019 Nikita Shakarun
-Source: https://github.com/nikita36078/J2ME-Loader
-Licensed under the Apache License, Version 2.0.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Subapp brand icons
-The Reddit (Snoo) and Pinterest (P) marks are trademarks of their respective
-owners, sourced from their official site favicons. The Wattpad "W" logomark is a
-trademark of Wattpad Corp, derived from the Wikimedia Commons artwork
-"Wattpad Logomark Orange (RGB HR).png". The Discord logo is a trademark of
-Discord Inc. They are used here only to identify the corresponding third-party
-services.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

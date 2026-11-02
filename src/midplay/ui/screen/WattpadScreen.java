@@ -137,7 +137,9 @@ public final class WattpadScreen extends BaseForm {
   private void openLatest(String[] entry, String json) {
     Vector parts = WattpadApi.parseParts(json);
     if (parts.size() == 0) {
-      navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
+      String error = WattpadApi.parseError(json);
+      navigator.showAlert(
+          error.length() == 0 ? Lang.tr("wattpad.empty") : error, AlertType.ERROR);
       return;
     }
     String storyTitle = WattpadApi.parseTitle(json);
@@ -271,7 +273,10 @@ public final class WattpadScreen extends BaseForm {
     Vector users = WattpadApi.parseUsers(text);
     if (users.size() == 0) {
       navigator.dismissAlert();
-      navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
+      String error = WattpadApi.parseError(text);
+      navigator.showAlert(
+          error.length() == 0 ? Lang.tr("wattpad.empty") : error,
+          error.length() == 0 ? AlertType.INFO : AlertType.ERROR);
       return;
     }
     int rawCount = WattpadApi.countUsers(text);
@@ -283,7 +288,10 @@ public final class WattpadScreen extends BaseForm {
     Vector stories = WattpadApi.parseStories(text, includeMature());
     if (stories.size() == 0) {
       navigator.dismissAlert();
-      navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
+      String error = WattpadApi.parseError(text);
+      navigator.showAlert(
+          error.length() == 0 ? Lang.tr("wattpad.empty") : error,
+          error.length() == 0 ? AlertType.INFO : AlertType.ERROR);
       return;
     }
     int rawCount = WattpadApi.countStories(text);

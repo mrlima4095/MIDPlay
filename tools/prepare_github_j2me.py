@@ -22,6 +22,89 @@ def escape_locale(value):
     return str(value).replace("\\", "\\\\").replace("\n", "\\n")
 
 
+def patch_gh(text):
+    """Add the htop lifecycle hooks used by MIDPlay's subapp manager."""
+    anchor = "\tprivate void start() {"
+    if anchor not in text:
+        raise SystemExit("GH start() changed upstream")
+
+    hooks = """\t/** True when the embedded GitHub client is alive in this process. */
+\tpublic static boolean isRunning() {
+\t\treturn midlet != null;
+\t}
+
+\t/** Stops background work and releases the GitHub client. Settings stay saved. */
+\tpublic static void kill() {
+\t\tif (midlet == null) return;
+\t\tif (needWriteConfig) {
+\t\t\ttry { writeConfig(); } catch (Throwable ignored) {}
+\t\t}
+\t\tneedWriteConfig = false;
+\t\ttry { stopOauthServer(); } catch (Throwable ignored) {}
+\t\toauthSocket = null;
+\t\toauthStarted = false;
+\t\toauthThread = null;
+\t\toauthMode = 0;
+\t\toauthUrl = null;
+\t\tgithubAccessToken = null;
+\t\tgithubAccessTokenTime = 0;
+\t\tgiteaAccessToken = null;
+\t\tgiteaRefreshToken = null;
+\t\tgiteaAccessTokenTime = 0;
+\t\tgiteaRefreshTokenTime = 0;
+\t\tlogin = null;
+\t\trun = 0;
+\t\trunParam = null;
+\t\tconfirmationTask = 0;
+\t\tconfirmationParam = null;
+\t\tformHistory.removeAllElements();
+\t\tthumbsToLoad.removeAllElements();
+\t\tbookmarks = null;
+\t\tfileImg = null;
+\t\tfolderImg = null;
+\t\trootsList = null;
+\t\tdownloadReturn = null;
+\t\tdownloadFile = null;
+\t\tdownloadCurrentPath = null;
+\t\tdownloadedPath = null;
+\t\ttokenImportReturn = null;
+\t\trepo = null;
+\t\tref = null;
+\t\tinSourceBrowser = false;
+\t\tdiscardSettingsPrompt = false;
+\t\tmainForm = null;
+\t\tsettingsForm = null;
+\t\tsearchForm = null;
+\t\tbookmarksList = null;
+\t\tloadingForm = null;
+\t\tmainField = null;
+\t\tproxyField = null;
+\t\tbrowseProxyField = null;
+\t\tproxyChoice = null;
+\t\tmodeChoice = null;
+\t\tlegacyUIChoice = null;
+\t\tcanvasFullscreenChoice = null;
+\t\tcustomApiField = null;
+\t\tnetworkChoice = null;
+\t\tdownloadMethodChoice = null;
+\t\tdownloadPathField = null;
+\t\tsearchField = null;
+\t\tsearchChoice = null;
+\t\tauthField = null;
+\t\tclientIdField = null;
+\t\tclientSecretField = null;
+\t\tcurrent = null;
+\t\tmidlet = null;
+\t\thost = null;
+\t\texitHandler = null;
+\t\tdisplay = null;
+\t\tL = null;
+\t}
+
+"""
+    return text.replace(anchor, hooks + anchor, 1)
+
+
 def main():
     if len(sys.argv) != 3:
         raise SystemExit("Usage: prepare_github_j2me.py <source-dir> <output-dir>")
@@ -56,6 +139,8 @@ def main():
             text = text.replace("/folder.png", "/gh2me-folder.png")
             text = text.replace('getResourceAsStream("/l/"', 'getResourceAsStream("/gh2me/l/"')
             text = "package githubj2me;\n\n" + text
+            if java_file.name == "GH.java":
+                text = patch_gh(text)
             target = output / java_file.name
         target.write_text(text, encoding="utf-8")
 

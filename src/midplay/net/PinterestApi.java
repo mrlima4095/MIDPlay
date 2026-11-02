@@ -51,9 +51,12 @@ public final class PinterestApi {
   public static final int USER_BOARD_COUNT = 6;
   public static final int USER_SIZE = 7;
 
-  public static final int MAX_THUMBNAILS = 12;
-
   private PinterestApi() {}
+
+  /** How many thumbnails to prefetch for the current list (Settings &gt; Pinterest). */
+  public static int maxThumbnails() {
+    return SettingsManager.getInstance().getPinterestThumbnails();
+  }
 
   private static int pageSize() {
     return SettingsManager.getInstance().getPinterestPinsPerPage();
@@ -99,6 +102,37 @@ public final class PinterestApi {
   /** Pin detail by numeric id; ids with a non-numeric prefix are rejected by the proxy. */
   public static String pinUrl(String id) {
     return apiQuery("op=pin&id=" + Utils.urlEncode(id));
+  }
+
+  /**
+   * Pins related to another pin. The title/description let the proxy fall back to a normal search
+   * when no Pinterest session is active.
+   */
+  public static String relatedUrl(String id, String title, String description, String bookmark) {
+    StringBuffer url =
+        new StringBuffer(
+            apiQuery(
+                "op=related&n="
+                    + pageSize()
+                    + "&id="
+                    + Utils.urlEncode(id)
+                    + "&q="
+                    + Utils.urlEncode(relatedQuery(title, description))));
+    appendBookmark(url, bookmark);
+    return url.toString();
+  }
+
+  private static String relatedQuery(String title, String description) {
+    String first = title == null ? "" : title.trim();
+    String second = description == null ? "" : description.trim();
+    if (first.length() == 0) {
+      first = second;
+      second = "";
+    }
+    if (second.length() > 160) {
+      second = second.substring(0, 160);
+    }
+    return second.length() == 0 ? first : first + " " + second;
   }
 
   public static String boardUrl(String username, String slug) {

@@ -93,6 +93,7 @@
     "tasks": "Tasks",
     "mpgram": "MPGram",
     "github": "GitHub",
+    "opentty": "OpenTTY",
     "open_uri": "Open...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
@@ -170,7 +171,21 @@
     "downloads_active": "Active: {0}",
     "downloads_pending": "Pending: {0}",
     "refresh": "Refresh",
-    "gc": "Collect garbage"
+    "gc": "Collect garbage",
+    "gc_done": "Garbage collected",
+    "apps": "Open apps",
+    "subapps_none": "No subapp open",
+    "select_all": "Select all",
+    "deselect_all": "Deselect all",
+    "kill": "Kill",
+    "killed_all": "{0} subapp(s) killed",
+    "nothing_to_kill": "No subapp to kill"
+  },
+  "subapp": {
+    "mpgram": "MPGram",
+    "github": "GitHub",
+    "discord": "Discord",
+    "opentty": "OpenTTY"
   },
   "player": {
     "next": "Next",
@@ -316,6 +331,7 @@
   },
   "settings": {
     "audio_quality": "Audio Quality",
+    "image_proxy": "Image Proxy",
     "check_update": "Check for Updates",
     "save_last_session": "Save Last Session",
     "mpgram_auto_login": "Prepare MPGram automatically",
@@ -560,7 +576,9 @@
     "settings_api_url": "Proxy URL (API)",
     "settings_image_proxy": "Image proxy URL",
     "settings_pins_per_page": "Pins per page",
-    "settings_path": "Download folder"
+    "settings_path": "Download folder",
+    "related": "Related pins",
+    "settings_thumbnails": "Thumbnails per page"
   },
   "reddit": {
     "title": "Reddit",
@@ -657,7 +675,13 @@
     "remove_selected_confirm": "Remove {0} selected posts from saved?",
     "removed_many": "Removed: {0}",
     "link_error": "Could not open this Reddit link",
-    "comments_pending": "Comments for this post are not archived yet. Try again in a moment."
+    "comments_pending": "Comments for this post are not archived yet. Try again in a moment.",
+    "gallery": "Gallery",
+    "image_loading": "Loading image...",
+    "image_error": "Could not load image",
+    "sort": "Sort",
+    "sort_old": "Old",
+    "top_posts": "Top posts"
   },
   "lyrics": {
     "title": "Lyrics",
@@ -787,7 +811,9 @@
     "remove_download": "Remove download",
     "remove_download_confirm": "Remove the downloaded chapters of {0}?",
     "download_removed": "Download removed",
-    "offline": "offline"
+    "offline": "offline",
+    "continue_loading": "Load more pages",
+    "parse_error": "Could not read Wattpad's response"
   },
   "speedtest": {
     "title": "Network speed test",
@@ -840,6 +866,10 @@
     "no_notes": "No notes found",
     "notification_title": "New Discord message",
     "open_in_discord": "Open in Discord",
-    "notification_close": "Close"
+    "notification_close": "Close",
+    "new_dm": "New DM",
+    "new_dm_id": "Username or user ID",
+    "new_dm_invalid": "Enter a username or a valid user ID",
+    "new_dm_not_found": "User not found. Check the username or use a numeric ID."
   }
 }

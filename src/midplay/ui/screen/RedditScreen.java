@@ -124,29 +124,97 @@ public final class RedditScreen extends BaseForm {
     if (loading) {
       return;
     }
-    String rest = query;
+    String rest = query.trim();
+    // "r/<subreddit> [keywords]" browses one subreddit; anything else is a
+    // keyword search across all of Reddit (no subreddit required).
+    boolean subredditForm = false;
     if (rest.regionMatches(true, 0, "r/", 0, 2)) {
-      rest = rest.substring(2);
+      subredditForm = true;
+      rest = rest.substring(2).trim();
     } else if (rest.startsWith("/r/")) {
-      rest = rest.substring(3);
+      subredditForm = true;
+      rest = rest.substring(3).trim();
     }
-    rest = rest.trim();
-    String subreddit;
+    String subreddit = "";
     String keywords;
     int space = indexOfWhitespace(rest);
-    if (space < 0) {
-      subreddit = rest;
-      keywords = "";
+    if (subredditForm) {
+      if (space < 0) {
+        subreddit = rest;
+        keywords = "";
+      } else {
+        subreddit = rest.substring(0, space).trim();
+        keywords = rest.substring(space).trim();
+      }
     } else {
-      subreddit = rest.substring(0, space);
-      keywords = rest.substring(space).trim();
+      keywords = rest;
     }
-    if (subreddit.length() == 0) {
-      navigator.showAlert(Lang.tr("reddit.subreddit_required"), AlertType.ERROR);
+    if (keywords.length() == 0 && subreddit.length() > 0) {
+      // No keywords after r/<subreddit>: list that subreddit's newest posts.
+      final String sub = subreddit;
+      loading = true;
+      navigator.showLoadingAlert(
+          Lang.tr("reddit.loading"),
+          new Runnable() {
+            public void run() {
+              loading = false;
+            }
+          });
+      MIDPlay.startOperation(
+          new HttpTextOperation(
+              RedditApi.subPostsUrl(sub, "new", ""),
+              new HttpTextOperation.Listener() {
+                public void onText(final String response) {
+                  navigator.callSerially(
+                      new Runnable() {
+                        public void run() {
+                          loading = false;
+                          RedditSearchHistoryManager.getInstance().record(queryField.getString().trim());
+                          refreshHistory();
+                          String error = RedditApi.parseError(response);
+                          if (error.length() > 0) {
+                            navigator.showAlert(error, AlertType.ERROR);
+                            return;
+                          }
+                          java.util.Vector items = RedditApi.parsePosts(response);
+                          if (items.size() == 0) {
+                            navigator.showAlert(Lang.tr("reddit.empty"), AlertType.INFO);
+                            return;
+                          }
+                          navigator.forward(
+                              new RedditResultsScreen(
+                                  navigator,
+                                  RedditResultsScreen.SOURCE_SUBPOSTS,
+                                  sub,
+                                  "",
+                                  "new",
+                                  Lang.tr("reddit.results_posts", "r/" + sub),
+                                  items,
+                                  RedditApi.parseBookmark(response)));
+                        }
+                      });
+                }
+
+                public void onError(final Exception e) {
+                  navigator.callSerially(
+                      new Runnable() {
+                        public void run() {
+                          loading = false;
+                          navigator.showAlert(e.toString(), AlertType.ERROR);
+                        }
+                      });
+                }
+              }));
       return;
     }
     final String sub = subreddit;
-    final String text = keywords;
+    final String text = keywords.length() == 0 ? rest : keywords;
+    if (text.length() == 0) {
+      navigator.showAlert(
+          Lang.tr(subredditForm ? "reddit.subreddit_required" : "reddit.empty"),
+          AlertType.ERROR);
+      return;
+    }
     loading = true;
     navigator.showLoadingAlert(
         Lang.tr("reddit.loading"),
@@ -155,18 +223,9 @@ public final class RedditScreen extends BaseForm {
             loading = false;
           }
         });
-    final String url =
-        text.length() == 0
-            ? RedditApi.subPostsUrl(sub, "new", "")
-            : RedditApi.searchPostsUrl(sub, text, "");
-    final String title =
-        text.length() == 0
-            ? Lang.tr("reddit.results_posts", "r/" + sub)
-            : Lang.tr("reddit.results_search", text);
-    final int source =
-        text.length() == 0
-            ? RedditResultsScreen.SOURCE_SUBPOSTS
-            : RedditResultsScreen.SOURCE_SEARCH_POSTS;
+    final String url = RedditApi.searchPostsUrl(sub, text, "");
+    final String title = Lang.tr("reddit.results_search", text);
+    final int source = RedditResultsScreen.SOURCE_SEARCH_POSTS;
     MIDPlay.startOperation(
         new HttpTextOperation(
             url,

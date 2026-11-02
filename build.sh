@@ -33,6 +33,8 @@ GITHUB_SOURCE_DIR="third_party/github-j2me"
 GITHUB_PREP_DIR="$BUILD_DIR/github-j2me"
 DISCORD_SOURCE_DIR="third_party/discord-j2me"
 DISCORD_PREP_DIR="$BUILD_DIR/discord-j2me"
+OPENTTY_SOURCE_DIR="third_party/opentty/src"
+OPENTTY_RES_DIR="$BUILD_DIR/opentty-res"
 JSR135_STUB_DIR="tools/jsr135-api"
 JSR135_STUB_JAR="$BUILD_DIR/jsr135-api.jar"
 DIST_DIR="dist"
@@ -111,7 +113,7 @@ MIDlet-1: MIDPlay, /Icon.png, midplay.MIDPlay
 MicroEdition-Profile: MIDP-2.0
 MicroEdition-Configuration: CLDC-1.1
 MIDlet-Permissions: javax.microedition.io.Connector.http, javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.file.delete
-MIDlet-Permissions-Opt: javax.microedition.io.Connector.socket
+MIDlet-Permissions-Opt: javax.microedition.io.Connector.socket, javax.microedition.io.Connector.serversocket, javax.microedition.io.Connector.https
 Nokia-UI-Enhancement: IgnoreProfilesBasedSoundMuting,MusicKeysSupported
 progressive_download: enabled
 Nokia-MIDlet-S60-Selection-Key-Compatibility: true
@@ -136,6 +138,12 @@ cp "$GITHUB_PREP_DIR/g.png" "$GITHUB_PREP_DIR/g.svg" \
 echo "• Prepare embedded Discord-j2me"
 python3 tools/prepare_discord_j2me.py "$DISCORD_SOURCE_DIR" "$DISCORD_PREP_DIR"
 
+echo "• Prepare embedded OpenTTY"
+rm -rf "$OPENTTY_RES_DIR"; mkdir -p "$OPENTTY_RES_DIR"
+cp -r "$OPENTTY_SOURCE_DIR/bin" "$OPENTTY_SOURCE_DIR/boot" \
+  "$OPENTTY_SOURCE_DIR/etc" "$OPENTTY_SOURCE_DIR/lib" "$OPENTTY_RES_DIR/"
+cp "$OPENTTY_SOURCE_DIR/icon.png" "$OPENTTY_RES_DIR/opentty.png"
+
 echo "• Prepare JSR-135 recording API"
 mkdir -p "$BUILD_DIR/jsr135-api"
 "$JAVAC" -source 1.3 -target 1.3 -g:none -bootclasspath "$BOOTCP" \
@@ -146,17 +154,24 @@ BOOTCP="$BOOTCP:$JSR135_STUB_JAR"
 
 echo "• Collect sources"
 find src "$MPGRAM_DIR" "$GITHUB_PREP_DIR" "$DISCORD_PREP_DIR/src" -name '*.java' > "$BUILD_DIR/sources.txt"
-echo "    $(wc -l < "$BUILD_DIR/sources.txt" | tr -d ' ') files"
+find "$OPENTTY_SOURCE_DIR" -maxdepth 1 -name '*.java' > "$BUILD_DIR/opentty-sources.txt"
+echo "    $(wc -l < "$BUILD_DIR/sources.txt" | tr -d ' ') MIDPlay files, $(wc -l < "$BUILD_DIR/opentty-sources.txt" | tr -d ' ') OpenTTY files"
 
-echo "• Compile (JDK 8, -source/-target 1.3, CLDC bootclasspath)"
+echo "• Compile OpenTTY (JDK 8, -source/-target 1.4, CLDC bootclasspath)"
+"$JAVAC" -encoding UTF-8 -source 1.4 -target 1.4 -g:none \
+  -bootclasspath "$BOOTCP" \
+  -d "$COMPILED_DIR" @"$BUILD_DIR/opentty-sources.txt"
+
+echo "• Compile MIDPlay (JDK 8, -source/-target 1.3, CLDC bootclasspath)"
 "$JAVAC" -encoding UTF-8 -source 1.3 -target 1.3 -g:none \
   -bootclasspath "$BOOTCP" \
+  -classpath "$COMPILED_DIR" \
   -d "$COMPILED_DIR" @"$BUILD_DIR/sources.txt"
 
-echo "• Package dist/MIDPlay_midlet.jar (classes + res/)"
+echo "• Package dist/MIDPlay_midlet.jar (classes + res/ + embedded apps)"
 manifest_body > "$BUILD_DIR/MANIFEST.MF"
 "$JAR_TOOL" cfm "$DIST_DIR/MIDPlay_midlet.jar" "$BUILD_DIR/MANIFEST.MF" \
-  -C "$COMPILED_DIR" . -C res . -C "$MPGRAM_RES_DIR" . -C "$DISCORD_PREP_DIR/res" .
+  -C "$COMPILED_DIR" . -C res . -C "$MPGRAM_RES_DIR" . -C "$DISCORD_PREP_DIR/res" . -C "$OPENTTY_RES_DIR" .
 
 echo "• ProGuard (shrink + obfuscate + -microedition preverify) → dist/MIDPlay.jar"
 "$RUN_JAVA" -cp "$PROGUARD_JAR" proguard.ProGuard @midlets.pro

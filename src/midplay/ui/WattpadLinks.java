@@ -163,7 +163,12 @@ public final class WattpadLinks {
                         Vector parts = WattpadApi.parseParts(text);
                         if (parts.size() == 0) {
                           navigator.dismissAlert();
-                          error(navigator);
+                          String message = WattpadApi.parseError(text);
+                          if (message.length() > 0) {
+                            navigator.showAlert(message, AlertType.ERROR);
+                          } else {
+                            error(navigator);
+                          }
                           return;
                         }
                         navigator.forward(new WattpadStoryScreen(navigator, storyId, text));

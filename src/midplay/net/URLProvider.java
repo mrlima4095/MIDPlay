@@ -1,6 +1,7 @@
 package midplay.net;
 
 import midplay.MIDPlay;
+import midplay.store.Configuration;
 import midplay.store.SettingsManager;
 import midplay.util.Lang;
 import midplay.util.Utils;
@@ -71,6 +72,16 @@ public class URLProvider {
   }
 
   public static String getSizedImage(String imageUrl, int size) {
+    if (useOpenTTYImageProxy()) {
+      return new StringBuffer(Configuration.OPENTTY_IMAGE_SERVICE_URL)
+          .append("/convert.php?url=")
+          .append(Utils.urlEncode(imageUrl))
+          .append("&w=")
+          .append(size)
+          .append("&h=")
+          .append(size)
+          .toString();
+    }
     StringBuffer urlBuffer =
         new StringBuffer(SERVICE_URL)
             .append("/convert?url=")
@@ -83,7 +94,14 @@ public class URLProvider {
   }
 
   public static String getSpriteSheetUrl() {
+    if (useOpenTTYImageProxy()) {
+      return Configuration.OPENTTY_IMAGE_SERVICE_URL + "/sprite.php";
+    }
     return SERVICE_URL + "/sprite";
+  }
+
+  private static boolean useOpenTTYImageProxy() {
+    return Configuration.IMAGE_PROXY_OPENTTY.equals(settingsManager.getCurrentImageProxy());
   }
 
   public static String getThemeColor(String hex) {

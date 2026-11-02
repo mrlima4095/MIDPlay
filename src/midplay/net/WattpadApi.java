@@ -21,7 +21,8 @@ public final class WattpadApi {
   public static final int STORY_AUTHOR = 2;
   public static final int STORY_PARTS = 3;
   public static final int STORY_MATURE = 4;
-  public static final int STORY_SIZE = 5;
+  public static final int STORY_COVER = 5;
+  public static final int STORY_SIZE = 6;
 
   /** Indexes into the chapter rows returned by {@link #parseParts}. */
   public static final int PART_ID = 0;
@@ -34,7 +35,7 @@ public final class WattpadApi {
   public static final int USER_SIZE = 2;
 
   private static final String SEARCH_FIELDS =
-      "&fields=stories(id,title,numParts,mature,user(name))";
+      "&fields=stories(id,title,numParts,mature,cover,user(name))";
   private static final int SEARCH_LIMIT = 20;
 
   /**
@@ -288,6 +289,7 @@ public final class WattpadApi {
         row[STORY_AUTHOR] = authorOf(story);
         row[STORY_PARTS] = Integer.toString(story.getInt("numParts", 0));
         row[STORY_MATURE] = mature ? "1" : "0";
+        row[STORY_COVER] = story.getString("cover", "");
         result.addElement(row);
       }
     } catch (Exception e) {
@@ -314,6 +316,49 @@ public final class WattpadApi {
     } catch (Exception e) {
       return "";
     }
+  }
+
+  /** Cover image URL of a story; empty when the response has none. */
+  public static String parseCover(String json) {
+    try {
+      String cover = JSON.getObject(json).getString("cover", "");
+      return cover == null ? "" : cover.trim();
+    } catch (Exception e) {
+      return "";
+    }
+  }
+
+  /**
+   * Error message carried by a Wattpad response, an empty string for a valid response, or a
+   * readable message when the body is not JSON at all. This lets screens tell a broken/blocked
+   * response apart from a story that genuinely has no chapters.
+   */
+  public static String parseError(String json) {
+    try {
+      JSONObject root = JSON.getObject(json);
+      if (root == null) {
+        return Lang.tr("wattpad.parse_error");
+      }
+      String error = root.getString("error", "");
+      if (error == null || error.length() == 0) {
+        error = root.getString("message", "");
+      }
+      return error == null ? "" : error.trim();
+    } catch (Exception e) {
+      return Lang.tr("wattpad.parse_error");
+    }
+  }
+
+  /** Routes a cover image through the shared HTTP image proxy used by the other services. */
+  public static String imageUrl(String source) {
+    if (source == null || source.length() == 0) {
+      return "";
+    }
+    String proxy = SettingsManager.getInstance().getRedditImageProxy();
+    if (proxy == null || proxy.length() == 0) {
+      proxy = midplay.store.Configuration.DEFAULT_REDDIT_IMAGE_PROXY;
+    }
+    return proxy + Utils.urlEncode(source);
   }
 
   /** Parses the story title; empty when the response cannot be read. */
@@ -541,6 +586,7 @@ public final class WattpadApi {
         row[STORY_AUTHOR] = authorOf(story);
         row[STORY_PARTS] = Integer.toString(story.getInt("numParts", 0));
         row[STORY_MATURE] = mature ? "1" : "0";
+        row[STORY_COVER] = story.getString("cover", "");
         result.addElement(row);
       }
     } catch (Exception e) {

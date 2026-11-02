@@ -29,7 +29,6 @@ import midplay.util.Pager;
  * opened the reader.
  */
 public final class WattpadReaderScreen extends BaseForm {
-  private static final int MAX_CHARS = 60000;
   private static final int TITLE_MAX = 40;
 
   private final String storyId;
@@ -43,6 +42,7 @@ public final class WattpadReaderScreen extends BaseForm {
   private final Command nextPage;
   private final Command gotoChapter;
   private final Command nextChapter;
+  private final Command continueLoadingCommand;
   private final Command shareChapterCommand;
   private final Command saveChapterCommand;
   private final StringItem content = new StringItem(null, "");
@@ -51,6 +51,10 @@ public final class WattpadReaderScreen extends BaseForm {
   private String[] pages;
   private int page;
   private int loadToken;
+  private int nextLoadPage;
+  private boolean moreAvailable;
+  private boolean continueAdded;
+  private boolean loadingMore;
   private boolean prevAdded;
   private boolean nextAdded;
   private boolean chapterNextAdded;
@@ -77,6 +81,7 @@ public final class WattpadReaderScreen extends BaseForm {
     nextPage = new Command(Lang.tr("wattpad.next_page"), Command.SCREEN, 2);
     gotoChapter = new Command(Lang.tr("wattpad.go_to_chapter"), Command.SCREEN, 3);
     nextChapter = new Command(Lang.tr("wattpad.next_chapter"), Command.SCREEN, 2);
+    continueLoadingCommand = new Command(Lang.tr("wattpad.continue_loading"), Command.SCREEN, 4);
     shareChapterCommand = new Command(Lang.tr("wattpad.share_chapter"), Command.SCREEN, 5);
     saveChapterCommand = new Command(Lang.tr("wattpad.save_chapter_page"), Command.SCREEN, 6);
     append(content);
@@ -97,6 +102,9 @@ public final class WattpadReaderScreen extends BaseForm {
     } else if (c == nextPage) {
       if (pages != null && page < pages.length - 1) {
         showPage(page + 1);
+      } else if (moreAvailable) {
+        // The chapter was cut by the safety page cap; extend it instead of ending it.
+        loadMore();
       } else if (index + 1 < parts.size()) {
         // At the end of a chapter, "next page" continues into the next chapter.
         openChapter(index + 1, 0);
@@ -105,6 +113,8 @@ public final class WattpadReaderScreen extends BaseForm {
       promptChapter();
     } else if (c == nextChapter) {
       openChapter(index + 1, 0);
+    } else if (c == continueLoadingCommand) {
+      loadMore();
     } else if (c == shareChapterCommand) {
       shareChapter();
     } else if (c == saveChapterCommand) {
@@ -127,6 +137,9 @@ public final class WattpadReaderScreen extends BaseForm {
     fullText = "";
     pages = null;
     page = 0;
+    nextLoadPage = 1;
+    moreAvailable = false;
+    updateContinueCommand();
     if (prevAdded) {
       removeCommand(prevPage);
       prevAdded = false;
@@ -206,10 +219,11 @@ public final class WattpadReaderScreen extends BaseForm {
 
   private void load(final int startPage) {
     final int token = ++loadToken;
+    loadingMore = false;
     // A downloaded chapter is served from the memory card, so the reader also works offline.
     String offlineText = WattpadDownloadManager.getInstance().readChapter(storyId, partId);
     if (offlineText != null) {
-      applyText(offlineText, startPage, true);
+      applyText(offlineText, startPage, true, false, 1);
       return;
     }
     MIDPlay.startOperation(
@@ -228,14 +242,14 @@ public final class WattpadReaderScreen extends BaseForm {
                     });
               }
 
-              public void onSuccess(final String text) {
+              public void onSuccess(final String text, final boolean more, final int next) {
                 navigator.callSerially(
                     new Runnable() {
                       public void run() {
                         if (token != loadToken) {
                           return;
                         }
-                        applyText(text, startPage, false);
+                        applyText(text, startPage, false, more, next);
                       }
                     });
               }
@@ -253,18 +267,97 @@ public final class WattpadReaderScreen extends BaseForm {
             }));
   }
 
+  /** Loads the next block of a chapter that hit the operation's safety page limit. */
+  private void loadMore() {
+    if (loadingMore || !moreAvailable) {
+      return;
+    }
+    loadingMore = true;
+    removeCommand(continueLoadingCommand);
+    continueAdded = false;
+    final int token = ++loadToken;
+    MIDPlay.startOperation(
+        new WattpadChapterOperation(
+            partId,
+            nextLoadPage,
+            new WattpadChapterOperation.Listener() {
+              public void onProgress(final int pageNumber) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        if (token == loadToken) {
+                          content.setText(
+                              Lang.tr("wattpad.loading_chapter") + " " + pageNumber);
+                        }
+                      }
+                    });
+              }
+
+              public void onSuccess(final String text, final boolean more, final int next) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        if (token != loadToken) {
+                          return;
+                        }
+                        loadingMore = false;
+                        if (text != null && text.length() > 0) {
+                          fullText = fullText + text;
+                          pages =
+                              Pager.paginate(
+                                  fullText,
+                                  SettingsManager.getInstance().getWattpadPageChars());
+                        }
+                        moreAvailable = more;
+                        nextLoadPage = next;
+                        updateContinueCommand();
+                        showPage(page < pages.length ? page : pages.length - 1);
+                      }
+                    });
+              }
+
+              public void onError(final Exception e) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        if (token == loadToken) {
+                          loadingMore = false;
+                          updateContinueCommand();
+                          navigator.showAlert(
+                              Lang.tr("wattpad.error") + "\n" + e, AlertType.ERROR);
+                        }
+                      }
+                    });
+              }
+            }));
+  }
+
   /** Paginates a chapter (from disk or from the network) and shows the requested page. */
-  private void applyText(String text, int startPage, boolean offline) {
+  private void applyText(
+      String text, int startPage, boolean offline, boolean more, int next) {
     fullText = text;
-    pages =
-        Pager.paginate(
-            Pager.truncate(text, MAX_CHARS), SettingsManager.getInstance().getWattpadPageChars());
+    pages = Pager.paginate(text, SettingsManager.getInstance().getWattpadPageChars());
+    moreAvailable = more;
+    nextLoadPage = next;
     int target = startPage;
     if (target < 0 || target >= pages.length) {
       target = 0;
     }
     setTitle(shorten(chapterTitle + (offline ? " [" + Lang.tr("wattpad.offline") + "]" : "")));
+    updateContinueCommand();
     showPage(target);
+  }
+
+  private void updateContinueCommand() {
+    if (moreAvailable) {
+      if (!continueAdded) {
+        addCommand(continueLoadingCommand);
+        continueAdded = true;
+      }
+    } else if (continueAdded) {
+      removeCommand(continueLoadingCommand);
+      continueAdded = false;
+    }
   }
 
   private void showPage(int target) {
@@ -289,7 +382,8 @@ public final class WattpadReaderScreen extends BaseForm {
   private void updateNavCommands() {
     boolean wantPrev = page > 0;
     boolean wantNext =
-        pages != null && (page < pages.length - 1 || index + 1 < parts.size());
+        pages != null
+            && (page < pages.length - 1 || moreAvailable || index + 1 < parts.size());
     if (wantPrev && !prevAdded) {
       addCommand(prevPage);
       prevAdded = true;

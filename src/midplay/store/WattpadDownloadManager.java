@@ -66,6 +66,10 @@ public final class WattpadDownloadManager implements CommandListener {
   private static final class LocalStory {
     String id;
     String title;
+    String description;
+    String details;
+    String author;
+    String cover;
     Vector parts;
   }
 
@@ -76,6 +80,7 @@ public final class WattpadDownloadManager implements CommandListener {
     Navigator navigator;
     volatile boolean cancelled;
     int total;
+    final Vector failedChapters = new Vector();
   }
 
   private final Hashtable storyCache = new Hashtable();
@@ -147,6 +152,30 @@ public final class WattpadDownloadManager implements CommandListener {
   public String getLocalTitle(String storyId) {
     LocalStory story = story(storyId);
     return story == null || story.title == null ? "" : story.title;
+  }
+
+  /** Saved synopsis of a downloaded story, or an empty string. */
+  public String getLocalDescription(String storyId) {
+    LocalStory story = story(storyId);
+    return story == null || story.description == null ? "" : story.description;
+  }
+
+  /** Saved details block of a downloaded story, or an empty string. */
+  public String getLocalDetails(String storyId) {
+    LocalStory story = story(storyId);
+    return story == null || story.details == null ? "" : story.details;
+  }
+
+  /** Saved author username of a downloaded story, or an empty string. */
+  public String getLocalAuthor(String storyId) {
+    LocalStory story = story(storyId);
+    return story == null || story.author == null ? "" : story.author;
+  }
+
+  /** Saved cover URL of a downloaded story, or an empty string. */
+  public String getLocalCover(String storyId) {
+    LocalStory story = story(storyId);
+    return story == null || story.cover == null ? "" : story.cover;
   }
 
   public boolean isChapterDownloaded(String storyId, String partId) {
@@ -298,6 +327,23 @@ public final class WattpadDownloadManager implements CommandListener {
       String storyTitle,
       Vector parts,
       Listener listener) {
+    download(navigator, storyId, storyTitle, "", "", "", "", parts, listener);
+  }
+
+  /**
+   * Starts downloading the missing chapters with the story metadata that the offline story screen
+   * needs (synopsis, details, author and cover).
+   */
+  public synchronized void download(
+      Navigator navigator,
+      String storyId,
+      String storyTitle,
+      String description,
+      String details,
+      String authorUsername,
+      String cover,
+      Vector parts,
+      Listener listener) {
     if (navigator == null || storyId == null || parts == null || parts.size() == 0) {
       return;
     }
@@ -307,7 +353,9 @@ public final class WattpadDownloadManager implements CommandListener {
     }
     // Write the chapter list before any chapter so an interrupted download can be resumed and the
     // story is listed offline even when only some chapters are on the card.
-    if (!ensureDirectories(storyDir(storyId)) || !writeStory(storyId, storyTitle, parts)) {
+    if (!ensureDirectories(storyDir(storyId))
+        || !writeStory(
+            storyId, storyTitle, description, details, authorUsername, cover, parts)) {
       navigator.showAlert(Lang.tr("wattpad.download_error"), AlertType.ERROR);
       return;
     }
@@ -360,12 +408,26 @@ public final class WattpadDownloadManager implements CommandListener {
           currentChapter = partTitle == null ? "" : partTitle;
         }
         if (!isChapterDownloaded(current.storyId, partId)) {
-          try {
-            String text = WattpadChapterOperation.downloadChapter(partId);
-            writeChapter(current.storyId, partId, text);
-          } catch (Exception e) {
+          boolean written = false;
+          for (int attempt = 0; attempt < 3 && !written && !current.cancelled; attempt++) {
+            try {
+              String text = WattpadChapterOperation.downloadChapter(partId);
+              writeChapter(current.storyId, partId, text);
+              written = true;
+            } catch (Exception e) {
+              if (attempt < 2) {
+                try {
+                  Thread.sleep(700);
+                } catch (InterruptedException ignored) {
+                }
+              }
+            }
+          }
+          if (!written && !current.cancelled) {
             synchronized (this) {
               failed++;
+              current.failedChapters.addElement(
+                  partTitle == null || partTitle.length() == 0 ? partId : partTitle);
             }
           }
         }
@@ -383,6 +445,7 @@ public final class WattpadDownloadManager implements CommandListener {
     final Navigator nav = finished.navigator;
     int downloaded;
     int failures;
+    String failedList;
     synchronized (this) {
       if (job != finished) {
         return;
@@ -392,10 +455,12 @@ public final class WattpadDownloadManager implements CommandListener {
       progressGauge = null;
       downloaded = done;
       failures = failed;
+      failedList = joinFailedChapters(finished.failedChapters);
     }
     final boolean cancelled = finished.cancelled;
     final int finalDownloaded = downloaded;
     final int finalFailures = failures;
+    final String finalFailedList = failedList;
     if (finished.listener != null && nav != null) {
       nav.callSerially(
           new Runnable() {
@@ -413,14 +478,32 @@ public final class WattpadDownloadManager implements CommandListener {
           public void run() {
             nav.dismissAlert();
             if (finalFailures > 0) {
+              String count = Integer.toString(finalFailures);
               nav.showAlert(
-                  Lang.tr("wattpad.download_failed", Integer.toString(finalFailures)),
+                  finalFailedList.length() == 0
+                      ? Lang.tr("wattpad.download_failed", count)
+                      : Lang.tr("wattpad.download_failed", count) + "\n" + finalFailedList,
                   AlertType.WARNING);
             } else {
               nav.showAlert(Lang.tr("wattpad.download_done"), AlertType.CONFIRMATION);
             }
           }
         });
+  }
+
+  /** Comma-separated list of failed chapter titles, capped so the alert stays readable. */
+  private static String joinFailedChapters(Vector titles) {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < titles.size() && i < 6; i++) {
+      if (sb.length() > 0) {
+        sb.append(", ");
+      }
+      sb.append((String) titles.elementAt(i));
+    }
+    if (titles.size() > 6) {
+      sb.append("...");
+    }
+    return sb.toString();
   }
 
   private void showProgress() {
@@ -561,6 +644,10 @@ public final class WattpadDownloadManager implements CommandListener {
       story.id = id == null || id.length() == 0 ? storyId : id;
       String title = json.getString("title", "");
       story.title = title == null ? "" : title;
+      story.description = json.getString("description", "");
+      story.details = json.getString("details", "");
+      story.author = json.getString("author", "");
+      story.cover = json.getString("cover", "");
       story.parts = new Vector();
       JSONArray parts = json.getArray("parts");
       if (parts != null) {
@@ -581,10 +668,21 @@ public final class WattpadDownloadManager implements CommandListener {
     }
   }
 
-  private boolean writeStory(String storyId, String storyTitle, Vector parts) {
+  private boolean writeStory(
+      String storyId,
+      String storyTitle,
+      String description,
+      String details,
+      String authorUsername,
+      String cover,
+      Vector parts) {
     JSONObject json = new JSONObject();
     json.put("id", storyId);
     json.put("title", storyTitle == null ? "" : storyTitle);
+    json.put("description", description == null ? "" : description);
+    json.put("details", details == null ? "" : details);
+    json.put("author", authorUsername == null ? "" : authorUsername);
+    json.put("cover", cover == null ? "" : cover);
     JSONArray array = new JSONArray();
     for (int i = 0; i < parts.size(); i++) {
       String[] part = (String[]) parts.elementAt(i);
@@ -599,6 +697,10 @@ public final class WattpadDownloadManager implements CommandListener {
       LocalStory story = new LocalStory();
       story.id = storyId;
       story.title = storyTitle == null ? "" : storyTitle;
+      story.description = description == null ? "" : description;
+      story.details = details == null ? "" : details;
+      story.author = authorUsername == null ? "" : authorUsername;
+      story.cover = cover == null ? "" : cover;
       story.parts = parts;
       storyCache.put(storyId, story);
       return true;

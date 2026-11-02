@@ -84,6 +84,7 @@
     "tasks": "משימות",
     "mpgram": "MPGram",
     "github": "GitHub",
+    "opentty": "OpenTTY",
     "open_uri": "פתח...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
@@ -560,7 +561,9 @@
     "settings_api_url": "כתובת פרוקסי (API)",
     "settings_image_proxy": "כתובת פרוקסי לתמונות",
     "settings_pins_per_page": "פינים בעמוד",
-    "settings_path": "תיקיית הורדות"
+    "settings_path": "תיקיית הורדות",
+    "related": "פינים קשורים",
+    "settings_thumbnails": "תמונות ממוזערות בעמוד"
   },
   "reddit": {
     "title": "Reddit",
@@ -657,7 +660,13 @@
     "remove_selected_confirm": "להסיר {0} פוסטים נבחרים מהשמורים?",
     "removed_many": "הוסרו: {0}",
     "link_error": "לא ניתן לפתוח קישור Reddit זה",
-    "comments_pending": "התגובות לפוסט זה עדיין לא נשמרו בארכיון. נסה שוב בעוד רגע."
+    "comments_pending": "התגובות לפוסט זה עדיין לא נשמרו בארכיון. נסה שוב בעוד רגע.",
+    "gallery": "גלריה",
+    "image_loading": "טוען תמונה...",
+    "image_error": "לא ניתן לטעון את התמונה",
+    "sort": "מיון",
+    "sort_old": "ישנים",
+    "top_posts": "פוסטים מובילים"
   },
   "lyrics": {
     "title": "מילים",
@@ -787,7 +796,9 @@
     "remove_download": "הסרת הורדה",
     "remove_download_confirm": "להסיר את הפרקים שהורדו של {0}?",
     "download_removed": "ההורדה הוסרה",
-    "offline": "לא מקוון"
+    "offline": "לא מקוון",
+    "continue_loading": "טעינת עמודים נוספים",
+    "parse_error": "לא ניתן לקרוא את התגובה של Wattpad"
   },
   "speedtest": {
     "title": "בדיקת מהירות רשת",
@@ -840,6 +851,10 @@
     "no_notes": "לא נמצאו פתקים",
     "notification_title": "הודעת Discord חדשה",
     "open_in_discord": "פתח ב-Discord",
-    "notification_close": "סגור"
+    "notification_close": "סגור",
+    "new_dm": "New DM",
+    "new_dm_id": "Username or user ID",
+    "new_dm_invalid": "Enter a username or a valid user ID",
+    "new_dm_not_found": "User not found. Check the username or use a numeric ID."
   }
 }

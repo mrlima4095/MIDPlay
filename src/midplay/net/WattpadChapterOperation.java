@@ -12,25 +12,35 @@ import midplay.util.Utils;
  * Downloads a whole Wattpad chapter. The text endpoint answers with one HTML fragment per page, so
  * this operation keeps requesting pages until an empty one comes back, then hands the joined result
  * over as plain text.
+ *
+ * <p>A hard safety page limit still applies so a misbehaving endpoint cannot loop forever. When it
+ * is reached the listener is told that more pages remain, and the reader can continue loading from
+ * {@code nextPage} instead of silently cutting the chapter.
  */
 public class WattpadChapterOperation extends NetworkOperation {
   public interface Listener {
     void onProgress(int page);
 
-    void onSuccess(String text);
+    void onSuccess(String text, boolean more, int nextPage);
 
     void onError(Exception e);
   }
 
-  private static final int MAX_PAGES = 15;
+  private static final int MAX_PAGES = 50;
   private static final int MAX_PAGE_BYTES = 256 * 1024;
   private static final long SOCKET_TIMEOUT_MS = 45000L;
 
   private final String partId;
+  private final int startPage;
   private final Listener listener;
 
   public WattpadChapterOperation(String partId, Listener listener) {
+    this(partId, 1, listener);
+  }
+
+  public WattpadChapterOperation(String partId, int startPage, Listener listener) {
     this.partId = partId;
+    this.startPage = startPage < 1 ? 1 : startPage;
     this.listener = listener;
   }
 
@@ -39,18 +49,42 @@ public class WattpadChapterOperation extends NetworkOperation {
     boolean isStopped();
   }
 
-  /**
-   * Fetches a whole chapter as plain text without delivering it to a listener. Used by the story
-   * downloader to store chapters on the card.
-   */
-  public static String downloadChapter(String partId) throws IOException {
-    return fetchText(partId, null, null);
+  /** One run of the page loop: text fetched so far plus whether the safety cap was reached. */
+  private static final class FetchResult {
+    String text;
+    boolean more;
+    int nextPage;
   }
 
-  private static String fetchText(String partId, Listener progress, Stopper stopper)
-      throws IOException {
+  /**
+   * Fetches a whole chapter as plain text without delivering it to a listener. Used by the story
+   * downloader to store chapters on the card. Follows continuation pages until the endpoint signals
+   * the end, with a total page guard against a broken server.
+   */
+  public static String downloadChapter(String partId) throws IOException {
+    StringBuffer joined = new StringBuffer();
+    int page = 1;
+    for (int guard = 0; guard < 1000; guard++) {
+      FetchResult result = fetchText(partId, page, null, null);
+      if (result.text != null) {
+        joined.append(result.text);
+      }
+      if (!result.more) {
+        return joined.toString();
+      }
+      page = result.nextPage;
+    }
+    throw new IOException("Chapter too long");
+  }
+
+  private static FetchResult fetchText(
+      String partId, int startPage, Listener progress, Stopper stopper) throws IOException {
     StringBuffer html = new StringBuffer();
-    for (int page = 1; page <= MAX_PAGES; page++) {
+    FetchResult result = new FetchResult();
+    result.nextPage = startPage;
+    int page = startPage;
+    boolean capReached = true;
+    for (int fetched = 0; fetched < MAX_PAGES; fetched++, page++) {
       if (stopper != null && stopper.isStopped()) {
         throw new IOException("Stopped");
       }
@@ -59,33 +93,35 @@ public class WattpadChapterOperation extends NetworkOperation {
       }
       String chunk = fetchPage(partId, page, stopper);
       if (chunk == null) {
+        capReached = false;
         break;
       }
       String trimmed = chunk.trim();
       if (trimmed.length() == 0) {
+        capReached = false;
         break;
       }
-      if (page == 1 && trimmed.charAt(0) == '{') {
+      if (page == startPage && trimmed.charAt(0) == '{') {
         // The endpoint answers with a small JSON error object when a part cannot be served.
         throw new IOException("Chapter unavailable");
       }
       html.append(chunk);
     }
-    if (html.length() == 0) {
+    result.more = capReached;
+    result.nextPage = page;
+    result.text = HtmlText.toText(html.toString());
+    if (result.text.length() == 0 && startPage == 1) {
       throw new IOException("Empty chapter");
     }
-    String text = HtmlText.toText(html.toString());
-    if (text.length() == 0) {
-      throw new IOException("Empty chapter");
-    }
-    return text;
+    return result;
   }
 
   protected void execute() {
     try {
-      String text =
+      FetchResult result =
           fetchText(
               partId,
+              startPage,
               listener,
               new Stopper() {
                 public boolean isStopped() {
@@ -93,7 +129,7 @@ public class WattpadChapterOperation extends NetworkOperation {
                 }
               });
       if (!isStopped()) {
-        listener.onSuccess(text);
+        listener.onSuccess(result.text, result.more, result.nextPage);
       }
     } catch (Exception e) {
       if (!isStopped()) {

@@ -1,5 +1,6 @@
 package midplay.ui.screen;
 
+import java.util.Vector;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
@@ -8,6 +9,7 @@ import javax.microedition.lcdui.ImageItem;
 import javax.microedition.lcdui.StringItem;
 import midplay.MIDPlay;
 import midplay.net.BinaryImageLoadOperation;
+import midplay.net.HttpTextOperation;
 import midplay.net.PinterestApi;
 import midplay.net.PinterestImageDownloadOperation;
 import midplay.store.PinterestFavoritesManager;
@@ -25,6 +27,7 @@ public final class PinterestPinScreen extends BaseForm {
   private final ImageItem imageItem = new ImageItem(null, null, ImageItem.LAYOUT_CENTER, null);
   private final StringItem content = new StringItem(null, "");
   private final Command imageCommand;
+  private final Command relatedCommand;
   private final Command authorCommand;
   private final Command boardCommand;
   private final Command saveCommand;
@@ -45,7 +48,8 @@ public final class PinterestPinScreen extends BaseForm {
     content.setText(PinterestApi.pinDetails(this.pin));
     append(content);
     imageCommand = new Command(Lang.tr("pinterest.view_image"), Command.SCREEN, 1);
-    authorCommand = new Command(Lang.tr("pinterest.author"), Command.SCREEN, 2);
+    relatedCommand = new Command(Lang.tr("pinterest.related"), Command.SCREEN, 2);
+    authorCommand = new Command(Lang.tr("pinterest.author"), Command.SCREEN, 3);
     boardCommand = new Command(Lang.tr("pinterest.board"), Command.SCREEN, 3);
     saveCommand = new Command(Lang.tr("pinterest.save"), Command.SCREEN, 4);
     removeSavedCommand = new Command(Lang.tr("pinterest.remove_saved"), Command.SCREEN, 4);
@@ -65,6 +69,11 @@ public final class PinterestPinScreen extends BaseForm {
       addCommand(shareCommand);
       updateSaveCommands();
     }
+    if (this.pin[PinterestApi.PIN_ID].length() > 0
+        || this.pin[PinterestApi.PIN_TITLE].length() > 0
+        || this.pin[PinterestApi.PIN_DESCRIPTION].length() > 0) {
+      addCommand(relatedCommand);
+    }
     if (imageUrl().length() > 0) {
       addCommand(downloadCommand);
     }
@@ -77,6 +86,8 @@ public final class PinterestPinScreen extends BaseForm {
       PlayerNavHelper.showNowPlaying(navigator);
     } else if (c == imageCommand) {
       navigator.forward(new PinterestImageViewer(navigator, Lang.tr("pinterest.pin"), imageUrl()));
+    } else if (c == relatedCommand) {
+      loadRelated();
     } else if (c == authorCommand) {
       navigator.forward(new PinterestUserScreen(navigator, pin[PinterestApi.PIN_USER]));
     } else if (c == boardCommand) {
@@ -96,6 +107,72 @@ public final class PinterestPinScreen extends BaseForm {
     } else if (c == downloadCommand) {
       downloadPin();
     }
+  }
+
+  private void loadRelated() {
+    if (loading) {
+      return;
+    }
+    final String id = pin[PinterestApi.PIN_ID];
+    final String title = pin[PinterestApi.PIN_TITLE];
+    final String description = pin[PinterestApi.PIN_DESCRIPTION];
+    loading = true;
+    navigator.showLoadingAlert(
+        Lang.tr("pinterest.loading"),
+        new Runnable() {
+          public void run() {
+            loading = false;
+          }
+        });
+    MIDPlay.startOperation(
+        new HttpTextOperation(
+            PinterestApi.relatedUrl(id, title, description, ""),
+            new HttpTextOperation.Listener() {
+              public void onText(final String text) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        String error = PinterestApi.parseError(text);
+                        if (error.length() > 0) {
+                          navigator.dismissAlert();
+                          navigator.showAlert(error, AlertType.ERROR);
+                          return;
+                        }
+                        Vector pins = PinterestApi.parsePins(text);
+                        if (pins.size() == 0) {
+                          navigator.dismissAlert();
+                          navigator.showAlert(Lang.tr("pinterest.empty"), AlertType.INFO);
+                          return;
+                        }
+                        String query =
+                            description.length() == 0 ? title : title + " " + description;
+                        navigator.forward(
+                            new PinterestResultsScreen(
+                                navigator,
+                                PinterestResultsScreen.SOURCE_RELATED_PINS,
+                                id,
+                                query,
+                                "",
+                                "",
+                                Lang.tr("pinterest.related"),
+                                pins,
+                                PinterestApi.parseBookmark(text)));
+                      }
+                    });
+              }
+
+              public void onError(final Exception e) {
+                navigator.callSerially(
+                    new Runnable() {
+                      public void run() {
+                        loading = false;
+                        navigator.dismissAlert();
+                        navigator.showAlert(e.toString(), AlertType.ERROR);
+                      }
+                    });
+              }
+            }));
   }
 
   private void updateSaveCommands() {

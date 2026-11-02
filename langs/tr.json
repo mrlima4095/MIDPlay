@@ -84,6 +84,7 @@
     "tasks": "Görevler",
     "mpgram": "MPGram",
     "github": "GitHub",
+    "opentty": "OpenTTY",
     "open_uri": "Aç...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
@@ -560,7 +561,9 @@
     "settings_api_url": "Proxy adresi (API)",
     "settings_image_proxy": "Resim proxy adresi",
     "settings_pins_per_page": "Sayfa başına pin",
-    "settings_path": "İndirme klasörü"
+    "settings_path": "İndirme klasörü",
+    "related": "İlgili pinler",
+    "settings_thumbnails": "Sayfa başına küçük resim"
   },
   "reddit": {
     "title": "Reddit",
@@ -657,7 +660,13 @@
     "remove_selected_confirm": "Seçilen {0} gönderi kaydedilenlerden kaldırılsın mı?",
     "removed_many": "Kaldırıldı: {0}",
     "link_error": "Bu Reddit bağlantısı açılamadı",
-    "comments_pending": "Bu gönderinin yorumları henüz arşivlenmedi. Birazdan tekrar deneyin."
+    "comments_pending": "Bu gönderinin yorumları henüz arşivlenmedi. Birazdan tekrar deneyin.",
+    "gallery": "Galeri",
+    "image_loading": "Görsel yükleniyor...",
+    "image_error": "Görsel yüklenemedi",
+    "sort": "Sırala",
+    "sort_old": "Eski",
+    "top_posts": "En iyi gönderiler"
   },
   "lyrics": {
     "title": "Şarkı sözleri",
@@ -787,7 +796,9 @@
     "remove_download": "İndirmeyi kaldır",
     "remove_download_confirm": "{0} hikayesinin indirilen bölümleri kaldırılsın mı?",
     "download_removed": "İndirme kaldırıldı",
-    "offline": "çevrimdışı"
+    "offline": "çevrimdışı",
+    "continue_loading": "Daha fazla sayfa yükle",
+    "parse_error": "Wattpad yanıtı okunamadı"
   },
   "speedtest": {
     "title": "Ağ hız testi",
@@ -840,6 +851,10 @@
     "no_notes": "Not bulunamadı",
     "notification_title": "Yeni Discord mesajı",
     "open_in_discord": "Discord'da aç",
-    "notification_close": "Kapat"
+    "notification_close": "Kapat",
+    "new_dm": "New DM",
+    "new_dm_id": "Username or user ID",
+    "new_dm_invalid": "Enter a username or a valid user ID",
+    "new_dm_not_found": "User not found. Check the username or use a numeric ID."
   }
 }

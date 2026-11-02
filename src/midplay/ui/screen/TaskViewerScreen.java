@@ -1,13 +1,16 @@
 package midplay.ui.screen;
 
 import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.StringItem;
+import javax.microedition.lcdui.Ticker;
 import midplay.MIDPlay;
 import midplay.store.DownloadQueueManager;
 import midplay.ui.BaseForm;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
+import midplay.util.MemoryUtils;
 
 /**
  * Hidden runtime monitor. It is reachable by typing {@code htop} in the Open... screen, so it does
@@ -15,33 +18,71 @@ import midplay.util.Lang;
  */
 public final class TaskViewerScreen extends BaseForm {
   private final StringItem content = new StringItem(null, "");
+  private final Command appsCommand;
   private final Command refreshCommand;
   private final Command gcCommand;
 
   public TaskViewerScreen(Navigator navigator) {
     super(Lang.tr("task_viewer.title"), navigator);
-    refreshCommand = new Command(Lang.tr("task_viewer.refresh"), Command.SCREEN, 2);
-    gcCommand = new Command(Lang.tr("task_viewer.gc"), Command.SCREEN, 3);
+    appsCommand = new Command(Lang.tr("task_viewer.apps"), Command.SCREEN, 2);
+    refreshCommand = new Command(Lang.tr("task_viewer.refresh"), Command.SCREEN, 4);
+    gcCommand = new Command(Lang.tr("task_viewer.gc"), Command.SCREEN, 5);
     append(content);
+    addCommand(appsCommand);
     addCommand(refreshCommand);
     addCommand(gcCommand);
     refresh();
   }
 
+  protected void showNotify() {
+    refresh();
+  }
+
   protected void handleCommand(Command c, Displayable d) {
-    if (c == refreshCommand) {
+    if (c == appsCommand) {
+      navigator.forward(new SubAppsScreen(navigator));
+    } else if (c == refreshCommand) {
       refresh();
     } else if (c == gcCommand) {
-      Runtime.getRuntime().gc();
+      MemoryUtils.collect();
+      showGcTicker();
       refresh();
     }
+  }
+
+  private void showGcTicker() {
+    final Ticker ticker = new Ticker(Lang.tr("task_viewer.gc_done"));
+    setTicker(ticker);
+    new Thread(
+            new Runnable() {
+              public void run() {
+                try {
+                  Thread.sleep(5000);
+                } catch (InterruptedException ignored) {
+                }
+                MIDPlay midlet = MIDPlay.getInstance();
+                if (midlet == null) {
+                  return;
+                }
+                Display.getDisplay(midlet)
+                    .callSerially(
+                        new Runnable() {
+                          public void run() {
+                            if (getTicker() == ticker) {
+                              setTicker(null);
+                            }
+                          }
+                        });
+              }
+            })
+        .start();
   }
 
   private void refresh() {
     Runtime runtime = Runtime.getRuntime();
     long total = runtime.totalMemory();
     long free = runtime.freeMemory();
-    long used = total - free;
+    long used = MemoryUtils.usedBytes();
     int usedPercent = total > 0 ? (int) ((used * 100L) / total) : 0;
 
     StringBuffer text = new StringBuffer();

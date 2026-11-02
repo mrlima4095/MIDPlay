@@ -1,11 +1,14 @@
 package midplay.ui.screen;
 
+import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.StringItem;
 import midplay.MIDPlay;
 import midplay.net.HttpTextOperation;
@@ -25,22 +28,32 @@ public final class RedditCommentsScreen extends BaseList {
 
   private final String postId;
   private final Command reloadCommand;
+  private final Command sortCommand;
+  private final Command moreCommand;
   private Vector items = new Vector();
+  private final Hashtable ids = new Hashtable();
+  private String bookmark = "";
+  private String sort = RedditApi.COMMENT_SORT_TOP;
+  private boolean hasMore;
   private boolean loading;
   private boolean pending;
+  private boolean moreAdded;
 
   public RedditCommentsScreen(Navigator navigator, String postId, String postTitle) {
     super(Lang.tr("reddit.comments_title"), navigator);
     this.postId = postId == null ? "" : postId;
     reloadCommand = new Command(Lang.tr("reddit.reload"), Command.SCREEN, 2);
+    sortCommand = new Command(Lang.tr("reddit.sort"), Command.SCREEN, 3);
+    moreCommand = new Command(Lang.tr("reddit.more"), Command.SCREEN, 4);
     addCommand(reloadCommand);
-    load();
+    addCommand(sortCommand);
+    load(false);
   }
 
   protected void showNotify() {
     super.showNotify();
     if (items.size() == 0) {
-      load();
+      load(false);
     }
   }
 
@@ -64,11 +77,51 @@ public final class RedditCommentsScreen extends BaseList {
 
   protected void handleCommand(Command c, Displayable d) {
     if (c == reloadCommand) {
-      load();
+      load(false);
+    } else if (c == sortCommand) {
+      showSortMenu();
+    } else if (c == moreCommand) {
+      load(true);
     }
   }
 
-  private void load() {
+  private void showSortMenu() {
+    final List menu = new List(Lang.tr("reddit.sort"), Choice.IMPLICIT);
+    menu.append(Lang.tr("reddit.sort_top"), null);
+    menu.append(Lang.tr("reddit.sort_new"), null);
+    menu.append(Lang.tr("reddit.sort_old"), null);
+    int selected =
+        RedditApi.COMMENT_SORT_NEW.equals(sort)
+            ? 1
+            : (RedditApi.COMMENT_SORT_OLD.equals(sort) ? 2 : 0);
+    menu.setSelectedIndex(selected, true);
+    menu.addCommand(Commands.back());
+    menu.setCommandListener(
+        new CommandListener() {
+          public void commandAction(Command command, Displayable displayable) {
+            if (command == Commands.back()) {
+              navigator.back();
+              return;
+            }
+            if (command == List.SELECT_COMMAND) {
+              int choice = menu.getSelectedIndex();
+              String next =
+                  choice == 1
+                      ? RedditApi.COMMENT_SORT_NEW
+                      : (choice == 2 ? RedditApi.COMMENT_SORT_OLD : RedditApi.COMMENT_SORT_TOP);
+              navigator.back();
+              if (!next.equals(sort)) {
+                sort = next;
+                load(false);
+              }
+            }
+          }
+        });
+    navigator.forward(menu);
+  }
+
+  /** Loads the first page, or appends the next one when {@code append} is set. */
+  private void load(final boolean append) {
     if (loading || postId.length() == 0) {
       return;
     }
@@ -82,7 +135,7 @@ public final class RedditCommentsScreen extends BaseList {
         });
     MIDPlay.startOperation(
         new HttpTextOperation(
-            RedditApi.commentsUrl(postId),
+            RedditApi.commentsUrl(postId, sort, append ? bookmark : ""),
             new HttpTextOperation.Listener() {
               public void onText(final String response) {
                 navigator.callSerially(
@@ -91,13 +144,45 @@ public final class RedditCommentsScreen extends BaseList {
                         loading = false;
                         String error = RedditApi.parseError(response);
                         if (error.length() > 0) {
+                          navigator.dismissAlert();
                           navigator.showAlert(error, AlertType.ERROR);
                           return;
                         }
                         navigator.dismissAlert();
-                        pending = RedditApi.commentsPending(response);
-                        items = RedditApi.parseComments(response);
+                        if (!append) {
+                          pending = RedditApi.commentsPending(response);
+                          items = new Vector();
+                          ids.clear();
+                        }
+                        Vector page = RedditApi.parseComments(response);
+                        int added = 0;
+                        for (int i = 0; i < page.size(); i++) {
+                          String[] comment = (String[]) page.elementAt(i);
+                          String id = comment[RedditApi.COMMENT_ID];
+                          String key =
+                              id != null && id.length() > 0
+                                  ? id
+                                  : comment[RedditApi.COMMENT_AUTHOR]
+                                      + "\n"
+                                      + comment[RedditApi.COMMENT_CREATED]
+                                      + "\n"
+                                      + comment[RedditApi.COMMENT_BODY];
+                          if (ids.containsKey(key)) {
+                            continue;
+                          }
+                          ids.put(key, key);
+                          items.addElement(comment);
+                          added++;
+                        }
+                        String next = RedditApi.parseBookmark(response);
+                        boolean end = next.length() == 0 || next.equals(bookmark);
+                        bookmark = next;
+                        hasMore = !end;
+                        updateMoreCommand();
                         refresh();
+                        if (append && added == 0) {
+                          navigator.showAlert(Lang.tr("reddit.end"), AlertType.INFO);
+                        }
                       }
                     });
               }
@@ -107,11 +192,22 @@ public final class RedditCommentsScreen extends BaseList {
                     new Runnable() {
                       public void run() {
                         loading = false;
+                        navigator.dismissAlert();
                         navigator.showAlert(e.toString(), AlertType.ERROR);
                       }
                     });
               }
             }));
+  }
+
+  private void updateMoreCommand() {
+    if (hasMore && !moreAdded) {
+      addCommand(moreCommand);
+      moreAdded = true;
+    } else if (!hasMore && moreAdded) {
+      removeCommand(moreCommand);
+      moreAdded = false;
+    }
   }
 
   /**

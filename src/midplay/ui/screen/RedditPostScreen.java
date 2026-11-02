@@ -28,6 +28,7 @@ public final class RedditPostScreen extends BaseForm {
   private final ImageItem imageItem = new ImageItem(null, null, ImageItem.LAYOUT_CENTER, null);
   private final StringItem content = new StringItem(null, "");
   private final Command imageCommand;
+  private final Command galleryCommand;
   private final Command commentsCommand;
   private final Command subredditCommand;
   private final Command authorCommand;
@@ -61,6 +62,7 @@ public final class RedditPostScreen extends BaseForm {
     content.setText(RedditApi.postDetails(this.post));
     append(content);
     imageCommand = new Command(Lang.tr("reddit.view_image"), Command.SCREEN, 1);
+    galleryCommand = new Command(Lang.tr("reddit.gallery"), Command.SCREEN, 1);
     commentsCommand = new Command(Lang.tr("reddit.comments"), Command.SCREEN, 2);
     subredditCommand = new Command(Lang.tr("reddit.subreddit"), Command.SCREEN, 3);
     authorCommand = new Command(Lang.tr("reddit.author"), Command.SCREEN, 4);
@@ -75,8 +77,12 @@ public final class RedditPostScreen extends BaseForm {
         new Command(Lang.tr("reddit.unfollow_subreddit"), Command.SCREEN, 9);
     followUserCommand = new Command(Lang.tr("reddit.follow_user"), Command.SCREEN, 10);
     unfollowUserCommand = new Command(Lang.tr("reddit.unfollow_user"), Command.SCREEN, 10);
-    if (imageUrl().length() > 0) {
+    if (RedditApi.galleryUrls(this.post).size() > 1) {
+      addCommand(galleryCommand);
+    } else if (imageUrl().length() > 0) {
       addCommand(imageCommand);
+    }
+    if (imageUrl().length() > 0) {
       addCommand(downloadCommand);
     }
     if (this.post[RedditApi.POST_ID].length() > 0) {
@@ -105,6 +111,8 @@ public final class RedditPostScreen extends BaseForm {
       PlayerNavHelper.showNowPlaying(navigator);
     } else if (c == imageCommand) {
       navigator.forward(new PinterestImageViewer(navigator, Lang.tr("reddit.post"), imageUrl()));
+    } else if (c == galleryCommand) {
+      openGallery();
     } else if (c == commentsCommand) {
       navigator.forward(
           new RedditCommentsScreen(
@@ -349,9 +357,22 @@ public final class RedditPostScreen extends BaseForm {
             }));
   }
 
+  /** Opens the gallery at its first image; the viewer handles prev/next and downloads. */
+  private void openGallery() {
+    java.util.Vector gallery = RedditApi.galleryUrls(post);
+    if (gallery.size() == 0) {
+      return;
+    }
+    String[] urls = new String[gallery.size()];
+    for (int i = 0; i < urls.length; i++) {
+      urls[i] = (String) gallery.elementAt(i);
+    }
+    navigator.forward(
+        new RedditGalleryScreen(navigator, Lang.tr("reddit.gallery"), urls, 0));
+  }
+
   private String imageUrl() {
-    String thumb = post[RedditApi.POST_THUMB];
-    return thumb == null ? "" : thumb;
+    return RedditApi.primaryImageUrl(post);
   }
 
   private void loadImage() {

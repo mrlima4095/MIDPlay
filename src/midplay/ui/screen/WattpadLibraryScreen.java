@@ -367,7 +367,9 @@ public final class WattpadLibraryScreen extends BaseList {
   /** Archived stories open on their chapter list, not directly on the saved reading position. */
   private void openChapters(String[] entry, String json) {
     if (WattpadApi.parseParts(json).size() == 0) {
-      navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
+      String error = WattpadApi.parseError(json);
+      navigator.showAlert(
+          error.length() == 0 ? Lang.tr("wattpad.empty") : error, AlertType.ERROR);
       return;
     }
     navigator.forward(
@@ -377,7 +379,9 @@ public final class WattpadLibraryScreen extends BaseList {
   private void resume(String[] entry, String json) {
     Vector parts = WattpadApi.parseParts(json);
     if (parts.size() == 0) {
-      navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
+      String error = WattpadApi.parseError(json);
+      navigator.showAlert(
+          error.length() == 0 ? Lang.tr("wattpad.empty") : error, AlertType.ERROR);
       return;
     }
     String storyTitle = WattpadApi.parseTitle(json);

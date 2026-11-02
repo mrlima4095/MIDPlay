@@ -31,6 +31,7 @@ public final class WattpadStoryScreen extends BaseList {
   private final String description;
   private final String details;
   private final String authorUsername;
+  private final String cover;
   private final Vector parts;
   private final Command synopsisCommand;
   private final Command continueCommand;
@@ -51,13 +52,23 @@ public final class WattpadStoryScreen extends BaseList {
         WattpadApi.parseDescription(json),
         WattpadApi.parseStoryDetails(json),
         WattpadApi.parseAuthorUsername(json),
+        WattpadApi.parseCover(json),
         false);
   }
 
   /** Opens a story from its downloaded metadata, without any network request. */
   public WattpadStoryScreen(
       Navigator navigator, String storyId, String storyTitle, Vector parts) {
-    this(navigator, storyId, storyTitle, parts, "", "", "", true);
+    this(
+        navigator,
+        storyId,
+        storyTitle,
+        parts,
+        WattpadDownloadManager.getInstance().getLocalDescription(storyId),
+        WattpadDownloadManager.getInstance().getLocalDetails(storyId),
+        WattpadDownloadManager.getInstance().getLocalAuthor(storyId),
+        WattpadDownloadManager.getInstance().getLocalCover(storyId),
+        true);
   }
 
   private WattpadStoryScreen(
@@ -68,6 +79,7 @@ public final class WattpadStoryScreen extends BaseList {
       String description,
       String details,
       String authorUsername,
+      String cover,
       boolean offline) {
     super(shorten(storyTitle), navigator);
     this.storyId = storyId == null ? "" : storyId;
@@ -77,6 +89,7 @@ public final class WattpadStoryScreen extends BaseList {
     this.description = description == null ? "" : description;
     this.details = details == null ? "" : details;
     this.authorUsername = authorUsername == null ? "" : authorUsername;
+    this.cover = cover == null ? "" : cover;
     synopsisCommand = new Command(Lang.tr("wattpad.synopsis"), Command.SCREEN, 1);
     continueCommand = new Command(Lang.tr("wattpad.continue"), Command.SCREEN, 2);
     detailsCommand = new Command(Lang.tr("wattpad.story_details"), Command.SCREEN, 3);
@@ -209,6 +222,10 @@ public final class WattpadStoryScreen extends BaseList {
             navigator,
             storyId,
             storyTitle,
+            description,
+            details,
+            authorUsername,
+            cover,
             parts,
             new WattpadDownloadManager.Listener() {
               public void onDownloadFinished(String storyId, int downloaded, int failed) {

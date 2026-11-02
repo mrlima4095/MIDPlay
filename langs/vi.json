@@ -84,6 +84,7 @@
     "tasks": "Nhiệm vụ",
     "mpgram": "MPGram",
     "github": "GitHub",
+    "opentty": "OpenTTY",
     "open_uri": "Mở...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
@@ -560,7 +561,9 @@
     "settings_api_url": "Địa chỉ proxy (API)",
     "settings_image_proxy": "Địa chỉ proxy ảnh",
     "settings_pins_per_page": "Pin mỗi trang",
-    "settings_path": "Thư mục tải xuống"
+    "settings_path": "Thư mục tải xuống",
+    "related": "Ghim liên quan",
+    "settings_thumbnails": "Ảnh thu nhỏ mỗi trang"
   },
   "reddit": {
     "title": "Reddit",
@@ -657,7 +660,13 @@
     "remove_selected_confirm": "Xóa {0} bài đã lưu đã chọn?",
     "removed_many": "Đã xóa: {0}",
     "link_error": "Không thể mở liên kết Reddit này",
-    "comments_pending": "Bình luận của bài này chưa được lưu trữ. Hãy thử lại sau giây lát."
+    "comments_pending": "Bình luận của bài này chưa được lưu trữ. Hãy thử lại sau giây lát.",
+    "gallery": "Thư viện ảnh",
+    "image_loading": "Đang tải ảnh...",
+    "image_error": "Không thể tải ảnh",
+    "sort": "Sắp xếp",
+    "sort_old": "Cũ",
+    "top_posts": "Bài viết nổi bật"
   },
   "lyrics": {
     "title": "Lời bài hát",
@@ -787,7 +796,9 @@
     "remove_download": "Xóa bản tải",
     "remove_download_confirm": "Xóa các chương đã tải của {0}?",
     "download_removed": "Đã xóa bản tải",
-    "offline": "ngoại tuyến"
+    "offline": "ngoại tuyến",
+    "continue_loading": "Tải thêm trang",
+    "parse_error": "Không thể đọc phản hồi của Wattpad"
   },
   "speedtest": {
     "title": "Kiểm tra tốc độ mạng",
@@ -840,6 +851,10 @@
     "no_notes": "Không tìm thấy ghi chú",
     "notification_title": "Tin nhắn Discord mới",
     "open_in_discord": "Mở trong Discord",
-    "notification_close": "Đóng"
+    "notification_close": "Đóng",
+    "new_dm": "New DM",
+    "new_dm_id": "Username or user ID",
+    "new_dm_invalid": "Enter a username or a valid user ID",
+    "new_dm_not_found": "User not found. Check the username or use a numeric ID."
   }
 }

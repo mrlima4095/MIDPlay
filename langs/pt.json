@@ -93,6 +93,7 @@
     "tasks": "Tarefas",
     "mpgram": "MPGram",
     "github": "GitHub",
+    "opentty": "OpenTTY",
     "open_uri": "Abrir...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
@@ -170,7 +171,21 @@
     "downloads_active": "Ativos: {0}",
     "downloads_pending": "Pendentes: {0}",
     "refresh": "Atualizar",
-    "gc": "Coletar lixo"
+    "gc": "Coletar lixo",
+    "gc_done": "Lixo coletado",
+    "apps": "Apps abertos",
+    "subapps_none": "Nenhum subapp aberto",
+    "select_all": "Selecionar todos",
+    "deselect_all": "Desmarcar todos",
+    "kill": "Matar",
+    "killed_all": "{0} subapp(s) finalizado(s)",
+    "nothing_to_kill": "Nenhum subapp para finalizar"
+  },
+  "subapp": {
+    "mpgram": "MPGram",
+    "github": "GitHub",
+    "discord": "Discord",
+    "opentty": "OpenTTY"
   },
   "player": {
     "next": "Próxima",
@@ -316,6 +331,7 @@
   },
   "settings": {
     "audio_quality": "Qualidade de Áudio",
+    "image_proxy": "Proxy de imagens",
     "check_update": "Verificar Atualizações",
     "save_last_session": "Salvar Última Sessão",
     "mpgram_auto_login": "Preparar MPGram automaticamente",
@@ -560,7 +576,9 @@
     "settings_api_url": "URL do proxy (API)",
     "settings_image_proxy": "URL do proxy de imagens",
     "settings_pins_per_page": "Pins por página",
-    "settings_path": "Pasta de downloads"
+    "settings_path": "Pasta de downloads",
+    "related": "Pins relacionados",
+    "settings_thumbnails": "Miniaturas por página"
   },
   "reddit": {
     "title": "Reddit",
@@ -657,7 +675,13 @@
     "remove_selected_confirm": "Remover {0} posts selecionados dos salvos?",
     "removed_many": "Removidos: {0}",
     "link_error": "Não foi possível abrir este link do Reddit",
-    "comments_pending": "Os comentários deste post ainda não foram arquivados. Tente de novo em instantes."
+    "comments_pending": "Os comentários deste post ainda não foram arquivados. Tente de novo em instantes.",
+    "gallery": "Galeria",
+    "image_loading": "Carregando imagem...",
+    "image_error": "Não foi possível carregar a imagem",
+    "sort": "Ordenar",
+    "sort_old": "Antigos",
+    "top_posts": "Posts mais votados"
   },
   "lyrics": {
     "title": "Letra",
@@ -787,7 +811,9 @@
     "remove_download": "Remover download",
     "remove_download_confirm": "Remover os capítulos baixados de {0}?",
     "download_removed": "Download removido",
-    "offline": "offline"
+    "offline": "offline",
+    "continue_loading": "Carregar mais páginas",
+    "parse_error": "Não foi possível ler a resposta do Wattpad"
   },
   "speedtest": {
     "title": "Teste de velocidade",
@@ -840,6 +866,10 @@
     "no_notes": "Nenhuma nota encontrada",
     "notification_title": "Nova mensagem no Discord",
     "open_in_discord": "Abrir no Discord",
-    "notification_close": "Fechar"
+    "notification_close": "Fechar",
+    "new_dm": "Nova DM",
+    "new_dm_id": "Usuário ou ID",
+    "new_dm_invalid": "Informe um nome de usuário ou um ID válido",
+    "new_dm_not_found": "Usuário não encontrado. Confira o nome ou use um ID numérico."
   }
 }

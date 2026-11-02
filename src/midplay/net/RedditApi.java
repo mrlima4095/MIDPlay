@@ -32,7 +32,9 @@ public final class RedditApi {
   public static final int POST_PERMALINK = 11;
   public static final int POST_FLAIR = 12;
   public static final int POST_SELF = 13;
-  public static final int POST_SIZE = 14;
+  /** Newline-separated full-size image URLs of a gallery post (empty otherwise). */
+  public static final int POST_GALLERY = 14;
+  public static final int POST_SIZE = 15;
 
   /** Compact subreddit row indexes. */
   public static final int SUB_NAME = 0;
@@ -73,9 +75,14 @@ public final class RedditApi {
   public static final int COMMENT_SCORE = 2;
   public static final int COMMENT_DEPTH = 3;
   public static final int COMMENT_CREATED = 4;
-  public static final int COMMENT_SIZE = 5;
+  public static final int COMMENT_ID = 5;
+  public static final int COMMENT_SIZE = 6;
 
   public static final int MAX_THUMBNAILS = 12;
+
+  public static final String COMMENT_SORT_TOP = "top";
+  public static final String COMMENT_SORT_NEW = "new";
+  public static final String COMMENT_SORT_OLD = "old";
 
   private RedditApi() {}
 
@@ -115,16 +122,17 @@ public final class RedditApi {
     return apiQuery("op=search&type=users&n=" + pageSize() + "&q=" + Utils.urlEncode(query));
   }
 
+  /**
+   * Keyword search. When {@code subreddit} is empty the proxy searches all of
+   * Reddit through its public RSS feed, so a subreddit is no longer required.
+   */
   public static String searchPostsUrl(String subreddit, String query, String bookmark) {
     StringBuffer url =
-        new StringBuffer(
-            apiQuery(
-                "op=search&type=posts&n="
-                    + pageSize()
-                    + "&sub="
-                    + Utils.urlEncode(subreddit)
-                    + "&q="
-                    + Utils.urlEncode(query)));
+        new StringBuffer(apiQuery("op=search&type=posts&n=" + pageSize()));
+    if (subreddit != null && subreddit.length() > 0) {
+      url.append("&sub=").append(Utils.urlEncode(subreddit));
+    }
+    url.append("&q=").append(Utils.urlEncode(query));
     appendBookmark(url, bookmark);
     return url.toString();
   }
@@ -145,9 +153,20 @@ public final class RedditApi {
   }
 
   public static String userPostsUrl(String username, String bookmark) {
+    return userPostsUrl(username, "new", bookmark);
+  }
+
+  /** Posts of a user, sorted by {@code new} or {@code top}. */
+  public static String userPostsUrl(String username, String sort, String bookmark) {
     StringBuffer url =
         new StringBuffer(
-            apiQuery("op=userposts&n=" + pageSize() + "&u=" + Utils.urlEncode(username)));
+            apiQuery(
+                "op=userposts&n="
+                    + pageSize()
+                    + "&u="
+                    + Utils.urlEncode(username)
+                    + "&sort="
+                    + Utils.urlEncode(sort == null || sort.length() == 0 ? "new" : sort)));
     appendBookmark(url, bookmark);
     return url.toString();
   }
@@ -165,7 +184,21 @@ public final class RedditApi {
   }
 
   public static String commentsUrl(String id) {
-    return apiQuery("op=comments&id=" + Utils.urlEncode(id) + "&n=50");
+    return commentsUrl(id, COMMENT_SORT_TOP, "");
+  }
+
+  /** Threaded comments sorted by top/new/old, optionally paged by a bookmark. */
+  public static String commentsUrl(String id, String sort, String bookmark) {
+    StringBuffer url =
+        new StringBuffer(
+            apiQuery(
+                "op=comments&id="
+                    + Utils.urlEncode(id)
+                    + "&n=50&sort="
+                    + Utils.urlEncode(
+                        sort == null || sort.length() == 0 ? COMMENT_SORT_TOP : sort)));
+    appendBookmark(url, bookmark);
+    return url.toString();
   }
 
   /** Translates {@code text} into {@code target} through the proxy. */
@@ -249,11 +282,64 @@ public final class RedditApi {
         row[POST_PERMALINK] = item.getString("pl", "");
         row[POST_FLAIR] = item.getString("fl", "");
         row[POST_SELF] = integerString(item, "sf");
+        row[POST_GALLERY] = joinGallery(item.getArray("gi"));
         result.addElement(row);
       }
     } catch (Exception e) {
     }
     return result;
+  }
+
+  private static String joinGallery(JSONArray images) {
+    if (images == null || images.size() == 0) {
+      return "";
+    }
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < images.size(); i++) {
+      String url = images.getString(i);
+      if (url == null || url.length() == 0) {
+        continue;
+      }
+      if (sb.length() > 0) {
+        sb.append('\n');
+      }
+      sb.append(url);
+    }
+    return sb.toString();
+  }
+
+  /** Full-size gallery image URLs of a post, or an empty vector for normal posts. */
+  public static Vector galleryUrls(String[] post) {
+    Vector result = new Vector();
+    if (post == null || post.length <= POST_GALLERY) {
+      return result;
+    }
+    String value = post[POST_GALLERY];
+    if (value == null || value.length() == 0) {
+      return result;
+    }
+    int start = 0;
+    for (int i = 0; i <= value.length(); i++) {
+      if (i == value.length() || value.charAt(i) == '\n') {
+        String url = value.substring(start, i).trim();
+        if (url.length() > 0) {
+          result.addElement(url);
+        }
+        start = i + 1;
+      }
+    }
+    return result;
+  }
+
+  /** First image of a post: its gallery cover when present, otherwise its thumbnail. */
+  public static String primaryImageUrl(String[] post) {
+    Vector gallery = galleryUrls(post);
+    if (gallery.size() > 0) {
+      return (String) gallery.elementAt(0);
+    }
+    return post == null || post.length <= POST_THUMB || post[POST_THUMB] == null
+        ? ""
+        : post[POST_THUMB];
   }
 
   /** Parses a profile reply, or returns null when it could not be loaded. */
@@ -356,6 +442,7 @@ public final class RedditApi {
         row[COMMENT_SCORE] = integerString(item, "sc");
         row[COMMENT_DEPTH] = integerString(item, "dp");
         row[COMMENT_CREATED] = item.getString("ct", "");
+        row[COMMENT_ID] = item.getString("id", "");
         result.addElement(row);
       }
     } catch (Exception e) {

@@ -40,6 +40,7 @@ public class Configuration {
   public static final String MENU_MPGRAM = "menu.mpgram";
   public static final String MENU_GITHUB = "menu.github";
   public static final String MENU_DISCORD = "menu.discord";
+  public static final String MENU_OPENTTY = "menu.opentty";
   public static final String MENU_OPEN_URI = "menu.open_uri";
   public static final String MENU_NOTES = "menu.notes";
   public static final String MENU_TASKS = "menu.tasks";
@@ -55,6 +56,9 @@ public class Configuration {
   public static final int DEFAULT_PINTEREST_PINS_PER_PAGE = 20;
   public static final int PINTEREST_PINS_PER_PAGE_MIN = 1;
   public static final int PINTEREST_PINS_PER_PAGE_MAX = 25;
+  public static final int DEFAULT_PINTEREST_THUMBNAILS = 12;
+  public static final int PINTEREST_THUMBNAILS_MIN = 1;
+  public static final int PINTEREST_THUMBNAILS_MAX = 50;
 
   public static final String DEFAULT_REDDIT_API_URL = "http://opentty.fun/reddit.php";
   public static final String DEFAULT_REDDIT_IMAGE_PROXY = "http://opentty.fun/proxy.php?url=";
@@ -121,6 +125,17 @@ public class Configuration {
   public static final String QUALITY_320 = "320kbps";
   public static final String[] ALL_QUALITIES = {QUALITY_128, QUALITY_320};
 
+  /**
+   * Where thumbnails and sprite sheets are fetched from. The S60Tube backend is
+   * the default; OpenTTY runs the same two endpoints locally (s60img) for when
+   * the upstream image service is down.
+   */
+  public static final String IMAGE_PROXY_S60TUBE = "s60tube.io.vn";
+  public static final String IMAGE_PROXY_OPENTTY = "opentty.fun";
+  public static final String[] ALL_IMAGE_PROXIES = {IMAGE_PROXY_S60TUBE, IMAGE_PROXY_OPENTTY};
+  public static final String DEFAULT_IMAGE_PROXY = IMAGE_PROXY_S60TUBE;
+  public static final String OPENTTY_IMAGE_SERVICE_URL = "http://opentty.fun/s60img";
+
   public static final String SEARCH_PLAYLIST = "media.playlist";
   public static final String SEARCH_ALBUM = "media.album";
   public static final String SEARCH_TRACK = "media.track";
@@ -174,6 +189,7 @@ public class Configuration {
   public static Image equalizerIcon;
   public static Image mpgramIcon;
   public static Image githubIcon;
+  public static Image openttyIcon;
   public static Image discordIcon;
   public static Image notesIcon;
   public static Image tasksIcon;
@@ -216,6 +232,7 @@ public class Configuration {
     equalizerIcon = region(8, 36, 36);
     mpgramIcon = Utils.resizeImageToFit(Image.createImage("/m.png"), 36, 36);
     githubIcon = Utils.resizeImageToFit(Image.createImage("/g.png"), 36, 36);
+    openttyIcon = Utils.resizeImageToFit(Image.createImage("/opentty.png"), 36, 36);
     discordIcon = Utils.resizeImageToFit(Image.createImage("/discord.png"), 36, 36);
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();

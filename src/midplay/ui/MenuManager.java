@@ -56,7 +56,6 @@ public class MenuManager {
     }
     removeMenuItem(Configuration.MENU_OPEN_URI);
     removeMenuItem(Configuration.MENU_NOW_PLAYING);
-    removeMenuItem("menu.opentty");
     // Leftover from an intermediate build that grouped web services in a "Web" submenu.
     removeMenuItem("menu.web");
     // The stopwatch menu entry was removed from the app.
@@ -70,15 +69,20 @@ public class MenuManager {
     removeMenuItem("menu.rss");
     boolean hadReddit = hasMenuItem(Configuration.MENU_REDDIT);
     boolean hadDiscord = hasMenuItem(Configuration.MENU_DISCORD);
+    boolean hadOpenTTY = hasMenuItem(Configuration.MENU_OPENTTY);
     ensureDefaultItemsPresent();
     // On upgrades, slot Reddit in right after Pinterest without touching the rest
     // of the user's custom arrangement.
     if (!hadReddit) {
       insertAfterAnchor(Configuration.MENU_REDDIT, Configuration.MENU_PINTEREST);
     }
-    // Discord follows GitHub on first run after the update, same rule as above.
+    // Discord follows GitHub on the first run after the update.
     if (!hadDiscord) {
       insertAfterAnchor(Configuration.MENU_DISCORD, Configuration.MENU_GITHUB);
+    }
+    // OpenTTY follows Discord on the first run after the update.
+    if (!hadOpenTTY) {
+      insertAfterAnchor(Configuration.MENU_OPENTTY, Configuration.MENU_DISCORD);
     }
   }
 
@@ -175,7 +179,8 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 14, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 15, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_DISCORD, 16, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 17, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_OPENTTY, 17, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 18, true));
     return defaultConfig;
   }
 

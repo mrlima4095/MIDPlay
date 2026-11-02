@@ -92,7 +92,7 @@ public final class RedditResultsScreen extends BaseList {
     if (isPosts() && this.items.size() > 0) {
       addCommand(saveCommand);
     }
-    if (isSubPosts()) {
+    if (isSortable()) {
       addCommand(newCommand);
       addCommand(topCommand);
     }
@@ -166,9 +166,9 @@ public final class RedditResultsScreen extends BaseList {
     } else if (c == shareCommand) {
       shareSelected();
     } else if (c == newCommand) {
-      reloadSub("new");
+      reloadPosts("new");
     } else if (c == topCommand) {
-      reloadSub("top");
+      reloadPosts("top");
     } else if (c == translateCommand) {
       if (titlesTranslated) {
         showOriginal = false;
@@ -349,6 +349,14 @@ public final class RedditResultsScreen extends BaseList {
     return source == SOURCE_SUBPOSTS && sourceId.length() > 0;
   }
 
+  private boolean isUserPosts() {
+    return source == SOURCE_USER_POSTS && sourceId.length() > 0;
+  }
+
+  private boolean isSortable() {
+    return isSubPosts() || isUserPosts();
+  }
+
   private boolean isUsers() {
     return source == SOURCE_SEARCH_USERS;
   }
@@ -361,12 +369,27 @@ public final class RedditResultsScreen extends BaseList {
     return (String[]) items.elementAt(index);
   }
 
-  private void reloadSub(String sort) {
+  private void reloadPosts(String sort) {
     if (loading || sourceId.length() == 0) {
       return;
     }
-    loadPosts(RedditApi.subPostsUrl(sourceId, sort, ""), SOURCE_SUBPOSTS, sourceId, "", sort,
-        Lang.tr("reddit.results_posts", "r/" + sourceId));
+    if (isUserPosts()) {
+      loadPosts(
+          RedditApi.userPostsUrl(sourceId, sort, ""),
+          SOURCE_USER_POSTS,
+          sourceId,
+          "",
+          sort,
+          Lang.tr("reddit.results_user_posts", sourceId));
+    } else {
+      loadPosts(
+          RedditApi.subPostsUrl(sourceId, sort, ""),
+          SOURCE_SUBPOSTS,
+          sourceId,
+          "",
+          sort,
+          Lang.tr("reddit.results_posts", "r/" + sourceId));
+    }
   }
 
   private void loadPosts(
@@ -517,7 +540,7 @@ public final class RedditResultsScreen extends BaseList {
       return RedditApi.subPostsUrl(sourceId, sourceSort, bookmark);
     }
     if (source == SOURCE_USER_POSTS) {
-      return RedditApi.userPostsUrl(sourceId, bookmark);
+      return RedditApi.userPostsUrl(sourceId, sourceSort, bookmark);
     }
     return "";
   }

@@ -14,6 +14,7 @@ public class SettingsManager {
   private static String currentLanguage;
   private static String currentService;
   private static String currentQuality;
+  private static String currentImageProxy;
   private static String currentSearchType;
   private static int currentAutoUpdate;
   private static String currentPlayerMethod;
@@ -40,6 +41,7 @@ public class SettingsManager {
   private static String currentPinterestApiUrl;
   private static String currentPinterestImageProxy;
   private static int currentPinterestPinsPerPage;
+  private static int currentPinterestThumbnails;
   private static String currentPinterestPath;
   private static String currentRedditApiUrl;
   private static String currentRedditImageProxy;
@@ -129,6 +131,8 @@ public class SettingsManager {
     setCurrentThemeMode(settings.getString("themeMode", Configuration.THEME_LIGHT));
     currentService = settings.getString("service", Configuration.SERVICE_NCT);
     currentQuality = settings.getString("quality", Configuration.QUALITY_128);
+    currentImageProxy =
+        settings.getString("imageProxy", Configuration.DEFAULT_IMAGE_PROXY);
     currentSearchType = settings.getString("searchType", Configuration.SEARCH_PLAYLIST);
     currentAutoUpdate = settings.getInt("autoUpdate", Configuration.AUTO_UPDATE_ENABLED);
     currentPlayerMethod = settings.getString("playerMethod", getDefaultPlayerMethod());
@@ -162,6 +166,9 @@ public class SettingsManager {
     currentPinterestPinsPerPage =
         settings.getInt(
             "pinterestPinsPerPage", Configuration.DEFAULT_PINTEREST_PINS_PER_PAGE);
+    currentPinterestThumbnails =
+        settings.getInt(
+            "pinterestThumbnails", Configuration.DEFAULT_PINTEREST_THUMBNAILS);
     currentPinterestPath =
         settings.getString("pinterestPath", Configuration.DEFAULT_PINTEREST_PATH);
     currentRedditApiUrl =
@@ -190,6 +197,7 @@ public class SettingsManager {
     settings.put("language", "en");
     settings.put("service", Configuration.SERVICE_NCT);
     settings.put("quality", Configuration.QUALITY_128);
+    settings.put("imageProxy", Configuration.DEFAULT_IMAGE_PROXY);
     settings.put("repeatMode", Configuration.PLAYER_REPEAT_ALL);
     settings.put("shuffleMode", Configuration.PLAYER_SHUFFLE_OFF);
     settings.put("volumeLevel", Configuration.PLAYER_MAX_VOLUME);
@@ -214,6 +222,7 @@ public class SettingsManager {
     settings.put("pinterestApiUrl", Configuration.DEFAULT_PINTEREST_API_URL);
     settings.put("pinterestImageProxy", Configuration.DEFAULT_PINTEREST_IMAGE_PROXY);
     settings.put("pinterestPinsPerPage", Configuration.DEFAULT_PINTEREST_PINS_PER_PAGE);
+    settings.put("pinterestThumbnails", Configuration.DEFAULT_PINTEREST_THUMBNAILS);
     settings.put("pinterestPath", Configuration.DEFAULT_PINTEREST_PATH);
     settings.put("redditApiUrl", Configuration.DEFAULT_REDDIT_API_URL);
     settings.put("redditImageProxy", Configuration.DEFAULT_REDDIT_IMAGE_PROXY);
@@ -502,6 +511,26 @@ public class SettingsManager {
     currentPinterestPinsPerPage = value;
   }
 
+  /** Number of pin thumbnails loaded per list page (1..50). */
+  public int getPinterestThumbnails() {
+    if (currentPinterestThumbnails < Configuration.PINTEREST_THUMBNAILS_MIN
+        || currentPinterestThumbnails > Configuration.PINTEREST_THUMBNAILS_MAX) {
+      currentPinterestThumbnails = Configuration.DEFAULT_PINTEREST_THUMBNAILS;
+    }
+    return currentPinterestThumbnails;
+  }
+
+  public void savePinterestThumbnails(int count) throws RecordStoreException {
+    int value = count;
+    if (value < Configuration.PINTEREST_THUMBNAILS_MIN) {
+      value = Configuration.PINTEREST_THUMBNAILS_MIN;
+    } else if (value > Configuration.PINTEREST_THUMBNAILS_MAX) {
+      value = Configuration.PINTEREST_THUMBNAILS_MAX;
+    }
+    saveSetting("pinterestThumbnails", value);
+    currentPinterestThumbnails = value;
+  }
+
   /** Folder where downloaded Pinterest photos are stored on the memory card. */
   public String getPinterestPath() {
     if (currentPinterestPath == null || currentPinterestPath.length() == 0) {
@@ -640,6 +669,11 @@ public class SettingsManager {
     currentThumbnails = thumbnails;
   }
 
+  public void saveImageProxy(String imageProxy) throws RecordStoreException {
+    saveSetting("imageProxy", imageProxy);
+    currentImageProxy = imageProxy;
+  }
+
   public void saveThemeColors(JSONObject lightColors, JSONObject darkColors, int selected)
       throws RecordStoreException {
     JSONObject themeData = new JSONObject();
@@ -747,6 +781,13 @@ public class SettingsManager {
 
   public int getCurrentThumbnails() {
     return currentThumbnails;
+  }
+
+  public String getCurrentImageProxy() {
+    if (currentImageProxy == null || currentImageProxy.length() == 0) {
+      return Configuration.DEFAULT_IMAGE_PROXY;
+    }
+    return currentImageProxy;
   }
 
   public void setEqEnabledLive(boolean enabled) {

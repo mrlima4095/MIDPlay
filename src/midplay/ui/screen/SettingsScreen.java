@@ -30,6 +30,7 @@ public final class SettingsScreen extends BaseForm {
   private ChoiceGroup themeColorGroup;
   private ChoiceGroup serviceGroup;
   private ChoiceGroup qualityGroup;
+  private ChoiceGroup imageProxyGroup;
   private ChoiceGroup togglesGroup;
   private ChoiceGroup playerMethodGroup;
   private TextField downloadPathField;
@@ -44,6 +45,7 @@ public final class SettingsScreen extends BaseForm {
   private String currentThemeMode;
   private String currentService;
   private String currentQuality;
+  private String currentImageProxy;
   private int currentAutoUpdate;
   private int currentBlackberryWifi;
   private int currentSaveLastSession;
@@ -103,6 +105,13 @@ public final class SettingsScreen extends BaseForm {
         getSelected(qualityGroup, Configuration.ALL_QUALITIES, Configuration.QUALITY_128))) {
       return true;
     }
+    if (!currentImageProxy.equals(
+        getSelected(
+            imageProxyGroup,
+            Configuration.ALL_IMAGE_PROXIES,
+            Configuration.DEFAULT_IMAGE_PROXY))) {
+      return true;
+    }
     if (!currentPlayerMethod.equals(
         getSelected(
             playerMethodGroup,
@@ -159,6 +168,9 @@ public final class SettingsScreen extends BaseForm {
             "settings.theme_mode", Configuration.ALL_THEME_MODES, "settings.theme_mode_options.");
     serviceGroup = createChoiceGroup("settings.service", Configuration.ALL_SERVICES, null);
     qualityGroup = createChoiceGroup("settings.audio_quality", Configuration.ALL_QUALITIES, null);
+    imageProxyGroup =
+        createChoiceGroup(
+            "settings.image_proxy", Configuration.ALL_IMAGE_PROXIES, null);
     playerMethodGroup =
         createChoiceGroup(
             "settings.player_method",
@@ -186,6 +198,7 @@ public final class SettingsScreen extends BaseForm {
     append(themeColorGroup);
     append(serviceGroup);
     append(qualityGroup);
+    append(imageProxyGroup);
     append(playerMethodGroup);
     append(togglesGroup);
 
@@ -214,6 +227,7 @@ public final class SettingsScreen extends BaseForm {
     currentThemeMode = settingsManager.getCurrentThemeMode();
     currentService = settingsManager.getCurrentService();
     currentQuality = settingsManager.getCurrentQuality();
+    currentImageProxy = settingsManager.getCurrentImageProxy();
     currentAutoUpdate = settingsManager.getCurrentAutoUpdate();
     currentBlackberryWifi = settingsManager.getCurrentBlackberryWifi();
     currentSaveLastSession = settingsManager.getCurrentSaveLastSession();
@@ -231,6 +245,10 @@ public final class SettingsScreen extends BaseForm {
         Configuration.THEME_COLOR_NAMES[currentColorIndex]);
     selectChoice(serviceGroup, Configuration.ALL_SERVICES, currentService);
     selectChoice(qualityGroup, Configuration.ALL_QUALITIES, currentQuality);
+    selectChoice(
+        imageProxyGroup,
+        Configuration.ALL_IMAGE_PROXIES,
+        settingsManager.getCurrentImageProxy());
     selectChoice(playerMethodGroup, Configuration.ALL_PLAYER_METHODS, currentPlayerMethod);
     togglesGroup.setSelectedIndex(
         autoUpdateIndex, currentAutoUpdate == Configuration.AUTO_UPDATE_ENABLED);
@@ -316,6 +334,15 @@ public final class SettingsScreen extends BaseForm {
       if (!currentQuality.equals(selectedQuality)) {
         hasChanges = true;
         settingsManager.saveQuality(selectedQuality);
+      }
+      String selectedImageProxy =
+          getSelected(
+              imageProxyGroup,
+              Configuration.ALL_IMAGE_PROXIES,
+              Configuration.DEFAULT_IMAGE_PROXY);
+      if (!currentImageProxy.equals(selectedImageProxy)) {
+        hasChanges = true;
+        settingsManager.saveImageProxy(selectedImageProxy);
       }
       if (currentAutoUpdate != selectedAutoUpdate) {
         hasChanges = true;

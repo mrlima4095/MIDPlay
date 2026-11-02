@@ -203,6 +203,7 @@ public final class RedditFavoritesManager {
     item.put("pl", post[RedditApi.POST_PERMALINK]);
     item.put("fl", post[RedditApi.POST_FLAIR]);
     item.put("sf", post[RedditApi.POST_SELF]);
+    item.put("g", post[RedditApi.POST_GALLERY]);
     return item;
   }
 
@@ -229,6 +230,7 @@ public final class RedditFavoritesManager {
     row[RedditApi.POST_PERMALINK] = item.getString("pl", "");
     row[RedditApi.POST_FLAIR] = item.getString("fl", "");
     row[RedditApi.POST_SELF] = item.getString("sf", "0");
+    row[RedditApi.POST_GALLERY] = item.getString("g", "");
     return row;
   }
 

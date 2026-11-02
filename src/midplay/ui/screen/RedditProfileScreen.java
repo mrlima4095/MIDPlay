@@ -29,6 +29,7 @@ public final class RedditProfileScreen extends BaseForm {
   private final String[] profile;
   private final ImageItem imageItem = new ImageItem(null, null, ImageItem.LAYOUT_CENTER, null);
   private final Command postsCommand;
+  private final Command topPostsCommand;
   private final Command followCommand;
   private final Command unfollowCommand;
   private boolean loading;
@@ -54,6 +55,7 @@ public final class RedditProfileScreen extends BaseForm {
     }
 
     postsCommand = new Command(Lang.tr("reddit.view_posts"), Command.SCREEN, 1);
+    topPostsCommand = new Command(Lang.tr("reddit.top_posts"), Command.SCREEN, 1);
     followCommand =
         new Command(
             Lang.tr(user ? "reddit.follow_user" : "reddit.follow_subreddit"),
@@ -65,6 +67,7 @@ public final class RedditProfileScreen extends BaseForm {
             Command.SCREEN,
             2);
     addCommand(postsCommand);
+    addCommand(topPostsCommand);
     updateFollowCommands();
     addCommand(Commands.playerNowPlaying());
     loadImage();
@@ -224,7 +227,7 @@ public final class RedditProfileScreen extends BaseForm {
         Lang.tr(follow ? "reddit.followed" : "reddit.unfollowed"), AlertType.CONFIRMATION);
   }
 
-  private void openPosts() {
+  private void openPosts(final String sort) {
     if (loading) {
       return;
     }
@@ -238,11 +241,10 @@ public final class RedditProfileScreen extends BaseForm {
         });
     final String url =
         user
-            ? RedditApi.userPostsUrl(name, "")
-            : RedditApi.subPostsUrl(name, "new", "");
+            ? RedditApi.userPostsUrl(name, sort, "")
+            : RedditApi.subPostsUrl(name, sort, "");
     final int source =
         user ? RedditResultsScreen.SOURCE_USER_POSTS : RedditResultsScreen.SOURCE_SUBPOSTS;
-    final String sort = user ? "" : "new";
     final String title =
         user
             ? Lang.tr("reddit.results_user_posts", name)
@@ -311,7 +313,9 @@ public final class RedditProfileScreen extends BaseForm {
     if (c == Commands.playerNowPlaying()) {
       PlayerNavHelper.showNowPlaying(navigator);
     } else if (c == postsCommand) {
-      openPosts();
+      openPosts("new");
+    } else if (c == topPostsCommand) {
+      openPosts("top");
     } else if (c == followCommand || c == unfollowCommand) {
       toggleFollow(c == followCommand);
     }

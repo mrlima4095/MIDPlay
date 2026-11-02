@@ -99,7 +99,10 @@ public final class WattpadAuthorScreen extends BaseForm {
                         Vector stories = WattpadApi.parseStories(text, includeMature);
                         if (stories.size() == 0) {
                           navigator.dismissAlert();
-                          navigator.showAlert(Lang.tr("wattpad.empty"), AlertType.INFO);
+                          String error = WattpadApi.parseError(text);
+                          navigator.showAlert(
+                              error.length() == 0 ? Lang.tr("wattpad.empty") : error,
+                              error.length() == 0 ? AlertType.INFO : AlertType.ERROR);
                           return;
                         }
                         int rawCount = WattpadApi.countStories(text);

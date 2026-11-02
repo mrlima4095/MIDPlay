@@ -1,0 +1,344 @@
+#!/bin/lua
+
+local version = "1.6.0"
+local api = os.getenv("VERSION") or getAppProperty("MIDlet-Version")
+local server = os.getenv("REPO") or "http://opentty.fun"
+
+local function load_sources()
+    local ok, sources = pcall(load, io.read("/etc/sources"))
+    if not ok then
+        error(":: failed to load sources: " .. tostring(sources))
+    end
+    return sources.version, sources.mirror
+end
+
+local db_version, mirror = load_sources()
+
+os.setproc("name", "pkg")
+
+if arg[1] == "install" then
+    if os.getuid() ~= 0 then
+        print(":: must be root to install packages")
+        os.exit(1)
+    end
+
+    local function install_package(pkg_name, report)
+        local function note(message)
+            print(message)
+            if report then report(message) end
+            -- Hand the interpreter to the UI thread so Stop/Close and repaints
+            -- are handled between steps (no-op when nothing else is waiting).
+            java.yield(15)
+        end
+
+        local pkg = mirror[pkg_name]
+
+        if not pkg then
+            note(":: package " .. pkg_name .. " not found")
+            return false
+        end
+        if pkg.riscv == true then
+            if java.midlet.lite ~= false then
+                note(":: package " .. pkg_name .. " requires the full OpenTTY ARM build")
+                return false
+            end
+        end
+        if pkg.depends then
+            for _, dep in ipairs(pkg.depends) do
+                local dep_pkg = mirror[dep]
+                if not dep_pkg then
+                    note(":: dependency " .. dep .. " not found for package " .. pkg_name)
+                    return false
+                end
+                note(":: installing dependency " .. dep)
+                local url = server .. "/apps/" .. db_version .. "/" .. dep_pkg.remote
+
+                local ok, stream = pcall(socket.http.rget, url)
+                if not ok then
+                    note(":: error downloading dependency " .. dep .. ": " .. tostring(stream))
+                    return false
+                end
+                local copied, err = pcall(io.copy, stream, dep_pkg.here)
+                if not copied then
+                    note(":: error installing dependency " .. dep .. ": " .. tostring(err))
+                    return false
+                end
+                note(":: installed dependency " .. dep)
+            end
+        end
+        note(":: downloading " .. pkg_name .. " from " .. pkg.remote)
+
+        local url = server .. "/apps/" .. db_version .. "/" .. pkg.remote
+        local ok, stream = pcall(socket.http.rget, url)
+        if not ok then
+            note(":: error downloading " .. pkg_name .. ": " .. tostring(stream))
+            return false
+        end
+        local copied, err = pcall(io.copy, stream, pkg.here)
+        if not copied then
+            note(":: error installing " .. pkg_name .. ": " .. tostring(err))
+            return false
+        end
+        note(":: installed " .. pkg_name)
+        return true
+    end
+
+    if arg[2] == nil then
+        local previous = graphics.getCurrent()
+
+        local function leave()
+            if previous then graphics.display(previous) end
+            os.exit(0)
+        end
+
+        local names = {}
+        for name in pairs(mirror) do names[#names + 1] = name end
+        table.sort(names)
+
+        local chooser = graphics.new("list", "Install packages", "multiple")
+        local install = graphics.new("command", { label = "Install", type = "ok", priority = 1 })
+        local back = graphics.new("command", { label = "Back", type = "back", priority = 2 })
+
+        -- Only the package name goes in the list: what the user selects is
+        -- already the key in the mirror, so Install can use it directly (no
+        -- label -> name table and no description parsing).
+        for _, name in ipairs(names) do
+            graphics.append(chooser, name)
+        end
+
+        graphics.addCommand(chooser, install)
+        graphics.addCommand(chooser, back)
+        graphics.handler(chooser, {
+            [install] = function(...)
+                -- OpenTTY stores varargs in a table, so {...} is not an array.
+                -- The selected labels are the package names themselves.
+                local packages = {}
+                local count = select('#', ...)
+                for i = 1, count do
+                    local rest = select(i, ...)
+                    local name = rest[1]
+                    if name and name ~= "" then packages[#packages + 1] = name end
+                end
+
+                if #packages == 0 then
+                    print(":: no packages selected")
+                    graphics.display(graphics.new("alert", "pkg", "Select at least one package.", { timeout = 2500, type = "warning" }))
+                    return
+                end
+
+                -- LCDUI progress screen. The device only repaints reliably with
+                -- plain Forms, so the install runs in a java.run worker that
+                -- updates a Gauge and a monospaced StringItem. java.yield()
+                -- lets the UI thread handle Stop/Close between steps without
+                -- two threads entering the Lua interpreter at once.
+                local state = {
+                    index = 0, total = #packages,
+                    installed = 0, failed = 0,
+                    running = true, stop = false, close = false,
+                    lines = {}
+                }
+
+                local form = graphics.new("screen", "Install packages")
+                local gauge = graphics.new("gauge", { label = "", interactive = false, maxValue = #packages, value = 0 })
+                local log = graphics.new("buffer", { label = "", value = "", style = "monospace" })
+                local switchCmd = graphics.new("command", { label = "Switch to...", type = "screen", priority = 2 })
+                local stopCmd = graphics.new("command", { label = "Stop", type = "stop", priority = 3 })
+                local closeCmd = graphics.new("command", { label = "Close", type = "back", priority = 1 })
+
+                graphics.append(form, gauge)
+                graphics.append(form, log)
+                graphics.addCommand(form, closeCmd)
+                graphics.addCommand(form, switchCmd)
+                graphics.addCommand(form, stopCmd)
+
+                local function refresh_log()
+                    -- Keep the visible item small: devices choke on a Form item
+                    -- that grows without bound. The full log stays in the
+                    -- terminal (print) and in state.lines.
+                    local first = #state.lines - 9
+                    if first < 1 then first = 1 end
+                    local visible = {}
+                    for i = first, #state.lines do visible[#visible + 1] = state.lines[i] end
+                    pcall(graphics.SetText, log, table.concat(visible, "\n"))
+                end
+
+                local function note(message)
+                    state.lines[#state.lines + 1] = message
+                    if #state.lines > 200 then table.remove(state.lines, 1) end
+                    print(message)
+                    refresh_log()
+                end
+
+                graphics.handler(form, {
+                    [switchCmd] = graphics.taskmngr,
+                    [stopCmd] = function()
+                        if state.running then
+                            state.stop = true
+                            note(":: stopping after the current operation...")
+                        else
+                            note(":: nothing is running")
+                        end
+                    end,
+                    [closeCmd] = function()
+                        if state.running then
+                            state.stop = true
+                            state.close = true
+                            note(":: stopping and closing...")
+                        else
+                            leave()
+                        end
+                    end
+                })
+
+                os.setproc("name", "pkg")
+                os.setproc("screen", form)
+                graphics.display(form)
+                note("Packages: " .. table.concat(packages, ", "))
+
+                java.run(function()
+                    for i, name in ipairs(packages) do
+                        if state.stop then break end
+
+                        pcall(graphics.SetTitle, form, "Installing " .. i .. "/" .. state.total)
+                        note("[" .. i .. "/" .. state.total .. "] " .. name)
+                        pcall(graphics.SetGauge, gauge, i - 1)
+                        java.yield(20)
+
+                        local ok, result = pcall(install_package, name, note)
+                        if ok and result then state.installed = state.installed + 1
+                        else
+                            state.failed = state.failed + 1
+                            if not ok then note(":: error: " .. tostring(result)) end
+                        end
+
+                        state.index = i
+                        pcall(graphics.SetGauge, gauge, i)
+                        java.yield(20)
+                    end
+
+                    state.running = false
+                    pcall(graphics.SetTitle, form, "Install packages - finished")
+                    if state.stop then note(":: operation stopped") end
+                    note(":: " .. state.installed .. " installed, " .. state.failed .. " failed")
+                    java.yield(20)
+
+                    if state.close then leave() end
+                end, "pkg-install")
+            end,
+            [back] = function()
+                leave()
+            end
+        })
+
+        os.setproc("name", "pkg")
+        os.setproc("screen", chooser)
+        graphics.display(chooser)
+    else
+        for i = 2, #arg do
+            install_package(arg[i], nil)
+        end
+    end
+elseif arg[1] == "remove" then
+    if os.getuid() ~= 0 then
+        print(":: must be root to remove packages")
+        os.exit(1)
+    end
+
+    for i = 2, #arg do
+        local pkg_name = arg[i]
+        local pkg = db.mirror[pkg_name]
+
+        if pkg then
+            print(":: removing " .. pkg_name)
+            local ok, err = pcall(os.remove, pkg.here)
+            if not ok then
+                print(":: error removing " .. pkg_name .. ": " .. tostring(err))
+            else
+                print(":: removed " .. pkg_name)
+            end
+        else
+            print(":: package " .. pkg_name .. " not found")
+        end
+    end
+
+elseif arg[1] == "download" then
+    if arg[2] and arg[3] then
+        print(":: downloading " .. arg[2] .. " to " .. arg[3])
+        local pkg_name = arg[2]
+        local pkg = mirror[pkg_name]
+
+        if pkg then
+            local url = server .. "/apps/" .. db_version .. "/" .. pkg.remote
+            
+            local ok, stream = pcall(socket.http.rget, url)
+            if ok then
+                ok, err = pcall(io.copy, stream, arg[3])
+                if not ok then
+                    print(":: error downloading " .. pkg_name .. ": " .. tostring(err))
+                else
+                    print(":: downloaded " .. pkg_name .. " to " .. arg[3])
+                end
+            end
+        else
+            print(":: package " .. pkg_name .. " not found")
+        end
+    else
+        print(":: usage: pkg download <package> <destination>")
+        os.exit(2)
+    end
+elseif arg[1] == "update" then
+    if os.getuid() ~= 0 then
+        print(":: must be root to update package database")
+        os.exit(1)
+    end
+
+    local url = server .. "/apps/" .. api .. "/sources.lua"
+    
+    local ok, body = pcall(socket.http.get, url)
+    if ok then
+        ok, err = pcall(io.write, body, "/etc/sources")
+        if not ok then
+            print(":: error updating package database: " .. tostring(err))
+        else
+            print(":: package database updated")
+        end
+    end
+elseif arg[1] == "switch" then
+    if os.getuid() ~= 0 then
+        print(":: must be root to switch package database")
+        os.exit(1)
+    end
+    if arg[2] == nil then
+        print(":: usage: pkg switch <version>")
+        os.exit(2)
+    end
+
+    local url = server .. "/apps/" .. arg[2] .. "/sources.lua"
+    
+    local ok, body = pcall(socket.http.get, url)
+    if ok then
+        ok, err = pcall(io.write, body, "/etc/sources")
+        if not ok then
+            print(":: error switching package database: " .. tostring(err))
+        else
+            print(":: package database switched to version " .. arg[2])
+        end
+    else print(":: error switching package database: " .. tostring(stream)) end
+elseif arg[1] == "list" then
+    print(":: available packages (" .. #mirror .. "):")
+    for pkg_name, pkg in pairs(mirror) do
+        print(pkg_name .. " - " .. pkg.description)
+    end
+elseif arg[1] == "version" then
+    print(":: pkg version " .. version)
+    print(":: sources for OpenTTY ".. db_version)
+else
+    print(":: usage: pkg <command> [args]")
+    print(":: commands:")
+    print("   install [packages...] - install packages (no packages opens a multi-select list)")
+    print("   remove <package> - remove a package")
+    print("   update - update the package database")
+    print("   switch <version> - switch to a different package database version")
+    print("   list - list available packages")
+    print("   version - show version")
+end
