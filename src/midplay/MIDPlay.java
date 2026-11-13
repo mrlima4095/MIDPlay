@@ -51,6 +51,7 @@ import midplay.ui.screen.RedditScreen;
 import midplay.ui.screen.WattpadScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
+import jm2pc.client.JM2PCMIDlet;
 import mpgram.MP;
 import githubj2me.GH;
 
@@ -135,6 +136,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     registerMenuAction(Configuration.MENU_GITHUB);
     registerMenuAction(Configuration.MENU_DISCORD);
     registerMenuAction(Configuration.MENU_OPENTTY);
+    registerMenuAction(Configuration.MENU_JM2PC);
     registerMenuAction(Configuration.MENU_NOTES);
     registerMenuAction(Configuration.MENU_TASKS);
     registerMenuAction(Configuration.MENU_WATTPAD);
@@ -211,6 +213,20 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
               openTTY.kill();
               openTTY = null;
             }
+          }
+        });
+    SubAppManager.register(
+        new SubAppManager.SubApp() {
+          public String getNameKey() {
+            return "subapp.jm2pc";
+          }
+
+          public boolean isRunning() {
+            return JM2PCMIDlet.isRunning();
+          }
+
+          public void kill() {
+            JM2PCMIDlet.kill();
           }
         });
   }
@@ -382,6 +398,9 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     if (key.equalsIgnoreCase("opentty")) {
       return Configuration.MENU_OPENTTY;
     }
+    if (key.equalsIgnoreCase("jm2pc")) {
+      return Configuration.MENU_JM2PC;
+    }
     if (key.equalsIgnoreCase("notes")) {
       return Configuration.MENU_NOTES;
     }
@@ -427,6 +446,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       openDiscordJ2ME();
     } else if (Configuration.MENU_OPENTTY.equals(key)) {
       openOpenTTY();
+    } else if (Configuration.MENU_JM2PC.equals(key)) {
+      openJM2PC();
     } else if (Configuration.MENU_NOTES.equals(key)) {
       goToNotesScreen();
     } else if (Configuration.MENU_TASKS.equals(key)) {
@@ -460,6 +481,16 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     discordj2me.App.setHostLanguage(Lang.getCurrentLang());
     discordj2me.App.setHostBridge(DiscordHostBridge.getInstance());
     discordj2me.App.open(
+        this,
+        new Runnable() {
+          public void run() {
+            Display.getDisplay(MIDPlay.this).setCurrent(mainMenu);
+          }
+        });
+  }
+
+  private void openJM2PC() {
+    JM2PCMIDlet.open(
         this,
         new Runnable() {
           public void run() {

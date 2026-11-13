@@ -94,6 +94,7 @@
     "mpgram": "MPGram",
     "github": "GitHub",
     "opentty": "OpenTTY",
+    "jm2pc": "JM2PC",
     "open_uri": "Abrir...",
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
@@ -185,7 +186,8 @@
     "mpgram": "MPGram",
     "github": "GitHub",
     "discord": "Discord",
-    "opentty": "OpenTTY"
+    "opentty": "OpenTTY",
+    "jm2pc": "JM2PC"
   },
   "player": {
     "next": "Próxima",

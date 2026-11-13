@@ -89,3 +89,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+JM2PC (Java Mobile to PC)
+Copyright (C) 2005-2009 Walter Alves Wanderley
+Source: http://jm2pc.sourceforge.net
+
+The embedded JM2PC client sources (third_party/jm2pc) and the JM2PC Server
+distribution (JM2PC Server/) are used under the GNU General Public License,
+version 3 or later. The full license text is included at
+third_party/jm2pc/COPYING.

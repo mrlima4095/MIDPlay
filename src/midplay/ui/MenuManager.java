@@ -70,6 +70,7 @@ public class MenuManager {
     boolean hadReddit = hasMenuItem(Configuration.MENU_REDDIT);
     boolean hadDiscord = hasMenuItem(Configuration.MENU_DISCORD);
     boolean hadOpenTTY = hasMenuItem(Configuration.MENU_OPENTTY);
+    boolean hadJm2pc = hasMenuItem(Configuration.MENU_JM2PC);
     ensureDefaultItemsPresent();
     // On upgrades, slot Reddit in right after Pinterest without touching the rest
     // of the user's custom arrangement.
@@ -83,6 +84,10 @@ public class MenuManager {
     // OpenTTY follows Discord on the first run after the update.
     if (!hadOpenTTY) {
       insertAfterAnchor(Configuration.MENU_OPENTTY, Configuration.MENU_DISCORD);
+    }
+    // JM2PC follows OpenTTY on the first run after the update.
+    if (!hadJm2pc) {
+      insertAfterAnchor(Configuration.MENU_JM2PC, Configuration.MENU_OPENTTY);
     }
   }
 
@@ -180,7 +185,8 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 15, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_DISCORD, 16, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_OPENTTY, 17, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 18, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_JM2PC, 18, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 19, true));
     return defaultConfig;
   }
 

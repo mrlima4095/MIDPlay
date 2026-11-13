@@ -30,6 +30,7 @@ This fork builds on upstream MIDPlay 1.7.1:
 - **Embedded GitHub client** — browse GitHub inside MIDPlay.
 - **Embedded Discord client** — read and send Discord messages, browse servers and DMs, and receive live updates while MIDPlay keeps running in the background. Notifications appear over MIDPlay screens and other subapps with an option to open the chat in Discord, copied messages can be saved as notes, the current track is shown on Discord screens, and the login token can be imported from a file or a MIDPlay note.
 - **Embedded OpenTTY** — a POSIX-like terminal with a Lua interpreter and a RISC-V ELF emulator inside MIDPlay. Use the `host` command to return to MIDPlay without stopping the terminal, then reopen it from the task manager or the menu.
+- **Embedded JM2PC** — control a PC over the network from the phone: mouse, keyboard, screen view, file browser, shell and messages. The PC side (JM2PC Server 3.1.0) ships in `JM2PC Server/` at the repository root.
 - **Wattpad** — search stories and authors, keep a reading library, download whole stories for offline reading, and resume where you left off, with archive and mature-content filters.
 - **Pinterest** — search pins, boards and users, save favorites into local folders, import a whole board, and download images.
 - **Reddit** — browse and search subreddits, users and posts, read comments, follow subreddits and users, save favorites, and optionally translate posts and comments. Uses the Arctic Shift archive, so no Reddit login is required.
@@ -77,7 +78,7 @@ See `build.sh` for the full pipeline and `tools/` for the subapp preparation scr
 
 - Java ME, MIDP 2.0 / CLDC 1.1, JSR-75 (FileConnection) and JSR-234 (AMMS)
 - Record Management System (RMS) with a small JSON layer for local storage
-- Embedded [MPGram client](https://github.com/shinovon/mpgram-client), [GitHub-j2me](https://github.com/mrlima4095/GitHub-j2me) and [Discord for J2ME](https://github.com/mrlima4095/discord-j2me) as git submodules, and [OpenTTY](https://github.com/mrlima4095/OpenTTY-J2ME) vendored under `third_party/opentty`
+- Embedded [MPGram client](https://github.com/shinovon/mpgram-client), [GitHub-j2me](https://github.com/mrlima4095/GitHub-j2me) and [Discord for J2ME](https://github.com/mrlima4095/discord-j2me) as git submodules, [OpenTTY](https://github.com/mrlima4095/OpenTTY-J2ME) vendored under `third_party/opentty`, and [JM2PC](http://jm2pc.sourceforge.net) vendored under `third_party/jm2pc` (GPLv3)
 - REST endpoints for streaming, lyrics, translation and the Reddit/Pinterest proxies
 
 Third-party notices are listed in [`res/THIRD_PARTY_NOTICES.txt`](/res/THIRD_PARTY_NOTICES.txt).
