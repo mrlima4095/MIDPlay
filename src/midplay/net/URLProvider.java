@@ -10,7 +10,7 @@ public class URLProvider {
   public static final String SERVICE_URL = "http://music.s60tube.io.vn";
   private static final SettingsManager settingsManager = SettingsManager.getInstance();
 
-  public static final String UPDATE_URL = "http://opentty.fun/update.php";
+  public static final String UPDATE_URL = "http://opentty.fun/dist/debug/update.php";
 
   public static String checkForUpdate() {
     return UPDATE_URL + "?version=" + Utils.urlEncode(MIDPlay.APP_VERSION) + "&format=text";
