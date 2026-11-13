@@ -42,7 +42,6 @@ public class Configuration {
   public static final String MENU_GITHUB = "menu.github";
   public static final String MENU_DISCORD = "menu.discord";
   public static final String MENU_OPENTTY = "menu.opentty";
-  public static final String MENU_JM2PC = "menu.jm2pc";
   public static final String MENU_OPEN_URI = "menu.open_uri";
   public static final String MENU_NOTES = "menu.notes";
   public static final String MENU_TASKS = "menu.tasks";
@@ -196,7 +195,6 @@ public class Configuration {
   public static Image githubIcon;
   public static Image openttyIcon;
   public static Image discordIcon;
-  public static Image jm2pcIcon;
   public static Image notesIcon;
   public static Image tasksIcon;
   public static Image wattpadIcon;
@@ -240,7 +238,6 @@ public class Configuration {
     githubIcon = Utils.resizeImageToFit(Image.createImage("/g.png"), 36, 36);
     openttyIcon = Utils.resizeImageToFit(Image.createImage("/opentty.png"), 36, 36);
     discordIcon = Utils.resizeImageToFit(Image.createImage("/discord.png"), 36, 36);
-    jm2pcIcon = createJm2pcIcon();
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();
     wattpadIcon = Utils.resizeImageToFit(Image.createImage("/wattpad.png"), 36, 36);
@@ -309,32 +306,6 @@ public class Configuration {
     graphics.fillRect(17, 14, 10, 2);
     graphics.fillRect(17, 21, 8, 2);
     graphics.fillRect(17, 28, 9, 2);
-    return image;
-  }
-
-  private static Image createJm2pcIcon() {
-    Image image = Image.createImage(36, 36);
-    Graphics graphics = image.getGraphics();
-    // Desktop monitor.
-    graphics.setColor(0x243447);
-    graphics.fillRoundRect(3, 4, 30, 21, 3, 3);
-    graphics.setColor(0xDCEEFF);
-    graphics.fillRect(5, 6, 26, 15);
-    graphics.setColor(0x397DB5);
-    graphics.fillRect(8, 9, 10, 2);
-    graphics.fillRect(8, 13, 14, 2);
-    graphics.setColor(0x243447);
-    graphics.fillRect(16, 25, 4, 3);
-    graphics.fillRect(11, 28, 14, 2);
-    // Phone in front controlling the desktop.
-    graphics.setColor(0x243447);
-    graphics.fillRoundRect(20, 18, 13, 17, 3, 3);
-    graphics.setColor(0xF4F7FB);
-    graphics.fillRoundRect(21, 19, 11, 15, 2, 2);
-    graphics.setColor(0x4B83B5);
-    graphics.fillRect(23, 22, 7, 8);
-    graphics.setColor(0x43A047);
-    graphics.fillRect(25, 26, 3, 2);
     return image;
   }
 

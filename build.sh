@@ -33,8 +33,6 @@ GITHUB_SOURCE_DIR="third_party/github-j2me"
 GITHUB_PREP_DIR="$BUILD_DIR/github-j2me"
 DISCORD_SOURCE_DIR="third_party/discord-j2me"
 DISCORD_PREP_DIR="$BUILD_DIR/discord-j2me"
-JM2PC_SOURCE_DIR="third_party/jm2pc/client/src"
-JM2PC_RES_DIR="third_party/jm2pc/client/res"
 OPENTTY_SOURCE_DIR="third_party/opentty/src"
 OPENTTY_RES_DIR="$BUILD_DIR/opentty-res"
 JSR135_STUB_DIR="tools/jsr135-api"
@@ -155,7 +153,7 @@ mkdir -p "$BUILD_DIR/jsr135-api"
 BOOTCP="$BOOTCP:$JSR135_STUB_JAR"
 
 echo "• Collect sources"
-find src "$MPGRAM_DIR" "$GITHUB_PREP_DIR" "$DISCORD_PREP_DIR/src" "$JM2PC_SOURCE_DIR" -name '*.java' > "$BUILD_DIR/sources.txt"
+find src "$MPGRAM_DIR" "$GITHUB_PREP_DIR" "$DISCORD_PREP_DIR/src" -name '*.java' > "$BUILD_DIR/sources.txt"
 find "$OPENTTY_SOURCE_DIR" -maxdepth 1 -name '*.java' > "$BUILD_DIR/opentty-sources.txt"
 echo "    $(wc -l < "$BUILD_DIR/sources.txt" | tr -d ' ') MIDPlay files, $(wc -l < "$BUILD_DIR/opentty-sources.txt" | tr -d ' ') OpenTTY files"
 
@@ -169,9 +167,6 @@ echo "• Compile MIDPlay (JDK 8, -source/-target 1.3, CLDC bootclasspath)"
   -bootclasspath "$BOOTCP" \
   -classpath "$COMPILED_DIR" \
   -d "$COMPILED_DIR" @"$BUILD_DIR/sources.txt"
-
-echo "• Prepare embedded JM2PC resources"
-cp -r "$JM2PC_RES_DIR"/. "$COMPILED_DIR"/
 
 echo "• Package dist/MIDPlay_midlet.jar (classes + res/ + embedded apps)"
 manifest_body > "$BUILD_DIR/MANIFEST.MF"
