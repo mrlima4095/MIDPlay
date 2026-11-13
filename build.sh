@@ -38,7 +38,7 @@ OPENTTY_RES_DIR="$BUILD_DIR/opentty-res"
 JSR135_STUB_DIR="tools/jsr135-api"
 JSR135_STUB_JAR="$BUILD_DIR/jsr135-api.jar"
 DIST_DIR="dist"
-VERSION="26.12"
+VERSION="26.11.2"
 
 # ProGuard (and only ProGuard) runs on any modern JDK.
 RUN_JAVA="${RUN_JAVA:-$(command -v java)}"
