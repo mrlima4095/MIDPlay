@@ -900,26 +900,5 @@
       "format": "Invalid format. Use MM:SS",
       "span": "Point B must be at least 0.5s after A"
     }
-  },
-  "web": {
-    "title": "MIDPlay Web",
-    "host": "Server",
-    "port": "Port",
-    "user": "User",
-    "password": "Password",
-    "device": "Device name",
-    "connect": "Connect",
-    "disconnect": "Disconnect",
-    "forget": "Forget credentials",
-    "connecting": "Connecting...",
-    "disconnected": "Disconnected",
-    "forgotten": "Credentials forgotten",
-    "host_empty": "Enter the server",
-    "user_empty": "Enter the user",
-    "connected": "Connected to MIDPlay Web",
-    "save_prompt": "Save these settings?",
-    "saved": "Settings saved",
-    "unsaved": "You have unsaved changes. Leave anyway?",
-    "error_ticker": "Error: {0}"
   }
 }

@@ -49,7 +49,6 @@ import midplay.ui.screen.TasksScreen;
 import midplay.ui.screen.PinterestScreen;
 import midplay.ui.screen.RedditScreen;
 import midplay.ui.screen.WattpadScreen;
-import midplay.ui.screen.WebConnectScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 import mpgram.MP;
@@ -392,17 +391,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     if (key.equalsIgnoreCase("playing")) {
       return Configuration.MENU_NOW_PLAYING;
     }
-    if (key.equalsIgnoreCase("web")) {
-      return "web";
-    }
     return null;
   }
 
   private void openInternalKey(String key) {
-    if ("web".equals(key)) {
-      forwardWebConnect();
-      return;
-    }
     if (Configuration.MENU_SEARCH.equals(key)) {
       goToSearchScreen();
     } else if (Configuration.MENU_FAVORITES.equals(key)) {
@@ -442,10 +434,6 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     } else if (Configuration.MENU_NOW_PLAYING.equals(key)) {
       openNowPlaying();
     }
-  }
-
-  private void forwardWebConnect() {
-    navigator.forward(new WebConnectScreen(navigator));
   }
 
   private void openMPGram() {

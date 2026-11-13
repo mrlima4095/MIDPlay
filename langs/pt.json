@@ -900,26 +900,5 @@
       "format": "Formato invalido. Use MM:SS",
       "span": "O ponto B precisa estar pelo menos 0,5s depois de A"
     }
-  },
-  "web": {
-    "title": "MIDPlay Web",
-    "host": "Servidor",
-    "port": "Porta",
-    "user": "Usuario",
-    "password": "Senha",
-    "device": "Nome do dispositivo",
-    "connect": "Conectar",
-    "disconnect": "Desconectar",
-    "forget": "Esquecer credenciais",
-    "connecting": "Conectando...",
-    "disconnected": "Desconectado",
-    "forgotten": "Credenciais esquecidas",
-    "host_empty": "Informe o servidor",
-    "user_empty": "Informe o usuario",
-    "connected": "Conectado ao MIDPlay Web",
-    "save_prompt": "Salvar estas configuracoes?",
-    "saved": "Configuracoes salvas",
-    "unsaved": "Voce tem alteracoes nao salvas. Sair mesmo assim?",
-    "error_ticker": "Erro: {0}"
   }
 }
