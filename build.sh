@@ -170,10 +170,13 @@ echo "• Compile MIDPlay (JDK 8, -source/-target 1.3, CLDC bootclasspath)"
   -classpath "$COMPILED_DIR" \
   -d "$COMPILED_DIR" @"$BUILD_DIR/sources.txt"
 
+echo "• Prepare embedded JM2PC resources"
+cp -r "$JM2PC_RES_DIR"/. "$COMPILED_DIR"/
+
 echo "• Package dist/MIDPlay_midlet.jar (classes + res/ + embedded apps)"
 manifest_body > "$BUILD_DIR/MANIFEST.MF"
 "$JAR_TOOL" cfm "$DIST_DIR/MIDPlay_midlet.jar" "$BUILD_DIR/MANIFEST.MF" \
-  -C "$COMPILED_DIR" . -C res . -C "$MPGRAM_RES_DIR" . -C "$DISCORD_PREP_DIR/res" . -C "$OPENTTY_RES_DIR" . -C "$JM2PC_RES_DIR" .
+  -C "$COMPILED_DIR" . -C res . -C "$MPGRAM_RES_DIR" . -C "$DISCORD_PREP_DIR/res" . -C "$OPENTTY_RES_DIR" .
 
 echo "• ProGuard (shrink + obfuscate + -microedition preverify) → dist/MIDPlay.jar"
 "$RUN_JAVA" -cp "$PROGUARD_JAR" proguard.ProGuard @midlets.pro
