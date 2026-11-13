@@ -50,6 +50,10 @@ public class SettingsManager {
   private static int currentRedditAutoTranslate;
   private static int currentEconomyMode;
   private static int currentAbLoopFeature;
+  private static String currentRelayHost;
+  private static int currentRelayPort;
+  private static String currentRelayUser;
+  private static String currentRelayPassword;
 
   public static SettingsManager getInstance() {
     if (instance == null) {
@@ -185,6 +189,10 @@ public class SettingsManager {
     currentEconomyMode = settings.getInt("economyMode", Configuration.ECONOMY_MODE_OFF);
     currentAbLoopFeature =
         settings.getInt("abLoopFeature", Configuration.AB_LOOP_FEATURE_ON);
+    currentRelayHost = settings.getString("relayHost", Configuration.DEFAULT_RELAY_HOST);
+    currentRelayPort = settings.getInt("relayPort", Configuration.DEFAULT_RELAY_PORT);
+    currentRelayUser = settings.getString("relayUser", "");
+    currentRelayPassword = settings.getString("relayPassword", "");
   }
 
   private JSONObject getSettingsJSON() {
@@ -882,6 +890,55 @@ public class SettingsManager {
       }
     }
     return result;
+  }
+
+  public String getRelayHost() {
+    if (currentRelayHost == null) {
+      currentRelayHost = Configuration.DEFAULT_RELAY_HOST;
+    }
+    return currentRelayHost;
+  }
+
+  public void saveRelayHost(String host) throws RecordStoreException {
+    String value = host == null ? "" : host.trim();
+    if (value.length() == 0) {
+      value = Configuration.DEFAULT_RELAY_HOST;
+    }
+    saveSetting("relayHost", value);
+    currentRelayHost = value;
+  }
+
+  public int getRelayPort() {
+    if (currentRelayPort <= 0) {
+      currentRelayPort = Configuration.DEFAULT_RELAY_PORT;
+    }
+    return currentRelayPort;
+  }
+
+  public void saveRelayPort(int port) throws RecordStoreException {
+    int value = port <= 0 || port > 65535 ? Configuration.DEFAULT_RELAY_PORT : port;
+    saveSetting("relayPort", value);
+    currentRelayPort = value;
+  }
+
+  public String getRelayUser() {
+    return currentRelayUser == null ? "" : currentRelayUser;
+  }
+
+  public void saveRelayUser(String user) throws RecordStoreException {
+    String value = user == null ? "" : user.trim();
+    saveSetting("relayUser", value);
+    currentRelayUser = value;
+  }
+
+  public String getRelayPassword() {
+    return currentRelayPassword == null ? "" : currentRelayPassword;
+  }
+
+  public void saveRelayPassword(String password) throws RecordStoreException {
+    String value = password == null ? "" : password;
+    saveSetting("relayPassword", value);
+    currentRelayPassword = value;
   }
 
   public void cleanup() {

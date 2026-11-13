@@ -181,6 +181,8 @@ public class Configuration {
 
   public static final int AB_LOOP_FEATURE_OFF = 0;
   public static final int AB_LOOP_FEATURE_ON = 1;
+  public static final String DEFAULT_RELAY_HOST = "opentty.fun";
+  public static final int DEFAULT_RELAY_PORT = 10141;
 
   public static Image folderIcon;
   public static Image musicIcon;
