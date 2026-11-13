@@ -10,8 +10,10 @@ import javax.microedition.lcdui.Graphics;
 import midplay.model.Track;
 import midplay.model.Tracks;
 import midplay.store.Configuration;
+import midplay.store.SettingsManager;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
+import midplay.ui.screen.AbLoopScreen;
 import midplay.ui.screen.LyricsScreen;
 import midplay.ui.screen.PlaylistPickerScreen;
 import midplay.ui.screen.QueueTrackListScreen;
@@ -162,17 +164,44 @@ public final class PlayerScreen extends Canvas
     }
 
     if (add) {
+      syncAbLoopCommands(true);
       updateSleepTimerCommands();
       navNextAdded = false;
       navPrevAdded = false;
       updateNavCommands();
     } else {
+      syncAbLoopCommands(false);
       removeSleepTimerCommand();
       removeCommand(Commands.playerNext());
       removeCommand(Commands.playerPrevious());
       navNextAdded = false;
       navPrevAdded = false;
     }
+  }
+
+  private boolean abLoopCommandsAdded = false;
+
+
+  private void syncAbLoopCommands(boolean screenVisible) {
+    boolean want = screenVisible && SettingsManager.getInstance().isAbLoopEnabled();
+    if (want == abLoopCommandsAdded) {
+      return;
+    }
+    Command[] loopCommands = {
+      Commands.playerLoopSetA(),
+      Commands.playerLoopSetB(),
+      Commands.playerLoopToggle(),
+      Commands.playerLoopDefine(),
+      Commands.playerLoopClear()
+    };
+    for (int i = 0; i < loopCommands.length; i++) {
+      if (want) {
+        addCommand(loopCommands[i]);
+      } else {
+        removeCommand(loopCommands[i]);
+      }
+    }
+    abLoopCommandsAdded = want;
   }
 
   public void addCommands() {
@@ -184,6 +213,7 @@ public final class PlayerScreen extends Canvas
   }
 
   public void showNotify() {
+    syncAbLoopCommands(true);
     getPlayerGUI().resumeRepaintTimer();
     if (!albumArtLoader.albumArtLoaded && albumArtLoader.canLoadAlbumArt()) {
       albumArtLoader.loadAlbumArt();
@@ -306,6 +336,20 @@ public final class PlayerScreen extends Canvas
       if (keycode == KEY_NUM3) {
         skipBy(NUMERIC_SEEK_STEP_MICROS);
         return;
+      }
+      if (SettingsManager.getInstance().isAbLoopEnabled()) {
+        if (keycode == KEY_NUM7) {
+          markLoopA();
+          return;
+        }
+        if (keycode == KEY_NUM9) {
+          markLoopB();
+          return;
+        }
+        if (keycode == KEY_NUM0) {
+          toggleAbLoop();
+          return;
+        }
       }
       int action = getGameAction(keycode);
 
@@ -511,6 +555,16 @@ public final class PlayerScreen extends Canvas
       showSleepTimerDialog();
     } else if (c == Commands.playerCancelTimer()) {
       handleCancelTimerCommand();
+    } else if (c == Commands.playerLoopSetA()) {
+      markLoopA();
+    } else if (c == Commands.playerLoopSetB()) {
+      markLoopB();
+    } else if (c == Commands.playerLoopToggle()) {
+      toggleAbLoop();
+    } else if (c == Commands.playerLoopDefine()) {
+      showAbLoopDialog();
+    } else if (c == Commands.playerLoopClear()) {
+      clearAbLoop();
     }
   }
 
@@ -759,6 +813,53 @@ public final class PlayerScreen extends Canvas
 
   private boolean isPlaylistEmpty(Tracks tracks) {
     return tracks == null || tracks.getTracks() == null || tracks.getTracks().length == 0;
+  }
+
+  private void markLoopA() {
+    boolean ok = getPlayerGUI().markLoopA();
+    navigator.showAlert(
+        Lang.tr(ok ? "loop.status.marked_a" : "loop.error.mark"),
+        ok ? AlertType.CONFIRMATION : AlertType.ERROR);
+  }
+
+  private void markLoopB() {
+    boolean ok = getPlayerGUI().markLoopB();
+    navigator.showAlert(
+        Lang.tr(ok ? "loop.status.marked_b" : "loop.error.mark"),
+        ok ? AlertType.CONFIRMATION : AlertType.ERROR);
+  }
+
+  private void toggleAbLoop() {
+    boolean ok = getPlayerGUI().toggleAbLoop();
+    boolean on = getPlayerGUI().getAbLoop().isEnabled();
+    navigator.showAlert(
+        Lang.tr(ok ? (on ? "loop.status.on" : "loop.status.off") : "loop.error.not_ready"),
+        ok ? AlertType.CONFIRMATION : AlertType.ERROR);
+  }
+
+  private void clearAbLoop() {
+    getPlayerGUI().clearAbLoop();
+    navigator.showAlert(Lang.tr("loop.status.cleared"), AlertType.CONFIRMATION);
+  }
+
+  private void showAbLoopDialog() {
+    PlayerGUI gui = getPlayerGUI();
+    AbLoopController loop = gui.getAbLoop();
+    AbLoopScreen screen =
+        new AbLoopScreen(
+            navigator,
+            new AbLoopScreen.AbLoopCallback() {
+              public void onPointsDefined(long a, long b) {
+                if (!getPlayerGUI().setLoopPoints(a, b)) {
+                  navigator.showAlert(Lang.tr("loop.error.span"), AlertType.ERROR);
+                } else {
+                  navigator.showAlert(Lang.tr("loop.status.defined"), AlertType.CONFIRMATION);
+                }
+              }
+            },
+            loop.getPointA(),
+            loop.getPointB());
+    navigator.showDialog(screen);
   }
 
   private void showSleepTimerDialog() {

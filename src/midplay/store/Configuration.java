@@ -22,6 +22,7 @@ public class Configuration {
   public static final String STORAGE_DOWNLOADS_BACKUP = "storage.downloads.bak";
   public static final String STORAGE_NOTES = "storage.notes";
   public static final String STORAGE_TASKS = "storage.tasks";
+  public static final String STORAGE_AB_LOOPS = "storage.ab_loops";
 
   public static final String DEFAULT_DOWNLOAD_PATH = "file:///SDCard/MIDPlay/Downloads/";
   public static final String DEFAULT_WATTPAD_PATH = "file:///SDCard/MIDPlay/Wattpad/";
@@ -177,6 +178,9 @@ public class Configuration {
 
   public static final int THUMBNAILS_OFF = 0;
   public static final int THUMBNAILS_ON = 1;
+
+  public static final int AB_LOOP_FEATURE_OFF = 0;
+  public static final int AB_LOOP_FEATURE_ON = 1;
 
   public static Image folderIcon;
   public static Image musicIcon;

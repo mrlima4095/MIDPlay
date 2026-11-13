@@ -49,6 +49,7 @@ public class SettingsManager {
   private static String currentRedditPath;
   private static int currentRedditAutoTranslate;
   private static int currentEconomyMode;
+  private static int currentAbLoopFeature;
 
   public static SettingsManager getInstance() {
     if (instance == null) {
@@ -182,6 +183,8 @@ public class SettingsManager {
     currentRedditAutoTranslate =
         settings.getInt("redditAutoTranslate", Configuration.DEFAULT_REDDIT_AUTO_TRANSLATE);
     currentEconomyMode = settings.getInt("economyMode", Configuration.ECONOMY_MODE_OFF);
+    currentAbLoopFeature =
+        settings.getInt("abLoopFeature", Configuration.AB_LOOP_FEATURE_ON);
   }
 
   private JSONObject getSettingsJSON() {
@@ -230,6 +233,7 @@ public class SettingsManager {
     settings.put("redditPath", Configuration.DEFAULT_REDDIT_PATH);
     settings.put("redditAutoTranslate", Configuration.DEFAULT_REDDIT_AUTO_TRANSLATE);
     settings.put("economyMode", Configuration.ECONOMY_MODE_OFF);
+    settings.put("abLoopFeature", Configuration.AB_LOOP_FEATURE_ON);
     settings.put("vaultPasswordHash", "");
     return settings;
   }
@@ -669,6 +673,12 @@ public class SettingsManager {
     currentThumbnails = thumbnails;
   }
 
+
+  public void saveAbLoopFeature(int enabled) throws RecordStoreException {
+    saveSetting("abLoopFeature", enabled);
+    currentAbLoopFeature = enabled;
+  }
+
   public void saveImageProxy(String imageProxy) throws RecordStoreException {
     saveSetting("imageProxy", imageProxy);
     currentImageProxy = imageProxy;
@@ -781,6 +791,14 @@ public class SettingsManager {
 
   public int getCurrentThumbnails() {
     return currentThumbnails;
+  }
+
+  public int getCurrentAbLoopFeature() {
+    return currentAbLoopFeature;
+  }
+
+  public boolean isAbLoopEnabled() {
+    return currentAbLoopFeature == Configuration.AB_LOOP_FEATURE_ON;
   }
 
   public String getCurrentImageProxy() {

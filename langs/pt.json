@@ -208,7 +208,12 @@
       "shuffle_off": "Embaralhar playlist desativado"
     },
     "stop": "Parar",
-    "volume": "Volume"
+    "volume": "Volume",
+    "save": {
+      "ok": "Música salva nos downloads",
+      "failed": "Falha ao salvar nos downloads",
+      "not_cached": "A música atual ainda não está no cache"
+    }
   },
   "details": {
     "title": "Detalhes",
@@ -374,7 +379,8 @@
     "wattpad_mature": "Mostrar histórias adultas (Wattpad)",
     "wattpad_page_chars": "Caracteres por página",
     "wattpad_language": "Idioma das buscas",
-    "wattpad_path": "Pasta do Wattpad"
+    "wattpad_path": "Pasta do Wattpad",
+    "ab_loop": "Habilitar recurso de repetição A/B"
   },
   "status": {
     "error": "Ocorreu um erro",
@@ -871,5 +877,28 @@
     "new_dm_id": "Usuário ou ID",
     "new_dm_invalid": "Informe um nome de usuário ou um ID válido",
     "new_dm_not_found": "Usuário não encontrado. Confira o nome ou use um ID numérico."
+  },
+  "loop": {
+    "define": "Definir A/B...",
+    "mark_a": "Marcar A",
+    "mark_b": "Marcar B",
+    "toggle": "Ativar/Desativar loop",
+    "clear": "Limpar loop A/B",
+    "point_a": "Ponto A (MM:SS)",
+    "point_b": "Ponto B (MM:SS)",
+    "status": {
+      "marked_a": "Ponto A marcado",
+      "marked_b": "Ponto B marcado",
+      "on": "Loop A/B ativado",
+      "off": "Loop A/B desativado",
+      "defined": "Loop A/B definido e ativado",
+      "cleared": "Loop A/B removido"
+    },
+    "error": {
+      "mark": "Nao foi possivel marcar o ponto",
+      "not_ready": "Marque A e B antes de ativar",
+      "format": "Formato invalido. Use MM:SS",
+      "span": "O ponto B precisa estar pelo menos 0,5s depois de A"
+    }
   }
 }

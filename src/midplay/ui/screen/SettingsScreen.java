@@ -40,6 +40,7 @@ public final class SettingsScreen extends BaseForm {
   private int discordAutoPrepareIndex;
   private int blackberryWifiIndex = -1;
   private int thumbnailsIndex;
+  private int abLoopFeatureIndex;
 
   private String currentLanguage;
   private String currentThemeMode;
@@ -52,6 +53,7 @@ public final class SettingsScreen extends BaseForm {
   private int currentMpgramAutoLogin;
   private int currentDiscordAutoPrepare;
   private int currentThumbnails;
+  private int currentAbLoopFeature;
   private String currentPlayerMethod;
   private String currentDownloadPath;
   private int currentColorIndex;
@@ -143,6 +145,10 @@ public final class SettingsScreen extends BaseForm {
         != togglesGroup.isSelected(thumbnailsIndex)) {
       return true;
     }
+    if ((currentAbLoopFeature == Configuration.AB_LOOP_FEATURE_ON)
+        != togglesGroup.isSelected(abLoopFeatureIndex)) {
+      return true;
+    }
     if (blackberryWifiIndex >= 0
         && (currentBlackberryWifi == Configuration.BLACKBERRY_WIFI_ON)
             != togglesGroup.isSelected(blackberryWifiIndex)) {
@@ -183,6 +189,7 @@ public final class SettingsScreen extends BaseForm {
     mpgramAutoLoginIndex = togglesGroup.append(Lang.tr("settings.mpgram_auto_login"), null);
     discordAutoPrepareIndex = togglesGroup.append(Lang.tr("settings.discord_auto_prepare"), null);
     thumbnailsIndex = togglesGroup.append(Lang.tr("settings.load_thumbnails"), null);
+    abLoopFeatureIndex = togglesGroup.append(Lang.tr("settings.ab_loop"), null);
     if (Utils.isBlackberry) {
       blackberryWifiIndex = togglesGroup.append(Lang.tr("settings.use_wifi"), null);
     }
@@ -234,6 +241,7 @@ public final class SettingsScreen extends BaseForm {
     currentMpgramAutoLogin = settingsManager.getCurrentMpgramAutoLogin();
     currentDiscordAutoPrepare = settingsManager.getCurrentDiscordAutoPrepare();
     currentThumbnails = settingsManager.getCurrentThumbnails();
+    currentAbLoopFeature = settingsManager.getCurrentAbLoopFeature();
     currentPlayerMethod = settingsManager.getCurrentPlayerMethod();
     currentDownloadPath = settingsManager.getCurrentDownloadPath();
     currentColorIndex = settingsManager.getSavedColorIndex();
@@ -261,6 +269,8 @@ public final class SettingsScreen extends BaseForm {
         currentDiscordAutoPrepare == Configuration.DISCORD_AUTO_PREPARE_ON);
     togglesGroup.setSelectedIndex(
         thumbnailsIndex, currentThumbnails == Configuration.THUMBNAILS_ON);
+    togglesGroup.setSelectedIndex(
+        abLoopFeatureIndex, currentAbLoopFeature == Configuration.AB_LOOP_FEATURE_ON);
     if (blackberryWifiIndex >= 0) {
       togglesGroup.setSelectedIndex(
           blackberryWifiIndex, currentBlackberryWifi == Configuration.BLACKBERRY_WIFI_ON);
@@ -314,6 +324,10 @@ public final class SettingsScreen extends BaseForm {
           togglesGroup.isSelected(thumbnailsIndex)
               ? Configuration.THUMBNAILS_ON
               : Configuration.THUMBNAILS_OFF;
+      int selectedAbLoop =
+          togglesGroup.isSelected(abLoopFeatureIndex)
+              ? Configuration.AB_LOOP_FEATURE_ON
+              : Configuration.AB_LOOP_FEATURE_OFF;
       int selectedBlackberryWifi =
           blackberryWifiIndex >= 0 && togglesGroup.isSelected(blackberryWifiIndex)
               ? Configuration.BLACKBERRY_WIFI_ON
@@ -363,6 +377,10 @@ public final class SettingsScreen extends BaseForm {
       if (currentThumbnails != selectedThumbnails) {
         hasChanges = true;
         settingsManager.saveThumbnails(selectedThumbnails);
+      }
+      if (currentAbLoopFeature != selectedAbLoop) {
+        hasChanges = true;
+        settingsManager.saveAbLoopFeature(selectedAbLoop);
       }
       if (currentBlackberryWifi != selectedBlackberryWifi) {
         hasChanges = true;

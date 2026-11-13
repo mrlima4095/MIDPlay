@@ -12,6 +12,7 @@ import javax.microedition.media.control.VolumeControl;
 import midplay.model.Track;
 import midplay.model.Tracks;
 import midplay.net.MediaHttpClient;
+import midplay.store.AbLoopStore;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
 import midplay.util.Lang;
@@ -22,6 +23,7 @@ public class PlayerGUI implements PlayerListener {
   private static final int VOLUME_STEP = 10;
   private static final int MAX_PENDING_TRACK_STEPS = 20;
   private static final long MEDIA_SAMPLE_WINDOW_MS = 1200L;
+  private static final int LOOP_TICK_MS = 150;
 
   private final PlayerScreen parent;
   private final SettingsManager settingsManager;
@@ -45,6 +47,11 @@ public class PlayerGUI implements PlayerListener {
   private Timer mainTimer;
   private TimerTask displayTask;
   private boolean repaintSuppressed = false;
+  private final AbLoopController abLoop = new AbLoopController();
+  /** Key/url da faixa cujo loop esta aplicado agora, para saber quando trocar. */
+  private String abLoopTrackId;
+  private TimerTask loopTask;
+  private volatile boolean loopFiring = false;
 
   private volatile Thread loadThread;
   private TimerTask startWatchdogTask;
@@ -388,6 +395,128 @@ public class PlayerGUI implements PlayerListener {
   void setPendingResumeSeek(long micros) {
     synchronized (this) {
       pendingResumeSeekMicros = micros;
+    }
+  }
+
+  public AbLoopController getAbLoop() {
+    return abLoop;
+  }
+
+  public boolean markLoopA() {
+    boolean ok = abLoop.setPointA(getCurrentTime());
+    if (ok) {
+      persistAbLoop();
+    }
+    parent.updateDisplayAsync();
+    return ok;
+  }
+
+  public boolean markLoopB() {
+    boolean ok = abLoop.setPointB(getCurrentTime());
+    if (ok) {
+      persistAbLoop();
+    }
+    parent.updateDisplayAsync();
+    return ok;
+  }
+
+  public boolean setLoopPoints(long aMicros, long bMicros) {
+    boolean ok = abLoop.setPointA(aMicros) && abLoop.setPointB(bMicros);
+    if (!ok) {
+      abLoop.clear();
+      return false;
+    }
+    abLoop.setEnabled(true);
+    restartLoopTimer();
+    persistAbLoop();
+    parent.updateDisplayAsync();
+    return true;
+  }
+
+  public boolean toggleAbLoop() {
+    boolean ok = abLoop.setEnabled(!abLoop.isEnabled());
+    if (ok) {
+      persistAbLoop();
+      restartLoopTimer();
+    }
+    parent.updateDisplayAsync();
+    return ok;
+  }
+
+  public void clearAbLoop() {
+    abLoop.clear();
+    synchronized (this) {
+      stopLoopTaskLocked();
+      abLoopTrackId = null;
+    }
+    Track current = getCurrentTrack();
+    if (current != null) {
+      AbLoopStore.getInstance().remove(current);
+    }
+    parent.updateDisplayAsync();
+  }
+
+  /** Salva o loop atual na faixa corrente, se A e B estiverem definidos. */
+  private void persistAbLoop() {
+    Track current = getCurrentTrack();
+    if (current == null || !abLoop.isReady()) {
+      return;
+    }
+    boolean on = abLoop.isEnabled();
+    synchronized (this) {
+      abLoopTrackId = AbLoopStore.trackId(current);
+    }
+    AbLoopStore.getInstance().save(current, abLoop.getPointA(), abLoop.getPointB(), on);
+  }
+
+  /** Restaura o loop salvo da faixa atual (ou limpa se ela nao tem loop). */
+  private void applyPersistedAbLoopLocked() {
+    Track current = getCurrentTrackLocked();
+    if (current == null) {
+      abLoop.clear();
+      abLoopTrackId = null;
+      stopLoopTaskLocked();
+      return;
+    }
+    String id = AbLoopStore.trackId(current);
+    if (id != null && id.equals(abLoopTrackId) && abLoop.isReady()) {
+      // Mesma faixa com loop ja aplicado: so garante o timer.
+      if (abLoop.isEnabled()) {
+        startLoopTaskLocked();
+      } else {
+        stopLoopTaskLocked();
+      }
+      return;
+    }
+    abLoopTrackId = id;
+    long[] saved = AbLoopStore.getInstance().get(current);
+    if (saved == null) {
+      abLoop.clear();
+      stopLoopTaskLocked();
+      return;
+    }
+    abLoop.clear();
+    boolean ok = abLoop.setPointA(saved[0]) && abLoop.setPointB(saved[1]);
+    if (!ok) {
+      abLoop.clear();
+      stopLoopTaskLocked();
+      return;
+    }
+    abLoop.setEnabled(saved[2] == 1L);
+    if (abLoop.isEnabled()) {
+      startLoopTaskLocked();
+    } else {
+      stopLoopTaskLocked();
+    }
+  }
+
+  private void restartLoopTimer() {
+    synchronized (this) {
+      stopLoopTaskLocked();
+      if (!destroyed && !repaintSuppressed && isPlaying()) {
+        ensureTimerLocked();
+        startLoopTaskLocked();
+      }
     }
   }
 
@@ -878,6 +1007,7 @@ public class PlayerGUI implements PlayerListener {
       if (destroyed || loading) {
         return;
       }
+      applyPersistedAbLoopLocked();
       loading = true;
       playbackSessionId++;
       sessionId = playbackSessionId;
@@ -1330,7 +1460,65 @@ public class PlayerGUI implements PlayerListener {
             };
         mainTimer.scheduleAtFixedRate(displayTask, 0L, TIMER_INTERVAL);
       }
+      startLoopTaskLocked();
     }
+  }
+
+  private void startLoopTaskLocked() {
+    if (loopTask != null || mainTimer == null) {
+      return;
+    }
+    if (!abLoop.isEnabled() || !abLoop.isReady()) {
+      return;
+    }
+    loopTask =
+        new TimerTask() {
+          public void run() {
+            handleLoopTick();
+          }
+        };
+    try {
+      mainTimer.scheduleAtFixedRate(loopTask, LOOP_TICK_MS, LOOP_TICK_MS);
+    } catch (Exception e) {
+      loopTask = null;
+    }
+  }
+
+  private void stopLoopTaskLocked() {
+    if (loopTask != null) {
+      loopTask.cancel();
+      loopTask = null;
+    }
+  }
+
+  private void handleLoopTick() {
+    if (loopFiring) {
+      return;
+    }
+    if (!isPlaying()) {
+      return;
+    }
+    long now = getCurrentTime();
+    final long target = abLoop.consumeFireAt(now);
+    if (target < 0L) {
+      return;
+    }
+    loopFiring = true;
+    Thread t =
+        new Thread(
+            new Runnable() {
+              public void run() {
+                try {
+                  pause();
+                  seek(target);
+                  play();
+                } catch (Throwable e) {
+                } finally {
+                  loopFiring = false;
+                }
+              }
+            });
+    t.start();
   }
 
   void stopTimer() {
@@ -1368,6 +1556,7 @@ public class PlayerGUI implements PlayerListener {
       displayTask.cancel();
       displayTask = null;
     }
+    stopLoopTaskLocked();
   }
 
   private void stopScheduledTasksLocked() {

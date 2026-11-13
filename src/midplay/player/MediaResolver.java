@@ -104,6 +104,7 @@ public class MediaResolver implements MediaHttpClient.ResolveContext {
       throw new IOException("No track URL");
     }
 
+
     PendingPlayback pending = new PendingPlayback();
     boolean keepPending = false;
     try {

@@ -208,7 +208,12 @@
       "shuffle_off": "Playlist shuffle disabled"
     },
     "stop": "Stop",
-    "volume": "Volume"
+    "volume": "Volume",
+    "save": {
+      "ok": "Track saved to downloads",
+      "failed": "Failed to save to downloads",
+      "not_cached": "Current track is not cached yet"
+    }
   },
   "details": {
     "title": "Details",
@@ -374,7 +379,8 @@
     "wattpad_mature": "Show mature stories (Wattpad)",
     "wattpad_page_chars": "Characters per page",
     "wattpad_language": "Search language",
-    "wattpad_path": "Wattpad folder"
+    "wattpad_path": "Wattpad folder",
+    "ab_loop": "Enable A/B loop feature"
   },
   "status": {
     "error": "An error occurred",
@@ -871,5 +877,28 @@
     "new_dm_id": "Username or user ID",
     "new_dm_invalid": "Enter a username or a valid user ID",
     "new_dm_not_found": "User not found. Check the username or use a numeric ID."
+  },
+  "loop": {
+    "define": "Define A/B...",
+    "mark_a": "Mark A",
+    "mark_b": "Mark B",
+    "toggle": "Toggle A/B loop",
+    "clear": "Clear A/B loop",
+    "point_a": "Point A (MM:SS)",
+    "point_b": "Point B (MM:SS)",
+    "status": {
+      "marked_a": "Point A marked",
+      "marked_b": "Point B marked",
+      "on": "A/B loop enabled",
+      "off": "A/B loop disabled",
+      "defined": "A/B loop defined and enabled",
+      "cleared": "A/B loop cleared"
+    },
+    "error": {
+      "mark": "Could not mark point",
+      "not_ready": "Mark A and B before enabling",
+      "format": "Invalid format. Use MM:SS",
+      "span": "Point B must be at least 0.5s after A"
+    }
   }
 }

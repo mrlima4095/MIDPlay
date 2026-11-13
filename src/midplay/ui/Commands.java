@@ -145,6 +145,26 @@ public class Commands {
     return get("lyrics.command", Command.SCREEN, 6);
   }
 
+  public static Command playerLoopSetA() {
+    return get("loop.mark_a", Command.SCREEN, 13);
+  }
+
+  public static Command playerLoopSetB() {
+    return get("loop.mark_b", Command.SCREEN, 14);
+  }
+
+  public static Command playerLoopToggle() {
+    return get("loop.toggle", Command.SCREEN, 15);
+  }
+
+  public static Command playerLoopClear() {
+    return get("loop.clear", Command.SCREEN, 16);
+  }
+
+  public static Command playerLoopDefine() {
+    return get("loop.define", Command.SCREEN, 17);
+  }
+
   public static Command openUri() {
     return get("menu.open_uri", Command.SCREEN, 0);
   }
