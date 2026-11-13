@@ -918,6 +918,8 @@
     "user_empty": "Enter the user",
     "connected": "Connected to MIDPlay Web",
     "save_prompt": "Save these settings?",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "unsaved": "You have unsaved changes. Leave anyway?",
+    "error_ticker": "Error: {0}"
   }
 }

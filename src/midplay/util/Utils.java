@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Random;
 import java.util.Vector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.lcdui.Graphics;
@@ -26,6 +27,24 @@ public class Utils {
   }
 
   private static final String HEX_DIGITS = "0123456789ABCDEF";
+
+  /** UUID v4 simples, compativel com CLDC (java.util.UUID nao existe no J2ME). */
+  public static String randomUuid() {
+    Random random = new Random(System.currentTimeMillis() ^ (Runtime.getRuntime().freeMemory() * 31L));
+    StringBuffer out = new StringBuffer(36);
+    for (int i = 0; i < 36; i++) {
+      if (i == 8 || i == 13 || i == 18 || i == 23) {
+        out.append('-');
+      } else if (i == 14) {
+        out.append('4');
+      } else if (i == 19) {
+        out.append("89ab".charAt(random.nextInt(4)));
+      } else {
+        out.append("0123456789abcdef".charAt(random.nextInt(16)));
+      }
+    }
+    return out.toString();
+  }
 
   private static boolean isUrlSafeCharacter(char c) {
     return (c >= 'A' && c <= 'Z')

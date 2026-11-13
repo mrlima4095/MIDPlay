@@ -1,6 +1,7 @@
 package midplay.net;
 
 import cc.nnproject.json.JSON;
+import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,12 +11,18 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.SocketConnection;
 import javax.microedition.lcdui.Display;
 import midplay.MIDPlay;
+import midplay.model.Playlist;
 import midplay.model.Track;
 import midplay.model.Tracks;
 import midplay.player.PlayerGUI;
 import midplay.player.PlayerScreen;
 import midplay.store.Configuration;
+import midplay.store.DownloadManager;
+import midplay.store.FavoritesManager;
+import midplay.store.NotesManager;
 import midplay.store.SettingsManager;
+import midplay.store.TasksManager;
+import midplay.util.DateTime;
 import midplay.util.Utils;
 
 /**
@@ -35,6 +42,16 @@ public final class SocketClient {
   private static final int READ_TIMEOUT_MS = 180000;
   private static final long BACKOFF_MIN_MS = 2000L;
   private static final long BACKOFF_MAX_MS = 60000L;
+  private static final long STATE_INTERVAL_MS = 2000L;
+  private static final int MAX_PLAYLISTS = 40;
+  private static final int MAX_PLAYLIST_TRACKS = 80;
+  private static final int MAX_NOTES = 30;
+  private static final int MAX_TASKS = 60;
+  private static final int MAX_DOWNLOADS = 100;
+  private static final int MAX_TEXT = 1200;
+  // O relay le linhas de ate 128 KB; manter o payload bem abaixo evita derrubar
+  // a conexao quando o aparelho tem muitas notas/downloads com texto longo.
+  private static final int MAX_DATA_CHARS = 24000;
 
   public interface Listener {
     void onStateChanged(int state, String message);
@@ -52,18 +69,20 @@ public final class SocketClient {
   private volatile int state = STATE_OFFLINE;
   private volatile boolean wantConnected;
   private volatile long lastReadAt;
-  private volatile boolean playing;
+  private volatile boolean statePusherRunning;
 
   private String host;
   private int port;
   private String user;
   private String password;
+  private String deviceId;
   private String deviceName;
   private String lastError = "";
 
   private SocketConnection connection;
   private OutputStream output;
   private Thread worker;
+  private Thread stateThread;
 
   private Listener listener;
 
@@ -89,8 +108,12 @@ public final class SocketClient {
     return deviceName;
   }
 
+  public String getDeviceId() {
+    return deviceId;
+  }
+
   public synchronized void connect(
-      String host, int port, String user, String password, String deviceName) {
+      String host, int port, String user, String password, String deviceId, String deviceName) {
     if (wantConnected) {
       disconnect();
     }
@@ -98,7 +121,10 @@ public final class SocketClient {
     this.port = port;
     this.user = user;
     this.password = password;
-    this.deviceName = deviceName;
+    this.deviceId =
+        deviceId == null || deviceId.length() == 0 ? Utils.randomUuid() : deviceId;
+    this.deviceName =
+        deviceName == null || deviceName.length() == 0 ? this.deviceId : deviceName;
     this.lastError = "";
     this.wantConnected = true;
     setState(STATE_CONNECTING, "Conectando a " + host + ":" + port);
@@ -112,6 +138,7 @@ public final class SocketClient {
 
   public synchronized void disconnect() {
     wantConnected = false;
+    stopStatePusher();
     closeQuietly();
     Thread t = worker;
     worker = null;
@@ -130,6 +157,7 @@ public final class SocketClient {
       } catch (Throwable t) {
         lastError = t.toString();
       }
+      stopStatePusher();
       closeQuietly();
       if (!wantConnected) {
         break;
@@ -145,7 +173,8 @@ public final class SocketClient {
         backoff = BACKOFF_MAX_MS;
       }
     }
-    setState(STATE_OFFLINE, "Desconectado");
+    // Nao emitir outro STATE_OFFLINE aqui: auth_err ja publicou o erro real e
+    // disconnect() ja publicou "Desconectado". Reemitir apagaria o ticker de erro.
   }
 
   private void runSession() throws IOException {
@@ -163,11 +192,18 @@ public final class SocketClient {
     auth.put("t", "auth");
     auth.put("user", user);
     auth.put("pass", password);
+    // device_id e o identificador estavel; device/name sao o nome amigavel.
+    // O campo "device" continua sendo enviado para relays antigos.
+    auth.put("device_id", deviceId);
     auth.put("device", deviceName);
+    auth.put("name", deviceName);
     JSONObject banner = new JSONObject();
+    String platform = safeProperty("microedition.platform");
     banner.put("app", "MIDPlay");
+    banner.put("ver", MIDPlay.APP_VERSION);
     banner.put("version", MIDPlay.APP_VERSION);
-    banner.put("platform", safeProperty("microedition.platform"));
+    banner.put("model", platform);
+    banner.put("platform", platform);
     auth.put("banner", banner);
     send(auth);
 
@@ -199,9 +235,17 @@ public final class SocketClient {
   private boolean handle(JSONObject msg) {
     String t = msg.getString("t", "");
     if ("auth_ok".equals(t)) {
-      String dev = msg.getString("device", deviceName);
-      deviceName = dev;
-      setState(STATE_ONLINE, "Online como " + user + " (" + dev + ")");
+      String devId = msg.getString("device", deviceId);
+      String friendly = msg.getString("name", deviceName);
+      if (devId != null && devId.length() > 0) {
+        deviceId = devId;
+      }
+      if (friendly == null || friendly.length() == 0) {
+        friendly = deviceName != null && deviceName.length() > 0 ? deviceName : deviceId;
+      }
+      deviceName = friendly;
+      setState(STATE_ONLINE, "Online como " + user + " (" + deviceName + ")");
+      startStatePusher();
       sendState();
       return true;
     }
@@ -235,7 +279,7 @@ public final class SocketClient {
       if ("state".equals(what)) {
         sendState(id);
       } else {
-        sendAck(id, false, "unsupported: " + what);
+        sendRequestedData(id, what);
       }
       return true;
     }
@@ -267,34 +311,35 @@ public final class SocketClient {
             return;
           }
           if ("play".equals(action)) {
-            if (!playing) {
+            if (!gui.isPlaying()) {
               gui.toggle();
-              playing = true;
             }
           } else if ("pause".equals(action)) {
-            if (playing) {
+            if (gui.isPlaying()) {
               gui.toggle();
-              playing = false;
             }
           } else if ("toggle".equals(action)) {
             gui.toggle();
-            playing = !playing;
           } else if ("next".equals(action)) {
             gui.next();
           } else if ("prev".equals(action) || "previous".equals(action)) {
             gui.previous();
           } else if ("stop".equals(action)) {
             gui.stop();
-            playing = false;
           } else if ("volume_up".equals(action)) {
             gui.adjustVolume(true);
           } else if ("volume_down".equals(action)) {
             gui.adjustVolume(false);
-          } else if ("volume".equals(action)) {
+          } else if ("volume".equals(action) || "set_volume".equals(action)) {
             gui.setVolumeLevel(args.getInt("level", gui.getVolumeLevel()));
           } else if ("seek".equals(action)) {
-            ok = false;
-            error = "seek nao suportado neste device";
+            int positionMs = args.getInt("position", -1);
+            if (positionMs < 0) {
+              ok = false;
+              error = "posicao invalida";
+            } else {
+              gui.seek(((long) positionMs) * 1000L);
+            }
           } else if ("noop".equals(action)) {
             // keep-alive vindo do site
           } else {
@@ -336,26 +381,47 @@ public final class SocketClient {
 
   private JSONObject buildState() {
     JSONObject s = new JSONObject();
+    JSONObject trackJson = new JSONObject();
+    trackJson.put("title", "");
+    trackJson.put("artist", "");
+    trackJson.put("album", "");
+    trackJson.put("duration", 0L);
+    trackJson.put("url", "");
+    trackJson.put("thumb", "");
     s.put("online", true);
-    s.put("playing", playing);
+    s.put("playing", false);
     s.put("volume", 0);
-    s.put("position", 0);
-    s.put("duration", 0);
-    s.put("track", "");
-    s.put("artist", "");
+    s.put("position", 0L);
+    s.put("duration", 0L);
+    s.put("track", trackJson);
     try {
       PlayerScreen screen = MIDPlay.getPlayerScreen();
       PlayerGUI gui = screen != null ? screen.getPlayerGUI() : null;
       if (gui == null) {
         return s;
       }
+      s.put("playing", gui.isPlaying());
       s.put("volume", gui.getVolumeLevel());
+      long position = gui.getCurrentTime() / 1000L;
+      long duration = gui.getDuration() / 1000L;
+      if (position < 0) {
+        position = 0L;
+      }
       Track track = gui.getCurrentTrack();
       if (track != null) {
-        s.put("track", track.getDisplayTitle(""));
-        s.put("artist", track.getArtist() == null ? "" : track.getArtist());
-        s.put("duration", track.getDuration());
+        if (duration <= 0 && track.getDuration() > 0) {
+          duration = ((long) track.getDuration()) * 1000L;
+        }
+        trackJson.put("title", track.getName() == null ? "" : track.getName());
+        trackJson.put("artist", track.getArtist() == null ? "" : track.getArtist());
+        trackJson.put("album", "");
+        trackJson.put("duration", duration);
+        trackJson.put("url", track.getUrl() == null ? "" : track.getUrl());
+        trackJson.put(
+            "thumb", track.getImageUrl() == null ? "" : track.getImageUrl());
       }
+      s.put("position", position);
+      s.put("duration", duration > 0 ? duration : (track != null ? ((long) track.getDuration()) * 1000L : 0L));
       Tracks list = gui.getCurrentTracks();
       if (list != null) {
         s.put("queue_size", list.size());
@@ -363,6 +429,237 @@ public final class SocketClient {
     } catch (Throwable t) {
     }
     return s;
+  }
+
+  private void startStatePusher() {
+    synchronized (this) {
+      if (statePusherRunning && stateThread != null && stateThread.isAlive()) {
+        return;
+      }
+      statePusherRunning = true;
+      stateThread =
+          new Thread(
+              new Runnable() {
+                public void run() {
+                  try {
+                    while (wantConnected && statePusherRunning) {
+                      try {
+                        Thread.sleep(STATE_INTERVAL_MS);
+                      } catch (InterruptedException e) {
+                        return;
+                      }
+                      if (!wantConnected || !statePusherRunning || state != STATE_ONLINE) {
+                        return;
+                      }
+                      sendState();
+                    }
+                  } finally {
+                    synchronized (SocketClient.this) {
+                      if (stateThread == Thread.currentThread()) {
+                        statePusherRunning = false;
+                        stateThread = null;
+                      }
+                    }
+                  }
+                }
+              });
+      stateThread.start();
+    }
+  }
+
+  private synchronized void stopStatePusher() {
+    statePusherRunning = false;
+    Thread t = stateThread;
+    stateThread = null;
+    if (t != null) {
+      t.interrupt();
+    }
+  }
+
+  private void sendRequestedData(final int id, final String what) {
+    if (!("playlists".equals(what)
+        || "notes".equals(what)
+        || "tasks".equals(what)
+        || "downloads".equals(what))) {
+      sendAck(id, false, "unsupported: " + what);
+      return;
+    }
+    Thread t =
+        new Thread(
+            new Runnable() {
+              public void run() {
+                try {
+                  JSONArray data;
+                  if ("playlists".equals(what)) {
+                    data = buildPlaylists();
+                  } else if ("notes".equals(what)) {
+                    data = buildNotes();
+                  } else if ("tasks".equals(what)) {
+                    data = buildTasks();
+                  } else {
+                    data = buildDownloads();
+                  }
+                  sendData(id, what, data);
+                } catch (Throwable t) {
+                  lastError = t.toString();
+                  sendAck(id, false, t.toString());
+                }
+              }
+            });
+    t.start();
+  }
+
+  private void sendData(int id, String what, JSONArray data) {
+    JSONObject msg = new JSONObject();
+    msg.put("t", "data");
+    msg.put("id", id);
+    msg.put("what", what);
+    msg.put("data", data);
+    try {
+      send(msg);
+    } catch (IOException e) {
+      lastError = e.toString();
+    }
+  }
+
+  private JSONArray buildPlaylists() {
+    JSONArray out = new JSONArray();
+    FavoritesManager favorites = FavoritesManager.getInstance();
+    Playlist[] playlists = favorites.getPlaylists().getPlaylists();
+    if (playlists == null) {
+      return out;
+    }
+    int playlistCount = Math.min(playlists.length, MAX_PLAYLISTS);
+    int trackBudget = MAX_PLAYLIST_TRACKS;
+    int charBudget = MAX_DATA_CHARS;
+    for (int i = 0; i < playlistCount; i++) {
+      Playlist playlist = playlists[i];
+      JSONObject item = new JSONObject();
+      item.put("name", truncate(playlist.getName()));
+      item.put("artist", truncate(playlist.getArtist()));
+      item.put("image", truncate(playlist.getImageUrl()));
+      JSONArray tracks = new JSONArray();
+      if (playlist.isCustom() && trackBudget > 0) {
+        try {
+          Tracks list = favorites.getCustomPlaylistTracks(playlist);
+          Track[] arr = list != null ? list.getTracks() : null;
+          if (arr != null) {
+            int count = Math.min(arr.length, trackBudget);
+            for (int j = 0; j < count; j++) {
+              tracks.add(trackJson(arr[j]));
+            }
+            trackBudget -= count;
+          }
+        } catch (Throwable t) {
+        }
+      }
+      item.put("tracks", tracks);
+      int size = item.toString().length();
+      if (charBudget - size < 0 && out.size() > 0) {
+        break;
+      }
+      charBudget -= size;
+      out.add(item);
+    }
+    return out;
+  }
+
+  private JSONArray buildNotes() {
+    JSONArray out = new JSONArray();
+    NotesManager.Note[] notes = NotesManager.getInstance().getNotes();
+    int count = notes == null ? 0 : Math.min(notes.length, MAX_NOTES);
+    int charBudget = MAX_DATA_CHARS;
+    for (int i = 0; i < count; i++) {
+      NotesManager.Note note = notes[i];
+      JSONObject item = new JSONObject();
+      String title = note.title;
+      if (title == null || title.length() == 0) {
+        title = firstLine(note.text);
+      }
+      item.put("title", truncate(title));
+      item.put("text", truncate(note.text));
+      item.put("pinned", note.pinned);
+      int size = item.toString().length();
+      if (charBudget - size < 0 && out.size() > 0) {
+        break;
+      }
+      charBudget -= size;
+      out.add(item);
+    }
+    return out;
+  }
+
+  private JSONArray buildTasks() {
+    JSONArray out = new JSONArray();
+    TasksManager.Task[] tasks = TasksManager.getInstance().getTasks();
+    int count = tasks == null ? 0 : Math.min(tasks.length, MAX_TASKS);
+    int charBudget = MAX_DATA_CHARS;
+    for (int i = 0; i < count; i++) {
+      TasksManager.Task task = tasks[i];
+      JSONObject item = new JSONObject();
+      item.put("title", truncate(task.title));
+      item.put("description", truncate(task.description));
+      item.put("done", task.done);
+      item.put("due", task.due == DateTime.NONE ? 0L : task.due);
+      item.put("priority", task.priority);
+      item.put("pinned", task.pinned);
+      int size = item.toString().length();
+      if (charBudget - size < 0 && out.size() > 0) {
+        break;
+      }
+      charBudget -= size;
+      out.add(item);
+    }
+    return out;
+  }
+
+  private JSONArray buildDownloads() {
+    JSONArray out = new JSONArray();
+    Track[] tracks = DownloadManager.getInstance().refreshDownloadedTracks();
+    int count = tracks == null ? 0 : Math.min(tracks.length, MAX_DOWNLOADS);
+    int charBudget = MAX_DATA_CHARS;
+    for (int i = 0; i < count; i++) {
+      Track track = tracks[i];
+      JSONObject item = new JSONObject();
+      item.put("name", truncate(track.getName()));
+      item.put("artist", truncate(track.getArtist()));
+      item.put("duration", ((long) track.getDuration()) * 1000L);
+      item.put("path", truncate(track.getUrl()));
+      item.put("thumb", truncate(track.getImageUrl()));
+      int size = item.toString().length();
+      if (charBudget - size < 0 && out.size() > 0) {
+        break;
+      }
+      charBudget -= size;
+      out.add(item);
+    }
+    return out;
+  }
+
+  private JSONObject trackJson(Track track) {
+    JSONObject item = new JSONObject();
+    item.put("title", truncate(track.getName()));
+    item.put("artist", truncate(track.getArtist()));
+    item.put("duration", ((long) track.getDuration()) * 1000L);
+    item.put("url", truncate(track.getUrl()));
+    item.put("thumb", truncate(track.getImageUrl()));
+    return item;
+  }
+
+  private static String truncate(String value) {
+    if (value == null) {
+      return "";
+    }
+    return value.length() <= MAX_TEXT ? value : value.substring(0, MAX_TEXT);
+  }
+
+  private static String firstLine(String text) {
+    if (text == null) {
+      return "";
+    }
+    int end = text.indexOf('\n');
+    String line = end >= 0 ? text.substring(0, end) : text;
+    return truncate(line.trim());
   }
 
   private void sendAck(int id, boolean ok, String error) {

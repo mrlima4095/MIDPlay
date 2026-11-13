@@ -907,7 +907,7 @@
     "port": "Porta",
     "user": "Usuario",
     "password": "Senha",
-    "device": "Nome do aparelho",
+    "device": "Nome do dispositivo",
     "connect": "Conectar",
     "disconnect": "Desconectar",
     "forget": "Esquecer credenciais",
@@ -918,6 +918,8 @@
     "user_empty": "Informe o usuario",
     "connected": "Conectado ao MIDPlay Web",
     "save_prompt": "Salvar estas configuracoes?",
-    "saved": "Configuracoes salvas"
+    "saved": "Configuracoes salvas",
+    "unsaved": "Voce tem alteracoes nao salvas. Sair mesmo assim?",
+    "error_ticker": "Erro: {0}"
   }
 }

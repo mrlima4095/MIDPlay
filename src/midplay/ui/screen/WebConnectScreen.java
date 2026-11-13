@@ -1,11 +1,12 @@
 package midplay.ui.screen;
 
-import javax.microedition.lcdui.AlertType;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.TextField;
+import javax.microedition.lcdui.Ticker;
 import javax.microedition.rms.RecordStoreException;
-import midplay.MIDPlay;
 import midplay.net.SocketClient;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
@@ -13,6 +14,7 @@ import midplay.ui.BaseForm;
 import midplay.ui.Commands;
 import midplay.ui.Navigator;
 import midplay.util.Lang;
+import midplay.util.Utils;
 
 public final class WebConnectScreen extends BaseForm implements SocketClient.Listener {
   private final TextField hostField;
@@ -23,12 +25,11 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
   private final Command connectCmd;
   private final Command disconnectCmd;
   private final Command forgetCmd;
+  private final Command saveCmd;
   private boolean awaitingConnection;
-  private String pendingHost;
-  private int pendingPort;
-  private String pendingUser;
-  private String pendingPassword;
-  private String pendingDevice;
+  private boolean initialized;
+  private String deviceId;
+  private Timer tickerTimer;
 
   public WebConnectScreen(Navigator navigator) {
     super(Lang.tr("web.title"), navigator);
@@ -47,31 +48,49 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
     connectCmd = new Command(Lang.tr("web.connect"), Command.OK, 1);
     disconnectCmd = new Command(Lang.tr("web.disconnect"), Command.SCREEN, 1);
     forgetCmd = new Command(Lang.tr("web.forget"), Command.SCREEN, 2);
+    saveCmd = Commands.formSave();
+    addCommand(saveCmd);
     addCommand(connectCmd);
-    addCommand(Commands.back());
   }
 
   protected void showNotify() {
-    SettingsManager sm = SettingsManager.getInstance();
-    hostField.setString(sm.getRelayHost());
-    portField.setString(String.valueOf(sm.getRelayPort()));
-    userField.setString(sm.getRelayUser());
-    passField.setString(sm.getRelayPassword());
-    String deviceName = sm.getRelayDevice();
-    if (deviceName.length() == 0) {
-      deviceName = SocketClient.getInstance().getDeviceName();
+    if (!initialized) {
+      loadFields();
+      initialized = true;
     }
-    if (deviceName != null && deviceName.length() > 0) {
-      deviceField.setString(deviceName);
-    } else {
-      deviceField.setString("MIDPlay-" + System.currentTimeMillis() % 10000);
-    }
-    updateCommands();
     SocketClient.getInstance().setListener(this);
+    updateCommands();
+  }
+
+  private void loadFields() {
+    SettingsManager settings = SettingsManager.getInstance();
+    hostField.setString(settings.getRelayHost());
+    portField.setString(String.valueOf(settings.getRelayPort()));
+    userField.setString(settings.getRelayUser());
+    passField.setString(settings.getRelayPassword());
+    deviceId = settings.getRelayDeviceId();
+    if (deviceId == null || deviceId.length() == 0) {
+      deviceId = Utils.randomUuid();
+    }
+    String device = settings.getRelayDevice();
+    if (device == null || device.length() == 0) {
+      device = defaultDeviceName();
+    }
+    deviceField.setString(device);
+  }
+
+  private String defaultDeviceName() {
+    String suffix =
+        deviceId != null && deviceId.length() >= 4
+            ? deviceId.substring(0, 4)
+            : String.valueOf(System.currentTimeMillis() % 10000);
+    return "MIDPlay-" + suffix;
   }
 
   protected void handleCommand(Command c, Displayable d) {
-    if (c == connectCmd) {
+    if (c == saveCmd) {
+      doSave();
+    } else if (c == connectCmd) {
       doConnect();
     } else if (c == disconnectCmd) {
       doDisconnect();
@@ -80,94 +99,131 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
     }
   }
 
+  protected boolean onBackPressed() {
+    if (!isDirty()) {
+      return false;
+    }
+    navigator.showConfirmationAlert(
+        Lang.tr("web.unsaved"),
+        new Runnable() {
+          public void run() {
+            navigator.back();
+          }
+        });
+    return true;
+  }
+
+  private void doSave() {
+    if (saveFields()) {
+      showTicker(Lang.tr("web.saved"));
+    }
+  }
+
+  private boolean saveFields() {
+    SettingsManager settings = SettingsManager.getInstance();
+    String host = hostField.getString().trim();
+    int port = parsePort(portField.getString());
+    String user = userField.getString().trim();
+    String password = passField.getString();
+    String device = deviceField.getString().trim();
+    if (device.length() == 0) {
+      device = defaultDeviceName();
+      deviceField.setString(device);
+    }
+    if (deviceId == null || deviceId.length() == 0) {
+      deviceId = Utils.randomUuid();
+    }
+    try {
+      settings.saveRelayHost(host);
+      settings.saveRelayPort(port);
+      settings.saveRelayUser(user);
+      settings.saveRelayPassword(password);
+      settings.saveRelayDevice(device);
+      settings.saveRelayDeviceId(deviceId);
+      return true;
+    } catch (RecordStoreException e) {
+      showTicker(Lang.tr("settings.error.save_failed"));
+      return false;
+    }
+  }
+
   private void doConnect() {
     String host = hostField.getString().trim();
-    String portStr = portField.getString().trim();
     String user = userField.getString().trim();
-    String pass = passField.getString().trim();
-    String device = deviceField.getString().trim();
     if (host.length() == 0) {
-      navigator.showAlert(Lang.tr("web.host_empty"), AlertType.ERROR);
+      showTicker(Lang.tr("web.host_empty"));
       return;
     }
     if (user.length() == 0) {
-      navigator.showAlert(Lang.tr("web.user_empty"), AlertType.ERROR);
+      showTicker(Lang.tr("web.user_empty"));
       return;
     }
-    int port = Configuration.DEFAULT_RELAY_PORT;
-    try {
-      port = Integer.parseInt(portStr);
-    } catch (NumberFormatException e) {
-      port = Configuration.DEFAULT_RELAY_PORT;
+    // Conectar salva tudo automaticamente, sem sair da tela.
+    if (!saveFields()) {
+      return;
     }
-    if (port <= 0 || port > 65535) {
-      port = Configuration.DEFAULT_RELAY_PORT;
-    }
-    if (device.length() == 0) {
-      device = "MIDPlay-" + System.currentTimeMillis() % 10000;
-    }
-    pendingHost = host;
-    pendingPort = port;
-    pendingUser = user;
-    pendingPassword = pass;
-    pendingDevice = device;
     awaitingConnection = true;
-    navigator.back();
-    SocketClient.getInstance().connect(host, port, user, pass, device);
-  }
-
-  private void savePending() {
-    SettingsManager sm = SettingsManager.getInstance();
-    try {
-      sm.saveRelayHost(pendingHost);
-      sm.saveRelayPort(pendingPort);
-      sm.saveRelayUser(pendingUser);
-      sm.saveRelayPassword(pendingPassword);
-      sm.saveRelayDevice(pendingDevice);
-    } catch (RecordStoreException e) {
-      navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
-      return;
-    }
-    navigator.showAlert(Lang.tr("web.saved"), AlertType.CONFIRMATION);
-  }
-
-  private void showConnectedAlert() {
-    String detail = pendingHost + ":" + pendingPort + "\n" + pendingUser + " (" + pendingDevice + ")";
-    navigator.showActionAlert(
-        Lang.tr("web.connected") + "\n" + detail + "\n" + Lang.tr("web.save_prompt"),
-        Lang.tr("action.save"),
-        new Runnable() {
-          public void run() {
-            savePending();
-          }
-        });
+    showTicker(Lang.tr("web.connecting"));
+    SocketClient.getInstance()
+        .connect(
+            host,
+            parsePort(portField.getString()),
+            user,
+            passField.getString(),
+            deviceId,
+            deviceField.getString().trim());
   }
 
   private void doDisconnect() {
     SocketClient.getInstance().disconnect();
-    navigator.showAlert(Lang.tr("web.disconnected"), AlertType.CONFIRMATION);
+    showTicker(Lang.tr("web.disconnected"));
     updateCommands();
   }
 
   private void doForget() {
-    SettingsManager sm = SettingsManager.getInstance();
+    SettingsManager settings = SettingsManager.getInstance();
     try {
-      sm.saveRelayHost(Configuration.DEFAULT_RELAY_HOST);
-      sm.saveRelayPort(Configuration.DEFAULT_RELAY_PORT);
-      sm.saveRelayUser("");
-      sm.saveRelayPassword("");
-      sm.saveRelayDevice("");
+      settings.saveRelayHost(Configuration.DEFAULT_RELAY_HOST);
+      settings.saveRelayPort(Configuration.DEFAULT_RELAY_PORT);
+      settings.saveRelayUser("");
+      settings.saveRelayPassword("");
+      settings.saveRelayDevice("");
+      settings.saveRelayDeviceId("");
     } catch (RecordStoreException e) {
-      navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
+      showTicker(Lang.tr("settings.error.save_failed"));
       return;
     }
     SocketClient.getInstance().disconnect();
-    hostField.setString(sm.getRelayHost());
-    portField.setString(String.valueOf(sm.getRelayPort()));
+    deviceId = Utils.randomUuid();
+    hostField.setString(settings.getRelayHost());
+    portField.setString(String.valueOf(settings.getRelayPort()));
     userField.setString("");
     passField.setString("");
-    navigator.showAlert(Lang.tr("web.forgotten"), AlertType.CONFIRMATION);
+    deviceField.setString(defaultDeviceName());
+    showTicker(Lang.tr("web.forgotten"));
     updateCommands();
+  }
+
+  private int parsePort(String value) {
+    try {
+      int port = Integer.parseInt(value.trim());
+      return port > 0 && port <= 65535 ? port : Configuration.DEFAULT_RELAY_PORT;
+    } catch (Exception e) {
+      return Configuration.DEFAULT_RELAY_PORT;
+    }
+  }
+
+  private boolean isDirty() {
+    SettingsManager settings = SettingsManager.getInstance();
+    String savedDevice = settings.getRelayDevice();
+    if (savedDevice == null || savedDevice.length() == 0) {
+      savedDevice = defaultDeviceName();
+    }
+    return !hostField.getString().trim().equals(settings.getRelayHost())
+        || parsePort(portField.getString()) != settings.getRelayPort()
+        || !userField.getString().trim().equals(settings.getRelayUser())
+        || !passField.getString().equals(settings.getRelayPassword())
+        || !deviceField.getString().trim().equals(savedDevice);
   }
 
   private void updateCommands() {
@@ -183,17 +239,46 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
     }
   }
 
+  private void showTicker(String text) {
+    if (text == null || text.length() == 0) {
+      return;
+    }
+    setTicker(new Ticker(text));
+    if (tickerTimer != null) {
+      tickerTimer.cancel();
+    }
+    tickerTimer = new Timer();
+    tickerTimer.schedule(
+        new TimerTask() {
+          public void run() {
+            navigator.callSerially(
+                new Runnable() {
+                  public void run() {
+                    setTicker(null);
+                  }
+                });
+          }
+        },
+        5000L);
+  }
+
   public void onStateChanged(int state, String message) {
     if (state == SocketClient.STATE_ONLINE) {
       if (awaitingConnection) {
         awaitingConnection = false;
-        showConnectedAlert();
+        showTicker(Lang.tr("web.connected"));
+      } else {
+        showTicker(message);
       }
     } else if (state == SocketClient.STATE_OFFLINE) {
       if (awaitingConnection) {
         awaitingConnection = false;
-        navigator.showAlert(message, AlertType.ERROR);
+        showTicker(Lang.tr("web.error_ticker", message == null ? "" : message));
+      } else if (message != null && message.length() > 0) {
+        showTicker(message);
       }
+    } else if (state == SocketClient.STATE_CONNECTING) {
+      showTicker(message);
     }
     updateCommands();
   }

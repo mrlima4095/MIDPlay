@@ -89,7 +89,7 @@ public class Lang {
     "loop.mark_b", "loop.toggle", "loop.clear", "loop.point_a", "loop.point_b", "loop.status.marked_a", "loop.status.marked_b", "loop.status.on", "loop.status.off", "loop.status.defined",
     "loop.status.cleared", "loop.error.mark", "loop.error.not_ready", "loop.error.format", "loop.error.span", "web.title", "web.host", "web.port", "web.user", "web.password",
     "web.device", "web.connect", "web.disconnect", "web.forget", "web.connecting", "web.disconnected", "web.forgotten", "web.host_empty", "web.user_empty", "web.connected",
-    "web.save_prompt", "web.saved"
+    "web.save_prompt", "web.saved", "web.unsaved", "web.error_ticker"
   };
 
   private static class EN {
@@ -252,7 +252,7 @@ public class Lang {
       "MIDPlay Web", "Server", "Port", "User", "Password",
       "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
       "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
-      "Save these settings?", "Settings saved"
+      "Save these settings?", "Settings saved", "You have unsaved changes. Leave anyway?", "Error: {0}"
     };
   }
 
@@ -416,7 +416,7 @@ public class Lang {
       "MIDPlay Web", "Server", "Port", "User", "Password",
       "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
       "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
-      "Save these settings?", "Settings saved"
+      "Save these settings?", "Settings saved", "You have unsaved changes. Leave anyway?", "Error: {0}"
     };
   }
 
@@ -580,7 +580,7 @@ public class Lang {
       "MIDPlay Web", "Server", "Port", "User", "Password",
       "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
       "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
-      "Save these settings?", "Settings saved"
+      "Save these settings?", "Settings saved", "You have unsaved changes. Leave anyway?", "Error: {0}"
     };
   }
 
@@ -742,9 +742,9 @@ public class Lang {
       "Ponto A marcado", "Ponto B marcado", "Loop A/B ativado", "Loop A/B desativado", "Loop A/B definido e ativado",
       "Loop A/B removido", "Nao foi possivel marcar o ponto", "Marque A e B antes de ativar", "Formato invalido. Use MM:SS", "O ponto B precisa estar pelo menos 0,5s depois de A",
       "MIDPlay Web", "Servidor", "Porta", "Usuario", "Senha",
-      "Nome do aparelho", "Conectar", "Desconectar", "Esquecer credenciais", "Conectando...",
+      "Nome do dispositivo", "Conectar", "Desconectar", "Esquecer credenciais", "Conectando...",
       "Desconectado", "Credenciais esquecidas", "Informe o servidor", "Informe o usuario", "Conectado ao MIDPlay Web",
-      "Salvar estas configuracoes?", "Configuracoes salvas"
+      "Salvar estas configuracoes?", "Configuracoes salvas", "Voce tem alteracoes nao salvas. Sair mesmo assim?", "Erro: {0}"
     };
   }
 
@@ -908,7 +908,7 @@ public class Lang {
       "MIDPlay Web", "Server", "Port", "User", "Password",
       "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
       "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
-      "Save these settings?", "Settings saved"
+      "Save these settings?", "Settings saved", "You have unsaved changes. Leave anyway?", "Error: {0}"
     };
   }
 
@@ -1072,7 +1072,7 @@ public class Lang {
       "MIDPlay Web", "Server", "Port", "User", "Password",
       "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
       "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
-      "Save these settings?", "Settings saved"
+      "Save these settings?", "Settings saved", "You have unsaved changes. Leave anyway?", "Error: {0}"
     };
   }
 
