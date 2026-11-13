@@ -87,8 +87,9 @@ public class Lang {
     "storage.group_reddit", "storage.group_other", "storage.rms", "discord.import_token_title", "discord.import_token_prompt", "discord.import_from_files", "discord.import_from_notes", "discord.import_token_note", "discord.import_token_empty", "discord.import_token_done",
     "discord.no_notes", "discord.notification_title", "discord.open_in_discord", "discord.notification_close", "discord.new_dm", "discord.new_dm_id", "discord.new_dm_invalid", "discord.new_dm_not_found", "loop.define", "loop.mark_a",
     "loop.mark_b", "loop.toggle", "loop.clear", "loop.point_a", "loop.point_b", "loop.status.marked_a", "loop.status.marked_b", "loop.status.on", "loop.status.off", "loop.status.defined",
-    "loop.status.cleared", "loop.error.mark", "loop.error.not_ready", "loop.error.format", "loop.error.span",
-    "web.title", "web.host", "web.port", "web.user", "web.password", "web.device", "web.connect", "web.disconnect", "web.forget", "web.connecting", "web.disconnected", "web.forgotten", "web.host_empty", "web.user_empty", "web.connected", "web.save_prompt", "web.saved"
+    "loop.status.cleared", "loop.error.mark", "loop.error.not_ready", "loop.error.format", "loop.error.span", "web.title", "web.host", "web.port", "web.user", "web.password",
+    "web.device", "web.connect", "web.disconnect", "web.forget", "web.connecting", "web.disconnected", "web.forgotten", "web.host_empty", "web.user_empty", "web.connected",
+    "web.save_prompt", "web.saved"
   };
 
   private static class EN {
@@ -248,8 +249,10 @@ public class Lang {
       "Mark B", "Toggle A/B loop", "Clear A/B loop", "Point A (MM:SS)", "Point B (MM:SS)",
       "Point A marked", "Point B marked", "A/B loop enabled", "A/B loop disabled", "A/B loop defined and enabled",
       "A/B loop cleared", "Could not mark point", "Mark A and B before enabling", "Invalid format. Use MM:SS", "Point B must be at least 0.5s after A",
-      "MIDPlay Web", "Server", "Port", "User", "Password", "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...", "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user",
-      "Connected to MIDPlay Web", "Save these settings?", "Settings saved"
+      "MIDPlay Web", "Server", "Port", "User", "Password",
+      "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
+      "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
+      "Save these settings?", "Settings saved"
     };
   }
 
@@ -410,8 +413,10 @@ public class Lang {
       "Mark B", "Toggle A/B loop", "Clear A/B loop", "Point A (MM:SS)", "Point B (MM:SS)",
       "Point A marked", "Point B marked", "A/B loop enabled", "A/B loop disabled", "A/B loop defined and enabled",
       "A/B loop cleared", "Could not mark point", "Mark A and B before enabling", "Invalid format. Use MM:SS", "Point B must be at least 0.5s after A",
-      "MIDPlay Web", "Server", "Port", "User", "Password", "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...", "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user",
-      "Connected to MIDPlay Web", "Save these settings?", "Settings saved"
+      "MIDPlay Web", "Server", "Port", "User", "Password",
+      "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
+      "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
+      "Save these settings?", "Settings saved"
     };
   }
 
@@ -572,8 +577,10 @@ public class Lang {
       "Mark B", "Toggle A/B loop", "Clear A/B loop", "Point A (MM:SS)", "Point B (MM:SS)",
       "Point A marked", "Point B marked", "A/B loop enabled", "A/B loop disabled", "A/B loop defined and enabled",
       "A/B loop cleared", "Could not mark point", "Mark A and B before enabling", "Invalid format. Use MM:SS", "Point B must be at least 0.5s after A",
-      "MIDPlay Web", "Server", "Port", "User", "Password", "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...", "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user",
-      "Connected to MIDPlay Web", "Save these settings?", "Settings saved"
+      "MIDPlay Web", "Server", "Port", "User", "Password",
+      "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
+      "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
+      "Save these settings?", "Settings saved"
     };
   }
 
@@ -734,8 +741,10 @@ public class Lang {
       "Marcar B", "Ativar/Desativar loop", "Limpar loop A/B", "Ponto A (MM:SS)", "Ponto B (MM:SS)",
       "Ponto A marcado", "Ponto B marcado", "Loop A/B ativado", "Loop A/B desativado", "Loop A/B definido e ativado",
       "Loop A/B removido", "Nao foi possivel marcar o ponto", "Marque A e B antes de ativar", "Formato invalido. Use MM:SS", "O ponto B precisa estar pelo menos 0,5s depois de A",
-      "MIDPlay Web", "Servidor", "Porta", "Usuario", "Senha", "Nome do aparelho", "Conectar", "Desconectar", "Esquecer credenciais", "Conectando...", "Desconectado", "Credenciais esquecidas", "Informe o servidor", "Informe o usuario",
-      "Conectado ao MIDPlay Web", "Salvar estas configuracoes?", "Configuracoes salvas"
+      "MIDPlay Web", "Servidor", "Porta", "Usuario", "Senha",
+      "Nome do aparelho", "Conectar", "Desconectar", "Esquecer credenciais", "Conectando...",
+      "Desconectado", "Credenciais esquecidas", "Informe o servidor", "Informe o usuario", "Conectado ao MIDPlay Web",
+      "Salvar estas configuracoes?", "Configuracoes salvas"
     };
   }
 
@@ -896,8 +905,10 @@ public class Lang {
       "Mark B", "Toggle A/B loop", "Clear A/B loop", "Point A (MM:SS)", "Point B (MM:SS)",
       "Point A marked", "Point B marked", "A/B loop enabled", "A/B loop disabled", "A/B loop defined and enabled",
       "A/B loop cleared", "Could not mark point", "Mark A and B before enabling", "Invalid format. Use MM:SS", "Point B must be at least 0.5s after A",
-      "MIDPlay Web", "Server", "Port", "User", "Password", "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...", "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user",
-      "Connected to MIDPlay Web", "Save these settings?", "Settings saved"
+      "MIDPlay Web", "Server", "Port", "User", "Password",
+      "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
+      "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
+      "Save these settings?", "Settings saved"
     };
   }
 
@@ -1058,8 +1069,10 @@ public class Lang {
       "Mark B", "Toggle A/B loop", "Clear A/B loop", "Point A (MM:SS)", "Point B (MM:SS)",
       "Point A marked", "Point B marked", "A/B loop enabled", "A/B loop disabled", "A/B loop defined and enabled",
       "A/B loop cleared", "Could not mark point", "Mark A and B before enabling", "Invalid format. Use MM:SS", "Point B must be at least 0.5s after A",
-      "MIDPlay Web", "Server", "Port", "User", "Password", "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...", "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user",
-      "Connected to MIDPlay Web", "Save these settings?", "Settings saved"
+      "MIDPlay Web", "Server", "Port", "User", "Password",
+      "Device name", "Connect", "Disconnect", "Forget credentials", "Connecting...",
+      "Disconnected", "Credentials forgotten", "Enter the server", "Enter the user", "Connected to MIDPlay Web",
+      "Save these settings?", "Settings saved"
     };
   }
 

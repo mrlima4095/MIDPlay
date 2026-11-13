@@ -23,6 +23,12 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
   private final Command connectCmd;
   private final Command disconnectCmd;
   private final Command forgetCmd;
+  private boolean awaitingConnection;
+  private String pendingHost;
+  private int pendingPort;
+  private String pendingUser;
+  private String pendingPassword;
+  private String pendingDevice;
 
   public WebConnectScreen(Navigator navigator) {
     super(Lang.tr("web.title"), navigator);
@@ -51,7 +57,10 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
     portField.setString(String.valueOf(sm.getRelayPort()));
     userField.setString(sm.getRelayUser());
     passField.setString(sm.getRelayPassword());
-    String deviceName = SocketClient.getInstance().getDeviceName();
+    String deviceName = sm.getRelayDevice();
+    if (deviceName.length() == 0) {
+      deviceName = SocketClient.getInstance().getDeviceName();
+    }
     if (deviceName != null && deviceName.length() > 0) {
       deviceField.setString(deviceName);
     } else {
@@ -97,18 +106,41 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
     if (device.length() == 0) {
       device = "MIDPlay-" + System.currentTimeMillis() % 10000;
     }
+    pendingHost = host;
+    pendingPort = port;
+    pendingUser = user;
+    pendingPassword = pass;
+    pendingDevice = device;
+    awaitingConnection = true;
+    navigator.back();
+    SocketClient.getInstance().connect(host, port, user, pass, device);
+  }
+
+  private void savePending() {
     SettingsManager sm = SettingsManager.getInstance();
     try {
-      sm.saveRelayHost(host);
-      sm.saveRelayPort(port);
-      sm.saveRelayUser(user);
-      sm.saveRelayPassword(pass);
+      sm.saveRelayHost(pendingHost);
+      sm.saveRelayPort(pendingPort);
+      sm.saveRelayUser(pendingUser);
+      sm.saveRelayPassword(pendingPassword);
+      sm.saveRelayDevice(pendingDevice);
     } catch (RecordStoreException e) {
       navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
       return;
     }
-    navigator.showAlert(Lang.tr("web.connecting"), AlertType.INFO);
-    SocketClient.getInstance().connect(host, port, user, pass, device);
+    navigator.showAlert(Lang.tr("web.saved"), AlertType.CONFIRMATION);
+  }
+
+  private void showConnectedAlert() {
+    String detail = pendingHost + ":" + pendingPort + "\n" + pendingUser + " (" + pendingDevice + ")";
+    navigator.showActionAlert(
+        Lang.tr("web.connected") + "\n" + detail + "\n" + Lang.tr("web.save_prompt"),
+        Lang.tr("action.save"),
+        new Runnable() {
+          public void run() {
+            savePending();
+          }
+        });
   }
 
   private void doDisconnect() {
@@ -124,6 +156,7 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
       sm.saveRelayPort(Configuration.DEFAULT_RELAY_PORT);
       sm.saveRelayUser("");
       sm.saveRelayPassword("");
+      sm.saveRelayDevice("");
     } catch (RecordStoreException e) {
       navigator.showAlert(Lang.tr("settings.error.save_failed"), AlertType.ERROR);
       return;
@@ -151,7 +184,17 @@ public final class WebConnectScreen extends BaseForm implements SocketClient.Lis
   }
 
   public void onStateChanged(int state, String message) {
-    navigator.showAlert(message, state == SocketClient.STATE_ONLINE ? AlertType.CONFIRMATION : (state == SocketClient.STATE_CONNECTING ? AlertType.INFO : AlertType.ERROR));
+    if (state == SocketClient.STATE_ONLINE) {
+      if (awaitingConnection) {
+        awaitingConnection = false;
+        showConnectedAlert();
+      }
+    } else if (state == SocketClient.STATE_OFFLINE) {
+      if (awaitingConnection) {
+        awaitingConnection = false;
+        navigator.showAlert(message, AlertType.ERROR);
+      }
+    }
     updateCommands();
   }
 }

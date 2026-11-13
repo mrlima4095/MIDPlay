@@ -293,6 +293,31 @@ public class Navigator {
     forward(a);
   }
 
+  /**
+   * Shows an alert with a single action command (for example Save) plus a cancel command. The
+   * action runs after the alert closes, so it can safely display another alert.
+   */
+  public void showActionAlert(String message, String actionLabel, final Runnable onAction) {
+    if (message == null || onAction == null) {
+      return;
+    }
+    Alert a = new Alert(null, message, null, AlertType.CONFIRMATION);
+    final Command action = new Command(actionLabel, Command.OK, 1);
+    a.addCommand(action);
+    a.addCommand(Commands.cancel());
+    a.setTimeout(Alert.FOREVER);
+    a.setCommandListener(
+        new CommandListener() {
+          public void commandAction(Command c, Displayable d) {
+            dismissAlert();
+            if (c == action) {
+              onAction.run();
+            }
+          }
+        });
+    forward(a);
+  }
+
   public void showLoadingAlert(String s) {
     showLoadingAlert(s, null);
   }

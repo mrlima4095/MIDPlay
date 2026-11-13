@@ -54,6 +54,7 @@ public class SettingsManager {
   private static int currentRelayPort;
   private static String currentRelayUser;
   private static String currentRelayPassword;
+  private static String currentRelayDevice;
 
   public static SettingsManager getInstance() {
     if (instance == null) {
@@ -193,6 +194,7 @@ public class SettingsManager {
     currentRelayPort = settings.getInt("relayPort", Configuration.DEFAULT_RELAY_PORT);
     currentRelayUser = settings.getString("relayUser", "");
     currentRelayPassword = settings.getString("relayPassword", "");
+    currentRelayDevice = settings.getString("relayDevice", "");
   }
 
   private JSONObject getSettingsJSON() {
@@ -939,6 +941,16 @@ public class SettingsManager {
     String value = password == null ? "" : password;
     saveSetting("relayPassword", value);
     currentRelayPassword = value;
+  }
+
+  public String getRelayDevice() {
+    return currentRelayDevice == null ? "" : currentRelayDevice;
+  }
+
+  public void saveRelayDevice(String device) throws RecordStoreException {
+    String value = device == null ? "" : device.trim();
+    saveSetting("relayDevice", value);
+    currentRelayDevice = value;
   }
 
   public void cleanup() {
