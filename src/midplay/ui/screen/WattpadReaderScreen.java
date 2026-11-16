@@ -43,6 +43,7 @@ public final class WattpadReaderScreen extends BaseForm {
   private final Command gotoChapter;
   private final Command nextChapter;
   private final Command continueLoadingCommand;
+  private final Command commentsCommand;
   private final Command shareChapterCommand;
   private final Command saveChapterCommand;
   private final StringItem content = new StringItem(null, "");
@@ -82,10 +83,12 @@ public final class WattpadReaderScreen extends BaseForm {
     gotoChapter = new Command(Lang.tr("wattpad.go_to_chapter"), Command.SCREEN, 3);
     nextChapter = new Command(Lang.tr("wattpad.next_chapter"), Command.SCREEN, 2);
     continueLoadingCommand = new Command(Lang.tr("wattpad.continue_loading"), Command.SCREEN, 4);
-    shareChapterCommand = new Command(Lang.tr("wattpad.share_chapter"), Command.SCREEN, 5);
-    saveChapterCommand = new Command(Lang.tr("wattpad.save_chapter_page"), Command.SCREEN, 6);
+    commentsCommand = new Command(Lang.tr("wattpad.comments"), Command.SCREEN, 5);
+    shareChapterCommand = new Command(Lang.tr("wattpad.share_chapter"), Command.SCREEN, 6);
+    saveChapterCommand = new Command(Lang.tr("wattpad.save_chapter_page"), Command.SCREEN, 7);
     append(content);
     addCommand(gotoChapter);
+    addCommand(commentsCommand);
     addCommand(shareChapterCommand);
     addCommand(saveChapterCommand);
     updateChapterNextCommand();
@@ -115,6 +118,8 @@ public final class WattpadReaderScreen extends BaseForm {
       openChapter(index + 1, 0);
     } else if (c == continueLoadingCommand) {
       loadMore();
+    } else if (c == commentsCommand) {
+      navigator.forward(new WattpadCommentsScreen(navigator, partId, chapterTitle));
     } else if (c == shareChapterCommand) {
       shareChapter();
     } else if (c == saveChapterCommand) {

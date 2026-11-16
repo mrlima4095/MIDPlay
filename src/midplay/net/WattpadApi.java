@@ -5,6 +5,7 @@ import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
 import java.util.Vector;
 import midplay.store.SettingsManager;
+import midplay.util.HtmlText;
 import midplay.util.Lang;
 import midplay.util.Utils;
 
@@ -33,6 +34,21 @@ public final class WattpadApi {
   public static final int USER_NAME = 0;
   public static final int USER_DISPLAY = 1;
   public static final int USER_SIZE = 2;
+
+  /** Indexes into the comment rows returned by {@link #parseComments}. */
+  public static final int COMMENT_ID = 0;
+  public static final int COMMENT_AUTHOR = 1;
+  public static final int COMMENT_BODY = 2;
+  public static final int COMMENT_CREATED = 3;
+  public static final int COMMENT_LIKES = 4;
+  public static final int COMMENT_REPLIES = 5;
+  public static final int COMMENT_SIZE = 6;
+
+  /** Resource namespaces used by the comments API. */
+  public static final String COMMENTS_PARTS = "parts";
+  public static final String COMMENTS_REPLIES = "comments";
+
+  private static final int COMMENTS_LIMIT = 20;
 
   private static final String SEARCH_FIELDS =
       "&fields=stories(id,title,numParts,mature,cover,user(name))";
@@ -243,6 +259,25 @@ public final class WattpadApi {
   /** Metadata of one chapter (used to find out which story it belongs to). */
   public static String partInfoUrl(String partId) {
     return route("https://www.wattpad.com/api/v3/story_parts/" + partId);
+  }
+
+  /**
+   * Comments of a chapter ({@code parts}) or of another comment ({@code comments}), already routed
+   * through the proxy. {@code after} is the cursor returned by {@link #parseCommentsAfter}.
+   */
+  public static String commentsUrl(String namespace, String resourceId, String after) {
+    StringBuffer url = new StringBuffer();
+    url.append("https://www.wattpad.com/v5/comments/namespaces/")
+        .append(namespace)
+        .append("/resources/")
+        .append(resourceId)
+        .append("/comments?limit=")
+        .append(COMMENTS_LIMIT);
+    if (after != null && after.length() > 0) {
+      // Cursors use "_" where the API expects "#"; urlEncode then makes them %23.
+      url.append("&after=").append(Utils.urlEncode(after.replace('_', '#')));
+    }
+    return route(url.toString());
   }
 
   /** Metadata of a reading list (its name, among other fields). */
@@ -557,6 +592,132 @@ public final class WattpadApi {
     } catch (Exception e) {
     }
     return result;
+  }
+
+  /** Parses the comments endpoint into rows laid out with the {@code COMMENT_*} indexes. */
+  public static Vector parseComments(String json) {
+    Vector result = new Vector();
+    try {
+      JSONArray comments = JSON.getObject(json).getArray("comments");
+      if (comments == null) {
+        return result;
+      }
+      for (int i = 0; i < comments.size(); i++) {
+        JSONObject comment = comments.getObject(i);
+        if (comment == null) {
+          continue;
+        }
+        String author = "";
+        try {
+          JSONObject user = comment.getObject("user");
+          if (user != null) {
+            author = user.getString("name", "");
+          }
+        } catch (Exception ignored) {
+        }
+        String id = "";
+        try {
+          JSONObject commentId = comment.getObject("commentId");
+          if (commentId != null) {
+            id = commentId.getString("resourceId", "");
+          }
+        } catch (Exception ignored) {
+        }
+        if (author.length() == 0) {
+          author = Lang.tr("wattpad.unknown_author");
+        }
+        int likes = 0;
+        try {
+          JSONObject sentiments = comment.getObject("sentiments");
+          if (sentiments != null) {
+            JSONObject like = sentiments.getObject(":like:");
+            if (like != null) {
+              likes = like.getInt("count", 0);
+            }
+          }
+        } catch (Exception ignored) {
+        }
+        String[] row = new String[COMMENT_SIZE];
+        row[COMMENT_ID] = id;
+        row[COMMENT_AUTHOR] = author;
+        row[COMMENT_BODY] = HtmlText.toText(comment.getString("text", ""));
+        row[COMMENT_CREATED] = comment.getString("created", "");
+        row[COMMENT_LIKES] = Integer.toString(likes);
+        row[COMMENT_REPLIES] = Integer.toString(comment.getInt("replyCount", 0));
+        result.addElement(row);
+      }
+    } catch (Exception e) {
+    }
+    return result;
+  }
+
+  /** Cursor for the next page of comments, or an empty string on the last page. */
+  public static String parseCommentsAfter(String json) {
+    try {
+      JSONObject pagination = JSON.getObject(json).getObject("pagination");
+      if (pagination != null) {
+        JSONObject after = pagination.getObject("after");
+        if (after != null) {
+          String id = after.getString("resourceId", "");
+          return id == null ? "" : id;
+        }
+      }
+    } catch (Exception e) {
+    }
+    return "";
+  }
+
+  /** Short date (YYYY-MM-DD) of a comment, or the original value when it is not ISO formatted. */
+  public static String commentDate(String created) {
+    if (created == null) {
+      return "";
+    }
+    return created.length() > 10 ? created.substring(0, 10) : created;
+  }
+
+  /** One comment row rendered for a list. */
+  public static String commentLabel(String[] comment) {
+    StringBuffer label = new StringBuffer();
+    label.append(comment[COMMENT_AUTHOR]);
+    int likes = intValue(comment[COMMENT_LIKES]);
+    if (likes > 0) {
+      label.append(" (").append(likes).append(')');
+    }
+    int replies = intValue(comment[COMMENT_REPLIES]);
+    if (replies > 0) {
+      label
+          .append(" - ")
+          .append(Lang.tr("wattpad.replies_count", Integer.toString(replies)));
+    }
+    String body = comment[COMMENT_BODY];
+    if (body == null || body.length() == 0) {
+      body = Lang.tr("wattpad.comment_empty");
+    }
+    label.append('\n').append(singleLine(body, 160));
+    return label.toString();
+  }
+
+  private static int intValue(String value) {
+    try {
+      return Integer.parseInt(value);
+    } catch (Exception e) {
+      return 0;
+    }
+  }
+
+  private static String singleLine(String text, int max) {
+    StringBuffer out = new StringBuffer();
+    for (int i = 0; i < text.length() && out.length() < max; i++) {
+      char c = text.charAt(i);
+      if (c == '\r') {
+        continue;
+      }
+      out.append(c == '\n' || c == '\t' ? ' ' : c);
+    }
+    if (out.length() >= max && text.length() > max) {
+      out.append("...");
+    }
+    return out.toString().trim();
   }
 
   /** Parses the similar stories (recommendations) endpoint. */
