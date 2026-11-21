@@ -363,7 +363,8 @@
     "translate": "תרגום",
     "show_original": "הצג מקור",
     "translating": "מתרגם פתק...",
-    "translate_error": "לא ניתן היה לתרגם את הפתק"
+    "translate_error": "לא ניתן היה לתרגם את הפתק",
+    "open_teleprompter": "פתח בטלפרומפטר"
   },
   "bulk": {
     "notes_deleted": "נמחקו {0} הערות",
@@ -856,5 +857,13 @@
     "new_dm_id": "Username or user ID",
     "new_dm_invalid": "Enter a username or a valid user ID",
     "new_dm_not_found": "User not found. Check the username or use a numeric ID."
+  },
+  "teleprompter": {
+    "edit": "ערוך",
+    "save": "שמור",
+    "clear": "נקה",
+    "empty": "טקסט ריק",
+    "edit_title": "ערוך טלפרומפטר",
+    "open": "פתח בטלפרומפטר"
   }
 }

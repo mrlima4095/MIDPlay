@@ -49,6 +49,7 @@ import midplay.ui.screen.TasksScreen;
 import midplay.ui.screen.PinterestScreen;
 import midplay.ui.screen.RedditScreen;
 import midplay.ui.screen.WattpadScreen;
+import midplay.ui.screen.TeleprompterScreen;
 import midplay.util.Lang;
 import midplay.util.Utils;
 import mpgram.MP;
@@ -140,6 +141,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     registerMenuAction(Configuration.MENU_WATTPAD);
     registerMenuAction(Configuration.MENU_PINTEREST);
     registerMenuAction(Configuration.MENU_REDDIT);
+    registerMenuAction(Configuration.MENU_TELEPROMPTER);
   }
 
   private void registerMenuAction(final String key) {
@@ -391,6 +393,9 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     if (key.equalsIgnoreCase("playing")) {
       return Configuration.MENU_NOW_PLAYING;
     }
+    if (key.equalsIgnoreCase("teleprompter")) {
+      return Configuration.MENU_TELEPROMPTER;
+    }
     return null;
   }
 
@@ -433,6 +438,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       goToTasksScreen();
     } else if (Configuration.MENU_NOW_PLAYING.equals(key)) {
       openNowPlaying();
+    } else if (Configuration.MENU_TELEPROMPTER.equals(key)) {
+      goToTeleprompterScreen();
     }
   }
 
@@ -829,6 +836,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
 
   private void goToRedditScreen() {
     navigator.forward(new RedditScreen(navigator));
+  }
+
+  private void goToTeleprompterScreen() {
+    navigator.forward(new TeleprompterScreen(navigator));
   }
 
   private void showExitConfirmation() {

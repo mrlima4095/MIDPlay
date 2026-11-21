@@ -22,6 +22,7 @@ public final class NoteReaderScreen extends BaseForm {
   private final Command editCommand;
   private final Command translateCommand;
   private final Command originalCommand;
+  private final Command teleprompterCommand;
   private boolean translating;
   private boolean translated;
   private boolean showOriginal;
@@ -35,8 +36,11 @@ public final class NoteReaderScreen extends BaseForm {
     editCommand = new Command(Lang.tr("note.edit"), Command.SCREEN, 1);
     translateCommand = new Command(Lang.tr("note.translate"), Command.SCREEN, 2);
     originalCommand = new Command(Lang.tr("note.show_original"), Command.SCREEN, 2);
+    teleprompterCommand = new Command(Lang.tr("teleprompter.open"), Command.SCREEN, 3);
     append(content);
     addCommand(editCommand);
+    addCommand(translateCommand);
+    addCommand(teleprompterCommand);
     addCommand(Commands.playerNowPlaying());
     updateTranslateCommands();
   }
@@ -53,8 +57,19 @@ public final class NoteReaderScreen extends BaseForm {
       showOriginal = true;
       updateContent();
       updateTranslateCommands();
+    } else if (command == teleprompterCommand) {
+      openTeleprompter();
     } else if (command == Commands.playerNowPlaying()) {
       PlayerNavHelper.showNowPlaying(navigator);
+    }
+  }
+
+  private void openTeleprompter() {
+    Note note = NotesManager.getInstance().getNote(noteId);
+    if (note != null) {
+      TeleprompterScreen teleprompter = new TeleprompterScreen(navigator);
+      teleprompter.setText(note.text);
+      navigator.forward(teleprompter);
     }
   }
 

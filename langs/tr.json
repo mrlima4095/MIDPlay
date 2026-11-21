@@ -370,7 +370,8 @@
     "translate": "Çevir",
     "show_original": "Orijinali göster",
     "translating": "Not çevriliyor...",
-    "translate_error": "Not çevrilemedi"
+    "translate_error": "Not çevrilemedi",
+    "open_teleprompter": "Teleprompterda Aç"
   },
   "bulk": {
     "notes_deleted": "{0} not silindi",
@@ -856,5 +857,13 @@
     "new_dm_id": "Username or user ID",
     "new_dm_invalid": "Enter a username or a valid user ID",
     "new_dm_not_found": "User not found. Check the username or use a numeric ID."
+  },
+  "teleprompter": {
+    "edit": "Düzenle",
+    "save": "Kaydet",
+    "clear": "Temizle",
+    "empty": "Boş metin",
+    "edit_title": "Teleprompter Düzenle",
+    "open": "Teleprompterda Aç"
   }
 }

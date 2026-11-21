@@ -370,7 +370,8 @@
     "translate": "Dịch",
     "show_original": "Xem bản gốc",
     "translating": "Đang dịch ghi chú...",
-    "translate_error": "Không thể dịch ghi chú"
+    "translate_error": "Không thể dịch ghi chú",
+    "open_teleprompter": "Mở trong Teleprompter"
   },
   "bulk": {
     "notes_deleted": "Đã xóa {0} ghi chú",
@@ -856,5 +857,13 @@
     "new_dm_id": "Username or user ID",
     "new_dm_invalid": "Enter a username or a valid user ID",
     "new_dm_not_found": "User not found. Check the username or use a numeric ID."
+  },
+  "teleprompter": {
+    "edit": "Chỉnh sửa",
+    "save": "Lưu",
+    "clear": "Xóa",
+    "empty": "Trống",
+    "edit_title": "Chỉnh sửa Teleprompter",
+    "open": "Mở trong Teleprompter"
   }
 }

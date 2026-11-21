@@ -49,6 +49,7 @@ public class Configuration {
   public static final String MENU_WATTPAD = "menu.wattpad";
   public static final String MENU_PINTEREST = "menu.pinterest";
   public static final String MENU_REDDIT = "menu.reddit";
+  public static final String MENU_TELEPROMPTER = "menu.teleprompter";
 
   public static final String DEFAULT_HTTP_PROXY = "http://opentty.fun/proxy.php?";
 
@@ -100,11 +101,11 @@ public class Configuration {
   public static final int WATTPAD_MATURE_ON = 1;
 
   public static final String SERVICE_NCT = "NCT";
-  public static final String SERVICE_SOUNDCLOUD = "SoundCloud";
+  public static final String SERVICE_SOUNDCLD = "SoundCloud";
   public static final String SERVICE_YTMUSIC = "YTMusic";
   public static final String SERVICE_SPOTIFY = "Spotify";
   public static final String[] ALL_SERVICES = {
-    SERVICE_NCT, SERVICE_SOUNDCLOUD, SERVICE_YTMUSIC, SERVICE_SPOTIFY
+    SERVICE_NCT, SERVICE_SOUNDCLD, SERVICE_YTMUSIC, SERVICE_SPOTIFY
   };
 
   public static final String THEME_LIGHT = "light";
@@ -309,7 +310,9 @@ public class Configuration {
     return image;
   }
 
-  private static Image createFileExplorerIcon() {    Image image = Image.createImage(36, 36);    Graphics graphics = image.getGraphics();
+  private static Image createFileExplorerIcon() {
+    Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
     // Distinct folder silhouette with a visible tab and blue front panel.
     graphics.setColor(0xB97920);
     graphics.fillRoundRect(3, 11, 30, 21, 4, 4);

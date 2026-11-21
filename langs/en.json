@@ -141,7 +141,8 @@
     "translate": "Translate",
     "show_original": "Show original",
     "translating": "Translating note...",
-    "translate_error": "Could not translate the note"
+    "translate_error": "Could not translate the note",
+    "open_teleprompter": "Open in Teleprompter"
   },
   "open_uri": {
     "title": "Open...",
@@ -915,5 +916,13 @@
       "format": "Invalid format. Use MM:SS",
       "span": "Point B must be at least 0.5s after A"
     }
+  },
+  "teleprompter": {
+    "edit": "Edit",
+    "save": "Save",
+    "clear": "Clear",
+    "empty": "Empty text",
+    "edit_title": "Edit Teleprompter",
+    "open": "Open in Teleprompter"
   }
 }

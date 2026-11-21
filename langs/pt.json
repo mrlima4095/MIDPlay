@@ -141,7 +141,8 @@
     "translate": "Traduzir",
     "show_original": "Ver original",
     "translating": "Traduzindo nota...",
-    "translate_error": "Não foi possível traduzir a nota"
+    "translate_error": "Não foi possível traduzir a nota",
+    "open_teleprompter": "Abrir no Teleprompter"
   },
   "open_uri": {
     "title": "Abrir...",
@@ -915,5 +916,13 @@
       "format": "Formato invalido. Use MM:SS",
       "span": "O ponto B precisa estar pelo menos 0,5s depois de A"
     }
+  },
+  "teleprompter": {
+    "edit": "Editar",
+    "save": "Salvar",
+    "clear": "Limpar",
+    "empty": "Texto vazio",
+    "edit_title": "Editar Teleprompter",
+    "open": "Abrir no Teleprompter"
   }
 }

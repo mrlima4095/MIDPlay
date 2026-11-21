@@ -27,6 +27,7 @@ public final class NotesScreen extends List implements CommandListener {
   private final Command selectMultipleCommand;
   private final Command vaultCommand;
   private final Command protectCommand;
+  private final Command teleprompterCommand;
   private Note[] notes;
   private String searchQuery = "";
 
@@ -42,6 +43,7 @@ public final class NotesScreen extends List implements CommandListener {
     deleteCommand = new Command(Lang.tr("note.delete"), Command.SCREEN, 9);
     selectMultipleCommand = new Command(Lang.tr("action.select"), Command.SCREEN, 10);
     protectCommand = new Command(Lang.tr("vault.protect"), Command.SCREEN, 11);
+    teleprompterCommand = new Command(Lang.tr("note.open_teleprompter"), Command.SCREEN, 12);
     addCommand(newCommand);
     addCommand(vaultCommand);
     addCommand(searchCommand);
@@ -51,6 +53,7 @@ public final class NotesScreen extends List implements CommandListener {
     addCommand(deleteCommand);
     addCommand(selectMultipleCommand);
     addCommand(protectCommand);
+    addCommand(teleprompterCommand);
     addCommand(Commands.back());
     addCommand(Commands.playerNowPlaying());
     setCommandListener(this);
@@ -97,6 +100,7 @@ public final class NotesScreen extends List implements CommandListener {
       else if (command == selectMultipleCommand) selectMultiple();
       else if (command == vaultCommand) openVault();
       else if (command == protectCommand) protectSelected();
+      else if (command == teleprompterCommand) openInTeleprompter();
     } catch (Exception e) {
       navigator.showAlert(e.toString(), AlertType.ERROR);
     }
@@ -170,6 +174,14 @@ public final class NotesScreen extends List implements CommandListener {
 
   private void createNote() {
     navigator.forward(new NoteEditorScreen(null, navigator, refreshOnClose()));
+  }
+
+  private void openInTeleprompter() {
+    Note note = selected();
+    if (note == null) return;
+    TeleprompterScreen teleprompter = new TeleprompterScreen(navigator);
+    teleprompter.setText(note.text);
+    navigator.forward(teleprompter);
   }
 
   private Runnable refreshOnClose() {

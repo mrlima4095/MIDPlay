@@ -363,7 +363,8 @@
     "translate": "Przetłumacz",
     "show_original": "Pokaż oryginał",
     "translating": "Tłumaczenie notatki...",
-    "translate_error": "Nie udało się przetłumaczyć notatki"
+    "translate_error": "Nie udało się przetłumaczyć notatki",
+    "open_teleprompter": "Otwórz w Teleprompterze"
   },
   "bulk": {
     "notes_deleted": "Usunięto {0} notatek",
@@ -856,5 +857,13 @@
     "new_dm_id": "Username or user ID",
     "new_dm_invalid": "Enter a username or a valid user ID",
     "new_dm_not_found": "User not found. Check the username or use a numeric ID."
+  },
+  "teleprompter": {
+    "edit": "Edytuj",
+    "save": "Zapisz",
+    "clear": "Wyczyść",
+    "empty": "Pusty tekst",
+    "edit_title": "Edytuj Teleprompter",
+    "open": "Otwórz w Teleprompterze"
   }
 }
