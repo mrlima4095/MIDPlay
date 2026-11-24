@@ -47,8 +47,14 @@ public final class OpenUriScreen extends BaseForm {
       return;
     }
     if (c == clearHistory) {
-      UriHistoryManager.getInstance().clear();
-      refreshHistory();
+      navigator.confirmClearHistory(
+          Lang.tr(Configuration.MENU_OPEN_URI),
+          new Runnable() {
+            public void run() {
+              UriHistoryManager.getInstance().clear();
+              refreshHistory();
+            }
+          });
       return;
     }
     if (c == enableEconomyCommand || c == disableEconomyCommand) {

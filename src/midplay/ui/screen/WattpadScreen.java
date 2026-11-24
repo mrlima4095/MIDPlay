@@ -83,8 +83,14 @@ public final class WattpadScreen extends BaseForm {
     } else if (c == useHistory) {
       useSelectedHistory();
     } else if (c == clearHistory) {
-      WattpadSearchHistoryManager.getInstance().clear();
-      refreshHistory();
+      navigator.confirmClearHistory(
+          Lang.tr(Configuration.MENU_WATTPAD),
+          new Runnable() {
+            public void run() {
+              WattpadSearchHistoryManager.getInstance().clear();
+              refreshHistory();
+            }
+          });
     }
   }
 

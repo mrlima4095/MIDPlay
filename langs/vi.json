@@ -5,7 +5,9 @@
     "exit": "Thoát",
     "ok": "OK",
     "save": "Lưu",
-    "select": "Chọn"
+    "select": "Chọn",
+    "yes": "Có",
+    "no": "Không"
   },
   "app": {
     "name": "MIDPlay"
@@ -13,6 +15,9 @@
   "confirm": {
     "exit": "Bạn có chắc chắn muốn thoát?",
     "discard_changes": "Hủy các thay đổi chưa lưu?"
+  },
+  "history": {
+    "clear_confirm": "Xóa lịch sử {0}?"
   },
   "favorites": {
     "add": "Thêm vào yêu thích",
@@ -252,6 +257,7 @@
     "resume_prompt": "Tiếp tục phát phiên gần nhất?"
   },
   "settings": {
+    "anonymous_mode": "Chế độ ẩn danh",
     "audio_quality": "Chất lượng âm thanh",
     "check_update": "Kiểm tra cập nhật",
     "save_last_session": "Lưu phiên nghe cuối cùng",

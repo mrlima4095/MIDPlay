@@ -22,6 +22,9 @@ public final class UriHistoryManager {
   private UriHistoryManager() {}
 
   public String[] getItems() {
+    if (HistoryPrivacy.isAnonymous()) {
+      return new String[0];
+    }
     JSONArray items = items();
     String[] result = new String[items.size()];
     int count = 0;
@@ -43,7 +46,7 @@ public final class UriHistoryManager {
   }
 
   public void record(String uri) {
-    if (uri == null || uri.length() == 0) {
+    if (uri == null || uri.length() == 0 || HistoryPrivacy.isAnonymous()) {
       return;
     }
     JSONArray next = new JSONArray();

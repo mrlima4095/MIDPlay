@@ -50,6 +50,7 @@ public class SettingsManager {
   private static int currentRedditAutoTranslate;
   private static int currentEconomyMode;
   private static int currentAbLoopFeature;
+  private static int currentAnonymousMode;
 
   public static SettingsManager getInstance() {
     if (instance == null) {
@@ -185,6 +186,8 @@ public class SettingsManager {
     currentEconomyMode = settings.getInt("economyMode", Configuration.ECONOMY_MODE_OFF);
     currentAbLoopFeature =
         settings.getInt("abLoopFeature", Configuration.AB_LOOP_FEATURE_ON);
+    currentAnonymousMode =
+        settings.getInt("anonymousMode", Configuration.ANONYMOUS_MODE_OFF);
   }
 
   private JSONObject getSettingsJSON() {
@@ -234,6 +237,7 @@ public class SettingsManager {
     settings.put("redditAutoTranslate", Configuration.DEFAULT_REDDIT_AUTO_TRANSLATE);
     settings.put("economyMode", Configuration.ECONOMY_MODE_OFF);
     settings.put("abLoopFeature", Configuration.AB_LOOP_FEATURE_ON);
+    settings.put("anonymousMode", Configuration.ANONYMOUS_MODE_OFF);
     settings.put("vaultPasswordHash", "");
     return settings;
   }
@@ -679,6 +683,11 @@ public class SettingsManager {
     currentAbLoopFeature = enabled;
   }
 
+  public void saveAnonymousMode(int enabled) throws RecordStoreException {
+    saveSetting("anonymousMode", enabled);
+    currentAnonymousMode = enabled;
+  }
+
   public void saveImageProxy(String imageProxy) throws RecordStoreException {
     saveSetting("imageProxy", imageProxy);
     currentImageProxy = imageProxy;
@@ -795,6 +804,15 @@ public class SettingsManager {
 
   public int getCurrentAbLoopFeature() {
     return currentAbLoopFeature;
+  }
+
+  public int getCurrentAnonymousMode() {
+    return currentAnonymousMode;
+  }
+
+  /** True while anonymous mode is on; history stores use it to hide and skip recording entries. */
+  public boolean isAnonymousModeEnabled() {
+    return currentAnonymousMode == Configuration.ANONYMOUS_MODE_ON;
   }
 
   public boolean isAbLoopEnabled() {

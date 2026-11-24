@@ -84,8 +84,14 @@ public final class RedditScreen extends BaseForm {
     } else if (c == useHistory) {
       useSelectedHistory();
     } else if (c == clearHistory) {
-      RedditSearchHistoryManager.getInstance().clear();
-      refreshHistory();
+      navigator.confirmClearHistory(
+          Lang.tr("menu.reddit"),
+          new Runnable() {
+            public void run() {
+              RedditSearchHistoryManager.getInstance().clear();
+              refreshHistory();
+            }
+          });
     }
   }
 

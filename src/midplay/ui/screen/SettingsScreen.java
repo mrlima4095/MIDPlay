@@ -41,6 +41,7 @@ public final class SettingsScreen extends BaseForm {
   private int blackberryWifiIndex = -1;
   private int thumbnailsIndex;
   private int abLoopFeatureIndex;
+  private int anonymousModeIndex;
 
   private String currentLanguage;
   private String currentThemeMode;
@@ -54,6 +55,7 @@ public final class SettingsScreen extends BaseForm {
   private int currentDiscordAutoPrepare;
   private int currentThumbnails;
   private int currentAbLoopFeature;
+  private int currentAnonymousMode;
   private String currentPlayerMethod;
   private String currentDownloadPath;
   private int currentColorIndex;
@@ -149,6 +151,10 @@ public final class SettingsScreen extends BaseForm {
         != togglesGroup.isSelected(abLoopFeatureIndex)) {
       return true;
     }
+    if ((currentAnonymousMode == Configuration.ANONYMOUS_MODE_ON)
+        != togglesGroup.isSelected(anonymousModeIndex)) {
+      return true;
+    }
     if (blackberryWifiIndex >= 0
         && (currentBlackberryWifi == Configuration.BLACKBERRY_WIFI_ON)
             != togglesGroup.isSelected(blackberryWifiIndex)) {
@@ -190,6 +196,7 @@ public final class SettingsScreen extends BaseForm {
     discordAutoPrepareIndex = togglesGroup.append(Lang.tr("settings.discord_auto_prepare"), null);
     thumbnailsIndex = togglesGroup.append(Lang.tr("settings.load_thumbnails"), null);
     abLoopFeatureIndex = togglesGroup.append(Lang.tr("settings.ab_loop"), null);
+    anonymousModeIndex = togglesGroup.append(Lang.tr("settings.anonymous_mode"), null);
     if (Utils.isBlackberry) {
       blackberryWifiIndex = togglesGroup.append(Lang.tr("settings.use_wifi"), null);
     }
@@ -242,6 +249,7 @@ public final class SettingsScreen extends BaseForm {
     currentDiscordAutoPrepare = settingsManager.getCurrentDiscordAutoPrepare();
     currentThumbnails = settingsManager.getCurrentThumbnails();
     currentAbLoopFeature = settingsManager.getCurrentAbLoopFeature();
+    currentAnonymousMode = settingsManager.getCurrentAnonymousMode();
     currentPlayerMethod = settingsManager.getCurrentPlayerMethod();
     currentDownloadPath = settingsManager.getCurrentDownloadPath();
     currentColorIndex = settingsManager.getSavedColorIndex();
@@ -271,6 +279,8 @@ public final class SettingsScreen extends BaseForm {
         thumbnailsIndex, currentThumbnails == Configuration.THUMBNAILS_ON);
     togglesGroup.setSelectedIndex(
         abLoopFeatureIndex, currentAbLoopFeature == Configuration.AB_LOOP_FEATURE_ON);
+    togglesGroup.setSelectedIndex(
+        anonymousModeIndex, currentAnonymousMode == Configuration.ANONYMOUS_MODE_ON);
     if (blackberryWifiIndex >= 0) {
       togglesGroup.setSelectedIndex(
           blackberryWifiIndex, currentBlackberryWifi == Configuration.BLACKBERRY_WIFI_ON);
@@ -328,6 +338,10 @@ public final class SettingsScreen extends BaseForm {
           togglesGroup.isSelected(abLoopFeatureIndex)
               ? Configuration.AB_LOOP_FEATURE_ON
               : Configuration.AB_LOOP_FEATURE_OFF;
+      int selectedAnonymousMode =
+          togglesGroup.isSelected(anonymousModeIndex)
+              ? Configuration.ANONYMOUS_MODE_ON
+              : Configuration.ANONYMOUS_MODE_OFF;
       int selectedBlackberryWifi =
           blackberryWifiIndex >= 0 && togglesGroup.isSelected(blackberryWifiIndex)
               ? Configuration.BLACKBERRY_WIFI_ON
@@ -381,6 +395,10 @@ public final class SettingsScreen extends BaseForm {
       if (currentAbLoopFeature != selectedAbLoop) {
         hasChanges = true;
         settingsManager.saveAbLoopFeature(selectedAbLoop);
+      }
+      if (currentAnonymousMode != selectedAnonymousMode) {
+        hasChanges = true;
+        settingsManager.saveAnonymousMode(selectedAnonymousMode);
       }
       if (currentBlackberryWifi != selectedBlackberryWifi) {
         hasChanges = true;

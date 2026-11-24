@@ -5,7 +5,9 @@
     "exit": "Wyjdź",
     "ok": "OK",
     "save": "Zapisz",
-    "select": "Wybierz"
+    "select": "Wybierz",
+    "yes": "Tak",
+    "no": "Nie"
   },
   "app": {
     "name": "MIDPlay"
@@ -13,6 +15,9 @@
   "confirm": {
     "exit": "Na pewno chcesz wyjść?",
     "discard_changes": "Odrzucić niezapisane zmiany?"
+  },
+  "history": {
+    "clear_confirm": "Wyczyścić historię: {0}?"
   },
   "favorites": {
     "add": "Dodaj do ulubionych",
@@ -252,6 +257,7 @@
     "resume_prompt": "Wznowić ostatnią sesję?"
   },
   "settings": {
+    "anonymous_mode": "Tryb anonimowy",
     "audio_quality": "Jakość dźwięku",
     "check_update": "Sprawdź aktualizacje",
     "save_last_session": "Zapisz ostatnią sesję",

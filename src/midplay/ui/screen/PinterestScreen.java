@@ -75,8 +75,14 @@ public final class PinterestScreen extends BaseForm {
     } else if (c == useHistory) {
       useSelectedHistory();
     } else if (c == clearHistory) {
-      PinterestSearchHistoryManager.getInstance().clear();
-      refreshHistory();
+      navigator.confirmClearHistory(
+          Lang.tr("menu.pinterest"),
+          new Runnable() {
+            public void run() {
+              PinterestSearchHistoryManager.getInstance().clear();
+              refreshHistory();
+            }
+          });
     }
   }
 

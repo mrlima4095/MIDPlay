@@ -71,8 +71,14 @@ public final class LyricsSearchScreen extends BaseForm {
     } else if (c == useHistory) {
       useSelectedHistory();
     } else if (c == clearHistory) {
-      LyricsSearchHistoryManager.getInstance().clear();
-      refreshHistory();
+      navigator.confirmClearHistory(
+          Lang.tr("lyrics.title"),
+          new Runnable() {
+            public void run() {
+              LyricsSearchHistoryManager.getInstance().clear();
+              refreshHistory();
+            }
+          });
     }
   }
 

@@ -71,8 +71,14 @@ public final class SearchScreen extends BaseForm {
     } else if (c == useHistory) {
       useSelectedHistory();
     } else if (c == clearHistory) {
-      MusicSearchHistoryManager.getInstance().clear();
-      refreshHistory();
+      navigator.confirmClearHistory(
+          Lang.tr(Configuration.MENU_SEARCH),
+          new Runnable() {
+            public void run() {
+              MusicSearchHistoryManager.getInstance().clear();
+              refreshHistory();
+            }
+          });
     }
   }
 

@@ -5,7 +5,9 @@
     "exit": "Çık",
     "ok": "Tamam",
     "save": "Kaydet",
-    "select": "Seç"
+    "select": "Seç",
+    "yes": "Evet",
+    "no": "Hayır"
   },
   "app": {
     "name": "MIDPlay"
@@ -13,6 +15,9 @@
   "confirm": {
     "exit": "Çıkmak istediğinizden emin misiniz?",
     "discard_changes": "Kaydedilmemiş değişiklikler silinsin mi?"
+  },
+  "history": {
+    "clear_confirm": "{0} geçmişi temizlensin mi?"
   },
   "favorites": {
     "add": "Favorilere Ekle",
@@ -252,6 +257,7 @@
     "resume_prompt": "Son oturumunuza devam edilsin mi?"
   },
   "settings": {
+    "anonymous_mode": "Anonim mod",
     "audio_quality": "Ses Kalitesi",
     "check_update": "Güncellemeleri Kontrol Et",
     "save_last_session": "Son Oturumu Kaydet",

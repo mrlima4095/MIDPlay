@@ -183,6 +183,9 @@ public class Configuration {
   public static final int AB_LOOP_FEATURE_OFF = 0;
   public static final int AB_LOOP_FEATURE_ON = 1;
 
+  public static final int ANONYMOUS_MODE_OFF = 0;
+  public static final int ANONYMOUS_MODE_ON = 1;
+
   public static Image folderIcon;
   public static Image musicIcon;
   public static Image searchIcon;

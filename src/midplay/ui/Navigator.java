@@ -293,6 +293,38 @@ public class Navigator {
     forward(a);
   }
 
+  /**
+   * Destructive-action confirmation with explicit Yes/No buttons, so a history clear cannot happen
+   * by accidentally tapping OK.
+   */
+  public void showYesNoAlert(String message, final Runnable onYes) {
+    if (message == null || onYes == null) {
+      return;
+    }
+    final Command yes = new Command(Lang.tr("action.yes"), Command.OK, 1);
+    final Command no = new Command(Lang.tr("action.no"), Command.CANCEL, 2);
+    Alert a = new Alert(null, message, null, AlertType.WARNING);
+    a.addCommand(yes);
+    a.addCommand(no);
+    a.setTimeout(Alert.FOREVER);
+    a.setCommandListener(
+        new CommandListener() {
+          public void commandAction(Command c, Displayable d) {
+            if (c == yes) {
+              onYes.run();
+            } else if (c == no) {
+              dismissAlert();
+            }
+          }
+        });
+    forward(a);
+  }
+
+  /** Asks before clearing the history of one section (Open..., search, Pinterest, etc.). */
+  public void confirmClearHistory(String section, Runnable onYes) {
+    showYesNoAlert(Lang.tr("history.clear_confirm", section), onYes);
+  }
+
   public void showLoadingAlert(String s) {
     showLoadingAlert(s, null);
   }

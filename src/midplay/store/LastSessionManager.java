@@ -37,7 +37,10 @@ public class LastSessionManager {
   }
 
   public void save(String title, Tracks tracks, int index, long positionMicros) {
-    if (tracks == null || tracks.getTracks() == null || tracks.getTracks().length == 0) {
+    if (HistoryPrivacy.isAnonymous()
+        || tracks == null
+        || tracks.getTracks() == null
+        || tracks.getTracks().length == 0) {
       return;
     }
     try {
@@ -83,6 +86,9 @@ public class LastSessionManager {
   }
 
   public boolean hasSession() {
+    if (HistoryPrivacy.isAnonymous()) {
+      return false;
+    }
     try {
       JSONObject root = session();
       if (!root.has("tracks")) {

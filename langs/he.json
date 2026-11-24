@@ -5,7 +5,9 @@
     "exit": "יציאה",
     "ok": "אישור",
     "save": "שמור",
-    "select": "בחר"
+    "select": "בחר",
+    "yes": "כן",
+    "no": "לא"
   },
   "app": {
     "name": "MIDPlay"
@@ -13,6 +15,9 @@
   "confirm": {
     "exit": "אתה בטוח שאתה רוצה לצאת?",
     "discard_changes": "לבטל שינויים שלא נשמרו?"
+  },
+  "history": {
+    "clear_confirm": "לנקות את ההיסטוריה של {0}?"
   },
   "favorites": {
     "add": "הוסף למועדפים",
@@ -252,6 +257,7 @@
     "resume_prompt": "להמשיך את ההפעלה האחרונה?"
   },
   "settings": {
+    "anonymous_mode": "מצב אנונימי",
     "audio_quality": "איכות שמע",
     "check_update": "בדוק עדכונים זמינים",
     "save_last_session": "שמור הפעלה אחרונה",

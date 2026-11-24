@@ -19,6 +19,9 @@ public abstract class SearchHistoryStore {
   }
 
   public String[] getItems() {
+    if (HistoryPrivacy.isAnonymous()) {
+      return new String[0];
+    }
     JSONArray items = items();
     String[] result = new String[items.size()];
     int count = 0;
@@ -40,7 +43,7 @@ public abstract class SearchHistoryStore {
   }
 
   public void record(String query) {
-    if (query == null || query.length() == 0) {
+    if (query == null || query.length() == 0 || HistoryPrivacy.isAnonymous()) {
       return;
     }
     JSONArray next = new JSONArray();

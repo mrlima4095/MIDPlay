@@ -37,7 +37,7 @@ public class RecentManager {
   }
 
   public void recordTrack(Track track) {
-    if (track == null) {
+    if (track == null || HistoryPrivacy.isAnonymous()) {
       return;
     }
     JSONArray arr = items();
@@ -74,6 +74,9 @@ public class RecentManager {
   }
 
   private void record(int type, String key, JSONObject data) {
+    if (HistoryPrivacy.isAnonymous()) {
+      return;
+    }
     String dedup = type + ":" + (key == null ? "" : key);
     JSONArray arr = items();
     JSONArray next = new JSONArray();
@@ -94,6 +97,9 @@ public class RecentManager {
   }
 
   public RecentItem[] getItems() {
+    if (HistoryPrivacy.isAnonymous()) {
+      return new RecentItem[0];
+    }
     JSONArray arr = items();
     RecentItem[] result = new RecentItem[arr.size()];
     int n = 0;
