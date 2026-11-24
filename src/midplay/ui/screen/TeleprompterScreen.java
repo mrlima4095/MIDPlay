@@ -78,6 +78,7 @@ public final class TeleprompterScreen extends Canvas implements CommandListener 
         g.setFont(font);
         g.setColor(0xFFFFFF);
 
+        visibleLines = Math.max(1, (h - 20) / lineHeight);
         String[] lines = wrapText(text, w - 20);
         int totalHeight = lines.length * lineHeight;
 
@@ -85,11 +86,17 @@ public final class TeleprompterScreen extends Canvas implements CommandListener 
         if (scrollY > totalHeight + bottomMargin - h) scrollY = totalHeight + bottomMargin - h;
         if (scrollY < 0) scrollY = 0;
 
+        // Short texts are centered vertically instead of being pinned to the top.
+        int top = 10;
+        if (totalHeight < h - 20) {
+            top = 10 + (h - 20 - totalHeight) / 2;
+        }
+
         int startLine = scrollY / lineHeight;
         int endLine = Math.min(lines.length, startLine + visibleLines + 1);
 
         for (int i = startLine; i < endLine; i++) {
-            int y = i * lineHeight - scrollY + 10;
+            int y = i * lineHeight - scrollY + top;
             if (y + lineHeight > 10 && y < h) {
                 g.drawString(lines[i], w / 2, y, Graphics.HCENTER | Graphics.TOP);
             }
