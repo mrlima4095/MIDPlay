@@ -13,7 +13,18 @@ import midplay.store.StatsManager;
 import midplay.util.Lang;
 
 public final class PlayerNavHelper {
+  /** Screen to restore when the player was opened over an embedded subapp. */
+  private static Displayable subappReturnScreen;
+
+  /** Brings that subapp back to life after the player closes. */
+  private static Runnable subappReturnAction;
+
   private PlayerNavHelper() {}
+
+  public static void clearSubappReturn() {
+    subappReturnScreen = null;
+    subappReturnAction = null;
+  }
 
   public static void loadRemotePlaylistTracks(Navigator navigator, String key, String name) {
     MIDPlay.startOperation(
@@ -75,6 +86,7 @@ public final class PlayerNavHelper {
   }
 
   public static void showNowPlaying(Navigator navigator) {
+    clearSubappReturn();
     Displayable previous = navigator.getPrevious();
     if (previous instanceof PlayerScreen) {
       navigator.back();
@@ -86,5 +98,34 @@ public final class PlayerNavHelper {
     } else {
       navigator.showAlert(Lang.tr(Configuration.PLAYER_STATUS_STOPPED), AlertType.INFO);
     }
+  }
+
+  /** Opens the player over an embedded client and remembers where to return. */
+  public static void showNowPlaying(
+      Navigator navigator, Displayable returnScreen, Runnable onReturn) {
+    clearSubappReturn();
+    PlayerScreen playerScreen = MIDPlay.getPlayerScreen();
+    if (playerScreen == null) {
+      navigator.showAlert(Lang.tr(Configuration.PLAYER_STATUS_STOPPED), AlertType.INFO);
+      return;
+    }
+    subappReturnScreen = returnScreen;
+    subappReturnAction = onReturn;
+    navigator.forward(playerScreen, returnScreen);
+  }
+
+  /**
+   * Handles the player's Back command when it was opened over an embedded client.
+   *
+   * @return true when the subapp return was handled
+   */
+  public static boolean handlePlayerBack(Navigator navigator) {
+    if (subappReturnScreen == null) {
+      return false;
+    }
+    final Runnable action = subappReturnAction;
+    clearSubappReturn();
+    navigator.back(action);
+    return true;
   }
 }

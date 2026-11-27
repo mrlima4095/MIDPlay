@@ -1,0 +1,580 @@
+package fi.gtrxac.bluewap.ui;
+
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Canvas;
+import java.util.*;
+import fi.gtrxac.bluewap.*;
+
+/**
+ * A list that can display a vertical scrollable list of Items.
+ */
+public class ListScreen extends Screen implements Runnable {
+    public int scroll;
+    public int maxScroll;
+    public int highlightedIndex;
+    public int itemPadding;
+    public Vector items;
+    private String bannerText;
+
+    private static int bannerHeight;
+    private int scrollbarHandleHeight;
+    
+    public ListScreen(int margin, int itemPadding) {
+        super(margin);
+        this.itemPadding = itemPadding;
+        items = new Vector();
+        scroll = -itemPadding;
+    }
+
+    public ListScreen() {
+        this(Math.max(2, Fonts.height/6), Math.max(2, Fonts.height/7));
+    }
+
+    public int getFullHeight() {
+        return super.getHeight();
+    }
+
+    public int getHeight() {
+        if (bannerText == null) return getFullHeight();
+        return getFullHeight() - bannerHeight;
+    }
+
+    public void draw(Graphics g) {
+        g.setColor(Colors.listScreenBackground);
+        g.fillRect(0, 0, getWidth(), getFullHeight());
+
+        if (bannerText != null) {
+            drawBanner(g);
+            g.translate(0, bannerHeight);
+            g.setClip(0, 0, getWidth(), getHeight());
+        }
+        drawScrollbar(g);
+
+        if (items.size() > 0) {
+            drawItems(g);
+        }
+        else {
+            g.setColor(Colors.listScreenEmptyText);
+            g.setFont(Fonts.plain);
+            g.drawString(
+                "Nothing to see here",
+                getWidth()/2,
+                getHeight()/2 - Fonts.height/2,
+                Graphics.HCENTER | Graphics.TOP);
+        }
+    }
+
+    private void drawBanner(Graphics g) {
+        g.setColor(Colors.bannerBackground);
+        g.fillRect(0, 0, getWidth(), bannerHeight);
+
+        g.setColor(Colors.bannerOutline);
+        g.drawLine(0, bannerHeight - 1, getWidth(), bannerHeight - 1);
+
+        g.setColor(Colors.bannerText);
+        g.setFont(Fonts.plain);
+        g.drawString(bannerText, getWidth()/2, Fonts.height/5, Graphics.TOP | Graphics.HCENTER);
+    }
+
+    private void drawItems(Graphics g) {
+        g.translate(getMargin(), -scroll);
+
+        int itemsEndY = AppCanvas.getBaseY() + AppCanvas.instance.getHeight();
+
+        synchronized (this) {
+            for (int i = 0; i < items.size(); i++) {
+                Item item = (Item) items.elementAt(i);
+            
+                if (item.needsRecalc) {
+                    recalcItems(i, false);
+                }
+                if (g.getTranslateY() + item.height > 0) {
+                    // g.setColor(0xFF0000);
+                    // g.drawRect(0, 0, contentWidth, item.height);
+                    item.draw(g, this, contentWidth, highlightedIndex == i);
+                }
+                g.translate(0, item.height + itemPadding);
+
+                if (g.getTranslateY() >= itemsEndY) break;
+            }
+        }
+    }
+
+    private void drawScrollbar(Graphics g) {
+        if (maxScroll <= 0) return;
+
+        int scrollbarAreaWidth = Fonts.height/2;
+        int margin = Fonts.height/7;
+        int scrollbarWidth = scrollbarAreaWidth - margin*2;
+        int scrollbarHeight = getHeight() - margin*2;
+        int x = getWidth() - scrollbarAreaWidth + margin;
+
+        // +itemPadding because -itemPadding is the minimum scroll
+        int curScroll = scroll + itemPadding;
+        int scrollRange = maxScroll + itemPadding;
+        int scrollableHeight = maxScroll + getHeight() + itemPadding;
+
+        // graphics programming is fun,, trust me :D
+        scrollbarHandleHeight = scrollbarHeight*(getHeight()*1000/scrollableHeight)/1000 - margin*2;
+        int handleY = (scrollbarHeight - scrollbarHandleHeight)*(curScroll*1000/scrollRange)/1000 + margin;
+
+        g.setColor(usingScrollBar ? Colors.listScreenScrollbarSel : Colors.listScreenScrollbar);
+        g.fillRect(x, handleY, scrollbarWidth, scrollbarHandleHeight);
+    }
+
+    public void recalc() {
+        bannerHeight = Fonts.height + Fonts.height/5*2;
+
+        recalcItems(0, true);
+
+        if (maxScroll > 0) {
+            // if screen is scrollable, make space for the scrollbar
+            contentWidth -= Fonts.height/2 - getMargin()*2/3;
+            recalcItems(0, true);
+        }
+        makeSelectedItemVisible();
+    }
+
+    private synchronized void recalcItems(int startIndex, boolean forceAll) {
+        if (items.size() == 0) {
+            maxScroll = scroll = -itemPadding;
+            return;
+        }
+
+        int y = 0;
+        if (startIndex > 0) {
+            Item prevItem = (Item) items.elementAt(startIndex);
+            y = prevItem.y;
+        }
+
+        Item prevItem = null;
+
+        for (int i = startIndex; i < items.size(); i++) {
+            Item item = (Item) items.elementAt(i);
+
+            if (forceAll || item.needsRecalc) {
+                // Two recalc methods with different args - an item should only define one of them
+                item.recalc(contentWidth);
+                item.recalc(contentWidth, this, prevItem);
+                item.needsRecalc = false;
+            }
+            item.y = y;
+            y += item.height + itemPadding;
+            prevItem = item;
+        }
+
+        maxScroll = Math.max(-itemPadding, y - getHeight());
+        if (scroll > maxScroll) scroll = maxScroll;
+    }
+
+    public void keyEvent(int keyCode, int gameAction) {
+        if (items.size() == 0) return;
+
+        switch (gameAction) {
+            case Canvas.DOWN: {
+                Item highlighted = (Item) items.elementAt(highlightedIndex);
+
+                if (highlighted.height > getHeight() && highlighted.y + highlighted.height - scroll > getHeight()) {
+                    // Item is taller than screen -> scroll down by two lines
+                    scroll += Fonts.height*2;
+
+                    if (scroll > maxScroll) {
+                        scroll = maxScroll;
+                    }
+                } else {
+                    int newSel = getNextSelectableItem();
+
+                    if (newSel != -1) {
+                        setHighlightedIndex(newSel);
+                    }
+                }
+                break;
+            }
+            case Canvas.UP: {
+                Item highlighted = (Item) items.elementAt(highlightedIndex);
+
+                if (highlighted.height > getHeight() && highlighted.y - scroll < 0) {
+                    // Item is taller than screen -> scroll up by two lines
+                    scroll -= Fonts.height*2;
+
+                    if (scroll < -itemPadding) {
+                        scroll = -itemPadding;
+                    }
+                } else {
+                    int newSel = getPreviousSelectableItem();
+
+                    if (newSel != -1) {
+                        setHighlightedIndex(newSel);
+                    }
+                }
+                break;
+            }
+            case Canvas.FIRE: {
+                selectItem();
+                break;
+            }
+            case Canvas.RIGHT: {
+                setHighlightedIndex(Math.min(highlightedIndex + 3, items.size() - 1));
+                break;
+            }
+            case Canvas.LEFT: {
+                setHighlightedIndex(Math.max(highlightedIndex - 3, 0));
+                break;
+            }
+        }
+    }
+
+    private boolean itemIsSelectable(int index) {
+        Item item = (Item) items.elementAt(index);
+        Item highlighted = (Item) items.elementAt(highlightedIndex);
+
+        // if gap between items is more than the screen height, don't allow jumping to
+        // this item because then the contents of some in-between items might never be seen
+        if (Math.abs(item.y - highlighted.y) > getHeight()) return false;
+
+        return (item.isSelectable() || item.height >= getHeight());
+    }
+
+    private int getPreviousSelectableItem() {
+        for (int i = highlightedIndex - 1; i >= 0; i--) {
+            if (itemIsSelectable(i)) return i;
+        }
+        // no suitable selectable item found - scroll to the previous item
+        return Math.max(0, highlightedIndex - 1);
+    }
+
+    private int getNextSelectableItem() {
+        for (int i = highlightedIndex + 1; i < items.size(); i++) {
+            if (itemIsSelectable(i)) return i;
+        }
+        // no suitable selectable item found - scroll to the next item or bottom-most visible item even if unselectable
+        int bottommostVisible = highlightedIndex + 1;
+        
+        for (int i = bottommostVisible; i < items.size(); i++) {
+            Item item = (Item) items.elementAt(i);
+            if (item.y + item.height - scroll <= getHeight()) bottommostVisible = i; 
+        }
+        return Math.min(items.size() - 1, bottommostVisible);
+    }
+
+    // from discord j2me, modified
+    private void makeSelectedItemVisible() {
+        if (items.size() == 0) return;
+
+        Item highlighted = (Item) items.elementAt(highlightedIndex);
+        int itemPos = highlighted.y - scroll;
+
+        if (highlighted.height > getHeight()) {
+            // For items taller than the screen, make sure one screenful of it is visible:
+            // Check if item is above the visible area
+            if (itemPos + highlighted.height < 0) {
+                scroll -= getHeight() + itemPadding;
+            }
+            // Check if below the visible area
+            else if (itemPos > getHeight()) {
+                scroll += getHeight() + itemPadding;
+            }
+        } else {
+            // For shorter items, make sure the entire item is visible:
+            // Check if item is above the visible area
+            if (itemPos < 0) {
+                scroll += itemPos - itemPadding;
+            }
+            // Check if below the visible area
+            else if (itemPos + highlighted.height > getHeight()) {
+                scroll += (itemPos + highlighted.height) - getHeight() + itemPadding;
+            }
+        }
+    }
+
+    // _________________________________________________________________________
+    //
+    //  Touch handling and kinetic scrolling
+    // _________________________________________________________________________
+    //
+
+    private int totalScroll;
+    private int totalScrollAbs;
+
+    public static int scrollUnit;
+    protected int velocity;
+    private long lastPointerTime;
+    private int lastPointerY;
+
+    public boolean usingScrollBar;
+    private int lastScrollBarY;
+    private boolean pressedOnBlank;
+    
+    protected int getMinScroll() {
+        return -itemPadding;
+    }
+
+    protected int getMaxScroll() {
+        return maxScroll;
+    }
+
+    protected void checkScrollInRange() {
+        scroll = Math.min(Math.max(scroll, getMinScroll()), getMaxScroll());
+    }
+
+    private boolean isScrollable() {
+        return getMaxScroll() - getMinScroll() > 0;
+    }
+
+    protected boolean pointerWasTapped() {
+        return totalScrollAbs < Fonts.height/2 && Math.abs(totalScroll) < Fonts.height/4;
+    }
+
+    private void handleScrollBar(int y) {
+        lastScrollBarY = y;
+        int height = getHeight() - scrollbarHandleHeight;
+        y = Math.max(Math.min(y, getHeight() - scrollbarHandleHeight/2), scrollbarHandleHeight/2);
+        y -= scrollbarHandleHeight/2;
+        int ratio = y*1000/height;
+
+        scroll = (getMaxScroll() - getMinScroll())*ratio;
+        // if (scroll%1000 >= 500) scroll += 500;
+        scroll = scroll/1000 + getMinScroll();
+        checkScrollInRange();
+        AppBase.repaint();
+    }
+
+    public void pointerPressed(int x, int y) {
+        if (bannerText != null) y -= bannerHeight;
+
+        // Use scrollbar if the content is tall enough to be scrollable and the user pressed on the right edge of the screen
+        // Note: Scrollbar hitbox is wider than the actual rendered scrollbar
+        usingScrollBar = isScrollable() && x > getWidth() - Fonts.height*4/3;
+
+        if (usingScrollBar) {
+            velocity = 0;  // stop any kinetic scrolling
+            totalScrollAbs = 65500;
+            handleScrollBar(y);
+            return;
+        }
+        lastPointerY = y;
+        totalScroll = 0;
+        totalScrollAbs = 0;
+
+        velocity = 0;
+        lastPointerTime = System.currentTimeMillis();
+
+        int tappedItemIndex = getItemIndexAtY(y);
+
+        if (tappedItemIndex != -1) {
+            setHighlightedIndex(tappedItemIndex);
+        }
+
+        AppBase.repaint();
+    }
+
+    public void pointerDragged(int x, int y) {
+        if (bannerText != null) y -= bannerHeight;
+
+        // Scroll position fix on S40 touch (e.g. Asha 300)
+        if (y > 65500) y = 0;
+        
+        if (usingScrollBar) {
+            handleScrollBar(y);
+            return;
+        }
+        int deltaY = y - lastPointerY;
+        scroll -= deltaY;
+        checkScrollInRange();
+
+        // Keep track of velocity
+        long currentTime = System.currentTimeMillis();
+        int timeDelta = (int) (currentTime - lastPointerTime);
+        if (timeDelta > 0) {
+            velocity = deltaY * 1000 / timeDelta;  // Pixels per second
+        }
+        lastPointerY = y;
+        lastPointerTime = currentTime;
+        totalScroll += deltaY;
+        totalScrollAbs += Math.abs(deltaY);
+        AppBase.repaint();
+    }
+    
+    public void pointerReleased(int x, int y) {
+        if (bannerText != null) y -= bannerHeight;
+
+        if (usingScrollBar) {
+            usingScrollBar = false;
+            AppBase.repaint();
+            return;
+        }
+
+        if (!pointerWasTapped()) {
+            // scrolled -> start kinetic scrolling thread if finger was not held in place for too long
+            if (System.currentTimeMillis() <= lastPointerTime + 110 && Math.abs(velocity) > Fonts.height*4) {
+                new Thread(this).start();
+            }
+        } else {
+            // Not scrolled: select item if pressed on one
+            int tappedItemIndex = getItemIndexAtY(y);
+            if (tappedItemIndex != -1) selectItem();
+        }
+        AppBase.repaint();
+    }
+    
+    // Kinetic scrolling thread
+    public void run() {
+        int maxVel = Fonts.height*30;
+
+        while (Math.abs(velocity) > 1) {
+            velocity = Math.min(Math.max(velocity, -maxVel), maxVel);
+            scroll -= velocity/30;
+            velocity = velocity*19/20;
+            checkScrollInRange();
+            AppBase.repaint();
+            Util.sleep(16);
+        }
+    }
+
+    private int getItemIndexAtY(int y) {
+        y += scroll;
+        for (int i = 0; i < items.size(); i++) {
+            Item item = (Item) items.elementAt(i);
+            if (y - item.y < item.height) return i;
+        }
+        return -1;
+    }
+
+    // _________________________________________________________________________
+    //
+    //  Public API
+    // _________________________________________________________________________
+    //
+
+    public synchronized void addItem(Item i) {
+        items.addElement(i);
+        needRecalc();
+    }
+
+    /**
+     * Adds a basic StringItem to the screen containing the specified text.
+     */
+    public void addItem(String str) {
+        addItem(new StringItem(str));
+    }
+
+    public synchronized void insertItem(Item i, int index) {
+        items.insertElementAt(i, index);
+        needRecalc();
+    }
+
+    public void insertItem(String str, int index) {
+        insertItem(new StringItem(str), index);
+    }
+
+    public synchronized void removeItem(int index) {
+        items.removeElementAt(index);
+        needRecalc();
+    }
+
+    public void removeItem(Item i) {
+        int index = items.indexOf(i);
+        if (index == -1) return;
+        removeItem(index);
+    }
+
+    /**
+     * Add multiple items at the same time.
+     * Adding items in bulk may be beneficial to avoid unnecessary recalcs,
+     * especially when multiple items are added by another thread.
+     */
+    public synchronized void addItems(Vector newItems) {
+        for (int i = 0; i < newItems.size(); i++) {
+            Object item = newItems.elementAt(i);
+            if (item instanceof String) {
+                item = new StringItem((String) item);
+            }
+            items.addElement(item);
+        }
+        needRecalc();
+    }
+
+    /**
+     * Remove all items from this screen.
+     */
+    public synchronized void removeAllItems() {
+        highlightedIndex = 0;
+        scroll = -itemPadding;
+        items.setSize(0);
+        needRecalc();
+    }
+
+    /**
+     * Get the amount of items currently contained in this screen.
+     */
+    public int getItemCount() {
+        return items.size();
+    }
+
+    /**
+     * Called when an item in this screen is selected.
+     */
+    protected void itemSelected(Item i) {}
+
+    /**
+     * Called when a different item is highlighted, usually by pressing a directional key.
+     */
+    protected void highlightedItemChanged() {}
+
+    /**
+     * Select the currently highlighted item.
+     */
+    public void selectItem() {
+        Item selected = (Item) items.elementAt(highlightedIndex);
+        if (!selected.isSelectable()) return;
+        selected.itemSelected();
+        itemSelected(selected);
+    }
+
+    /**
+     * Set the currently highlighted item and scroll to it.
+     */
+    public void setHighlightedItem(Item item) {
+        int index = items.indexOf(item);
+        if (index == -1) return;
+        setHighlightedIndex(index);
+    }
+
+    public void setHighlightedIndex(int index) {
+        if (index < 0 || index >= getItemCount()) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        highlightedIndex = index;
+        recalcItems(0, false);
+        makeSelectedItemVisible();
+        highlightedItemChanged();
+        AppBase.repaint();
+    }
+
+    public int getHighlightedIndex() {
+        return highlightedIndex;
+    }
+
+    public Item getHighlightedItem() {
+        if (items.size() == 0 || highlightedIndex < 0 || highlightedIndex >= items.size()) {
+            return null;
+        }
+        return (Item) items.elementAt(highlightedIndex);
+    }
+
+    /**
+     * Get the banner text that is currently being shown; null if none shown
+     */
+    public String getBannerText() {
+        return bannerText;
+    }
+
+    /**
+     * Set the banner text that will be shown on the top of the screen.
+     * Specify null to hide the banner text.
+     */
+    public void setBannerText(String newBannerText) {
+        bannerText = newBannerText;
+        needRecalc();
+    }
+}

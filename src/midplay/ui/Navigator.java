@@ -29,6 +29,14 @@ public class Navigator {
   }
 
   public void forward(final Displayable newView) {
+    forward(newView, null);
+  }
+
+  /**
+   * Shows a view and records an explicit screen to return to. Used when a host
+   * screen is opened over an embedded subapp whose canvas is not the menu.
+   */
+  public void forward(final Displayable newView, final Displayable returnTo) {
     if (newView == null) {
       return;
     }
@@ -49,7 +57,9 @@ public class Navigator {
                     display.setCurrent(alert);
                   }
                 } else {
-                  if (current instanceof Alert) {
+                  if (returnTo != null) {
+                    navStack.push(returnTo);
+                  } else if (current instanceof Alert) {
                     if (beforeAlert != null) {
                       navStack.push(beforeAlert);
                     } else if (rootView != null) {
@@ -72,6 +82,11 @@ public class Navigator {
   }
 
   public void back() {
+    back(null);
+  }
+
+  /** Goes back and runs {@code after} once the previous screen is on display. */
+  public void back(final Runnable after) {
     Display.getDisplay(this.midlet)
         .callSerially(
             new Runnable() {
@@ -85,8 +100,10 @@ public class Navigator {
                       && !(current instanceof Alert)) {
                     display.setCurrent(rootView);
                     beforeAlert = null;
+                    if (after != null) after.run();
                     return;
                   }
+                  if (after != null) after.run();
                   MIDPlay app = MIDPlay.getInstance();
                   if (app != null) {
                     app.exitApp();
@@ -99,6 +116,7 @@ public class Navigator {
                 Displayable previous = (Displayable) navStack.pop();
                 Display.getDisplay(midlet).setCurrent(previous);
                 beforeAlert = null;
+                if (after != null) after.run();
               }
             });
   }

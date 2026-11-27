@@ -258,6 +258,30 @@ HOST_FIELDS = """    private static MIDlet host;
         }
     }
 
+    /**
+     * Temporarily gives the display to the host (for example MIDPlay's player)
+     * without closing Discord. Its screen history and exit handler are kept.
+     */
+    public static Displayable suspend() {
+        if (!active || instance == null) return null;
+        Object screen = disp.getCurrent();
+        // Do not restore a dialog that asked to leave the app; show what was behind it.
+        if (screen instanceof Dialog && ((Dialog) screen).lastScreen != null) {
+            screen = ((Dialog) screen).lastScreen;
+        }
+        lastScreen = screen;
+        active = false;
+        return Display.getDisplay(host).getCurrent();
+    }
+
+    /** Takes the display back after a temporary host screen. */
+    public static void resume() {
+        if (instance == null) return;
+        active = true;
+        if (Settings.useGateway && !gatewayActive()) startGateway();
+        if (lastScreen != null) disp.restore(lastScreen);
+    }
+
     /** Leaves Discord and shows the host MIDlet again. */
     public static void exit() {
         if (!active) return;

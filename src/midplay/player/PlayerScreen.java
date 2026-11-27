@@ -742,7 +742,7 @@ public final class PlayerScreen extends Canvas
   private void handleBackCommand() {
     if (volumeAlertShowing) {
       hideVolumeAlert();
-    } else {
+    } else if (!midplay.ui.PlayerNavHelper.handlePlayerBack(navigator)) {
       navigator.back();
     }
   }

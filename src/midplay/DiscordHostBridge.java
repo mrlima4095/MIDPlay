@@ -74,14 +74,29 @@ public final class DiscordHostBridge implements discordj2me.HostBridge {
     if (midlet == null) {
       return;
     }
-    // Leave Discord first so its screens stop owning the display and its
-    // command does not fight with the host player.
-    try {
-      discordj2me.App.exit();
-    } catch (Throwable ignored) {
-      // The Discord app may not have been initialized yet.
+    if (MIDPlay.getPlayerScreen() == null) {
+      midlet.openNowPlayingFromDiscord();
+      return;
     }
-    midlet.openNowPlayingFromDiscord();
+    // Keep Discord alive but stop it from repainting over MIDPlay's player.
+    final Displayable returnScreen;
+    try {
+      returnScreen = discordj2me.App.suspend();
+    } catch (Throwable ignored) {
+      midlet.openNowPlayingFromDiscord();
+      return;
+    }
+    if (returnScreen == null) {
+      midlet.openNowPlayingFromDiscord();
+      return;
+    }
+    midlet.openNowPlayingFromSubapp(
+        returnScreen,
+        new Runnable() {
+          public void run() {
+            discordj2me.App.resume();
+          }
+        });
   }
 
   private static final class DiscordNotificationForm extends Form implements CommandListener {

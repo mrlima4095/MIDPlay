@@ -102,6 +102,11 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     PlayerNavHelper.showNowPlaying(navigator);
   }
 
+  /** Opens the player over a suspended subapp and returns to its screen on Back. */
+  public void openNowPlayingFromSubapp(Displayable returnScreen, Runnable onReturn) {
+    PlayerNavHelper.showNowPlaying(navigator, returnScreen, onReturn);
+  }
+
   public static MIDPlay getInstance() {
     return instance;
   }
@@ -139,6 +144,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     registerMenuAction(Configuration.MENU_MPGRAM);
     registerMenuAction(Configuration.MENU_GITHUB);
     registerMenuAction(Configuration.MENU_DISCORD);
+    registerMenuAction(Configuration.MENU_DISCOFI);
     registerMenuAction(Configuration.MENU_OPENTTY);
     registerMenuAction(Configuration.MENU_NOTES);
     registerMenuAction(Configuration.MENU_TASKS);
@@ -200,6 +206,20 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
 
           public void kill() {
             discordj2me.App.kill();
+          }
+        });
+    SubAppManager.register(
+        new SubAppManager.SubApp() {
+          public String getNameKey() {
+            return "subapp.discofi";
+          }
+
+          public boolean isRunning() {
+            return discofi.App.isRunning();
+          }
+
+          public void kill() {
+            discofi.App.kill();
           }
         });
     SubAppManager.register(
@@ -385,6 +405,9 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     if (key.equalsIgnoreCase("discord")) {
       return Configuration.MENU_DISCORD;
     }
+    if (key.equalsIgnoreCase("discofi")) {
+      return Configuration.MENU_DISCOFI;
+    }
     if (key.equalsIgnoreCase("opentty")) {
       return Configuration.MENU_OPENTTY;
     }
@@ -439,6 +462,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       openGitHubJ2ME();
     } else if (Configuration.MENU_DISCORD.equals(key)) {
       openDiscordJ2ME();
+    } else if (Configuration.MENU_DISCOFI.equals(key)) {
+      openDiscofi();
     } else if (Configuration.MENU_OPENTTY.equals(key)) {
       openOpenTTY();
     } else if (Configuration.MENU_NOTES.equals(key)) {
@@ -476,6 +501,17 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     discordj2me.App.setHostLanguage(Lang.getCurrentLang());
     discordj2me.App.setHostBridge(DiscordHostBridge.getInstance());
     discordj2me.App.open(
+        this,
+        new Runnable() {
+          public void run() {
+            Display.getDisplay(MIDPlay.this).setCurrent(mainMenu);
+          }
+        });
+  }
+
+  private void openDiscofi() {
+    discofi.App.setHostBridge(DiscofiHostBridge.getInstance());
+    discofi.App.open(
         this,
         new Runnable() {
           public void run() {
@@ -568,6 +604,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
                 discordj2me.App.setHostLanguage(Lang.getCurrentLang());
                 discordj2me.App.setHostBridge(DiscordHostBridge.getInstance());
                 discordj2me.App.warmUp(MIDPlay.this);
+                discofi.App.setHostBridge(DiscofiHostBridge.getInstance());
+                discofi.App.warmUp(MIDPlay.this);
               }
             });
       }
@@ -722,6 +760,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   }
 
   private void goToPlayerScreen() {
+    PlayerNavHelper.clearSubappReturn();
     PlayerScreen currentPlayerScreen = getPlayerScreen();
     if (currentPlayerScreen != null) {
       navigator.forward(currentPlayerScreen);

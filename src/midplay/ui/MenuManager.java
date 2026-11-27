@@ -69,6 +69,7 @@ public class MenuManager {
     removeMenuItem("menu.rss");
     boolean hadReddit = hasMenuItem(Configuration.MENU_REDDIT);
     boolean hadDiscord = hasMenuItem(Configuration.MENU_DISCORD);
+    boolean hadDiscofi = hasMenuItem(Configuration.MENU_DISCOFI);
     boolean hadOpenTTY = hasMenuItem(Configuration.MENU_OPENTTY);
     ensureDefaultItemsPresent();
     // On upgrades, slot Reddit in right after Pinterest without touching the rest
@@ -83,6 +84,10 @@ public class MenuManager {
     // OpenTTY follows Discord on the first run after the update.
     if (!hadOpenTTY) {
       insertAfterAnchor(Configuration.MENU_OPENTTY, Configuration.MENU_DISCORD);
+    }
+    // Discofi sits next to the legacy Discord client without replacing it.
+    if (!hadDiscofi) {
+      insertAfterAnchor(Configuration.MENU_DISCOFI, Configuration.MENU_DISCORD);
     }
   }
 

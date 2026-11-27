@@ -1,0 +1,101 @@
+package fi.gtrxac.bluewap.ui;
+
+import fi.gtrxac.bluewap.*;
+import tube42.lib.imagelib.ImageUtils;
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Image;
+
+public class RadioButtonItem extends Item {
+    private RadioButtonGroup group;
+    private StringItem strItem;
+    public boolean ticked;
+
+    private static int imageHash;
+    private static Image tickedImage;
+    private static Image untickedImage;
+    
+    public RadioButtonItem(RadioButtonGroup group, String text) {
+        super(true);
+        this.group = group;
+        group.addItem(this);
+        this.strItem = new StringItem(text);
+    }
+
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
+        if (highlighted) {
+            g.setColor(Colors.radioButtonItemBackgroundSel);
+            g.fillRect(0, 0, width, height);
+            drawHighlight(g, width);
+        }
+
+        int pad = Fonts.height/10;
+        g.drawImage(ticked ? tickedImage : untickedImage, pad, pad, 0);
+
+        int strOffset = Fonts.height*6/5;
+        g.translate(strOffset, 0);
+        strItem.draw(g, screen, width - strOffset, false);
+        g.translate(-strOffset, 0);
+    }
+
+    private Image createRadioButtonImage(int size, boolean ticked) {
+        int renderSize = (size*Platform.vectorRenderScale + 13)/14*14;
+        int blockSize = renderSize/14;
+
+        Image result = Image.createImage(renderSize, renderSize);
+        Graphics g = result.getGraphics();
+
+        // outline
+        g.setColor(Colors.radioButtonOutline);
+        g.fillArc(blockSize, blockSize, blockSize*12, blockSize*12, 0, 360);
+
+        // fill insides
+        g.setColor(Colors.radioButtonFill);
+        g.fillArc(blockSize*2, blockSize*2, blockSize*10, blockSize*10, 0, 360);
+
+        // black dot for ticked button
+        if (ticked) {
+            g.setColor(Colors.radioButtonDot);
+            g.fillArc(blockSize*4, blockSize*4, blockSize*6, blockSize*6, 0, 360);
+        }
+        
+        // make transparent
+        int[] rgb = new int[renderSize*renderSize];
+        result.getRGB(rgb, 0, renderSize, 0, 0, renderSize, renderSize);
+        result = null;
+        int topLeft = rgb[0];  // color of an unpainted pixel
+
+        for (int i = 0; i < rgb.length; i++) {
+            // Make every unpainted (white) pixel transparent (0 alpha).
+            // Using the same color as the button's outline to avoid ugly outlines
+            if (rgb[i] == topLeft) {
+                rgb[i] = Colors.radioButtonOutline;  // color entries have 0 alpha
+            }
+        }
+
+        result = Image.createRGBImage(rgb, renderSize, renderSize, true);
+
+        return ImageUtils.resize(result, size, size, true, true);
+    }
+
+    public void recalc(int width) {
+        int newImageSize = Fonts.height - Fonts.height/10*2;
+        
+        int newImageHash = newImageSize + Colors.radioButtonOutline +
+            Colors.radioButtonFill + Colors.radioButtonDot;
+
+        if (imageHash != newImageHash) {
+            untickedImage = null;
+            tickedImage = null;
+            untickedImage = createRadioButtonImage(newImageSize, false);
+            tickedImage = createRadioButtonImage(newImageSize, true);
+            imageHash = newImageHash;
+        }
+
+        strItem.recalc(width - Fonts.height*5/4);
+        height = strItem.height;
+    }
+
+    public void itemSelected() {
+        if (group != null) group.setTicked(this);
+    }
+}

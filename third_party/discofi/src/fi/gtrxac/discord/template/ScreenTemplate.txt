@@ -1,0 +1,34 @@
+package fi.gtrxac.discord;
+
+import fi.gtrxac.discord.model.*;
+import fi.gtrxac.bluewap.ui.*;
+import fi.gtrxac.bluewap.*;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
+
+public class MyScreen extends ListScreen implements CommandListener {
+    public static final int CMD_BACK = 1;
+
+    public MyScreen() {
+        super();
+        setTitle("");
+
+        addItem();
+
+        setCommandListener(this);
+        addCommand(new Command("Back", Command.BACK, CMD_BACK));
+    }
+
+    public void commandAction(Command c, Displayable d) {
+        switch (c.getPriority()) {
+            case CMD_BACK: {
+                App.popScreen();
+                break;
+            }
+        }
+    }
+
+    public void itemSelected(Item i) {
+    }
+}

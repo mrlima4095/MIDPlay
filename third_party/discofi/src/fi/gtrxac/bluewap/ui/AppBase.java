@@ -1,0 +1,120 @@
+package fi.gtrxac.bluewap.ui;
+
+import javax.microedition.midlet.*;
+import javax.microedition.lcdui.*;
+import java.util.*;
+
+public abstract class AppBase extends MIDlet {
+    // _________________________________________________________________________
+    //
+    //  MIDlet lifecycle
+    // _________________________________________________________________________
+    //
+	public static Display disp;
+    public static AppBase instance;
+    
+    private boolean started = false;
+
+    public AppBase() {
+        instance = this;
+    }
+
+    public void startApp() {
+        if (started) return;
+        started = true;
+        disp = Display.getDisplay(this);
+        Fonts.loadFonts(Font.SIZE_SMALL);
+        Colors.loadDefaults();
+
+        init();
+
+        disp.setCurrent(AppCanvas.instance);
+    }
+
+    public void pauseApp() {}
+
+    public void destroyApp(boolean unconditional) {}
+
+    // _________________________________________________________________________
+    //
+    //  Screen management
+    // _________________________________________________________________________
+    //
+    private static Stack screens = new Stack();
+
+    private static void screenChanged() {
+        AppCanvas.instance.updateCommands();
+        AppCanvas.instance.updateTitle();
+        repaint();
+    }
+
+    // _________________________________________________________________________
+    //
+    //  Public API
+    // _________________________________________________________________________
+    //
+
+    /**
+     * Implemented by the app to show the first screen of the app.
+     */
+    public abstract void init();
+
+    /**
+     * Add a new screen to the top of the screen stack and show it.
+     */
+    public static void pushScreen(Screen s) {
+        screens.push(s);
+        screenChanged();
+    }
+
+    /**
+     * Close the screen from the top of the screen stack and go back to the previous screen. 
+     */
+    public static void popScreen() {
+        screens.pop();
+        screenChanged();
+    }
+
+    /**
+     * Replace the currently shown screen with another screen.
+     */
+    public static void replaceScreen(Screen s) {
+        screens.pop();
+        pushScreen(s);
+    }
+
+    /**
+     * Close all screens from the screen stack and show a new screen.
+     */
+    public static void replaceAllScreens(Screen s) {
+        screens.setSize(0);
+        pushScreen(s);
+    }
+
+    /**
+     * Get the currently shown screen.
+     */
+    public static Screen getCurrentScreen() {
+        if (screens.empty()) return null;
+        return (Screen) screens.peek();
+    }
+
+    /**
+     * Get the screen that is below the currently shown screen.
+     */
+    public static Screen getPreviousScreen() {
+        if (screens.size() <= 1) return null;
+        return (Screen) screens.elementAt(screens.size() - 2);
+    }
+
+    public static void recalcAllScreens() {
+        for (int i = 0; i < screens.size(); i++) {
+            Screen s = (Screen) screens.elementAt(i);
+            s.needRecalc();
+        }
+    }
+
+    public static void repaint() {
+        AppCanvas.instance.repaint();
+    }
+}

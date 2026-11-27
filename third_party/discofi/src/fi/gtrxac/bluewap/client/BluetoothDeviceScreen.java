@@ -1,0 +1,211 @@
+//#ifndef NO_BLUETOOTH
+package fi.gtrxac.bluewap.client;
+
+import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.http.*;
+import fi.gtrxac.bluewap.bt.*;
+import fi.gtrxac.bluewap.ui.*;
+import java.util.Vector;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
+import javax.bluetooth.*;
+
+import fi.gtrxac.discord.*;
+
+public class BluetoothDeviceScreen extends ListScreen implements BluetoothClientListener, CommandListener {
+    private static final int CMD_BACK = 0;
+
+    private ButtonItem searchButton = new ButtonItem("Search devices");
+    private ButtonItem autoConnectButton = new ButtonItem("Auto connect");
+    private Vector devices = new Vector();
+    private Vector deviceItems = new Vector();
+    private BluetoothClient client;
+
+    private RemoteDevice[] knownDevices;
+    private boolean threadIsForKnownDevices;
+
+    public BluetoothDeviceScreen() {
+        super();
+        setTitle("Select device");
+
+        addItem(searchButton);
+        addItem(autoConnectButton);
+        addItem(new BlankItem(Fonts.height/8));
+
+        initClient();
+        knownDevices = client.getKnownDevices();
+
+        // start getting device names
+        if (knownDevices.length > 0) {
+            threadIsForKnownDevices = true;
+            new Thread(this).start();
+        }
+
+        addCommand(new Command("Back", Command.BACK, CMD_BACK));
+        setCommandListener(this);
+    }
+
+    public void run() {
+        if (!threadIsForKnownDevices) {
+            // Thread is for kinetic scrolling
+            super.run();
+            return;
+        }
+        threadIsForKnownDevices = false;
+
+        setBannerText("Loading...");
+
+        // Wait for the screen to show up
+        while (App.getCurrentScreen() != this) {
+            Util.sleep(10);
+        }
+
+        // Allow up to 2 seconds for the paired device names to be fetched
+        // (may take especially long on Samsung; 15 sec for every device that can't be reached)
+        long timeLimit = System.currentTimeMillis() + 2000;
+
+        for (int i = 0; i < knownDevices.length; i++) {
+            String name = knownDevices[i].getBluetoothAddress();
+
+            if (Settings.deviceNameCache.containsKey(name)) {
+                name = (String) Settings.deviceNameCache.get(name);
+            }
+            else if (Settings.getPairedDeviceNames && System.currentTimeMillis() < timeLimit) {
+                try {
+                    String friendlyName = knownDevices[i].getFriendlyName(false);
+
+                    if (friendlyName != null && friendlyName.length() != 0) {
+                        name = friendlyName;
+                    }
+                }
+                catch (Exception e) {}
+            }
+            addDeviceItem(name, knownDevices[i]);
+        }
+
+        setBannerText(null);
+
+        // took too long -> don't fetch device names next time
+        if (System.currentTimeMillis() > timeLimit) {
+            Settings.getPairedDeviceNames = false;
+            Settings.save();
+        }
+    }
+
+    public void commandAction(Command c, Displayable d) {
+        if (c.getPriority() == CMD_BACK) {
+            if (client != null) {
+                client.stopSearching();
+            }
+            App.popScreen();
+        }
+    }
+
+    protected void itemSelected(Item i) {
+        if (i == searchButton) {
+            searchDevices(false);
+        }
+        else if (i == autoConnectButton) {
+            searchDevices(true);
+        }
+        else {
+            setBannerText("Connecting...");
+
+            int idx = deviceItems.indexOf(i);
+            RemoteDevice dev = (RemoteDevice) devices.elementAt(idx);
+            initClient();
+            client.connect(dev);
+        }
+    }
+
+    private void initClient() {
+        if (client != null) return;
+        client = new BluetoothClient(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
+    }
+
+    private void clearAndRefresh() {
+        int lastSel = getHighlightedIndex();
+
+        devices.removeAllElements();
+        deviceItems.removeAllElements();
+        removeAllItems();
+        addItem(searchButton);
+        addItem(autoConnectButton);
+        addItem(new BlankItem(Fonts.height/5));
+
+        setHighlightedIndex(Math.min(getItemCount() - 1, lastSel));
+    }
+
+    private void searchDevices(boolean autoConnect) {
+        initClient();
+        if (client.isSearching()) return;
+
+        clearAndRefresh();
+        setBannerText("Searching...");
+
+        if (autoConnect) client.autoConnect();
+        else client.search();
+    }
+
+    private void addDeviceItem(String name, RemoteDevice device) {
+        devices.addElement(device);
+        ListItem item = new ListItem(name);
+        deviceItems.addElement(item);
+        addItem(item);
+    }
+
+    public void bluetoothDeviceFound(String name, RemoteDevice device, DeviceClass cod) {
+        if (devices.size() == 0) {
+            clearAndRefresh();
+        }
+        String addr = device.getBluetoothAddress();
+
+        // if device name is not directly known, try to get it from the cache
+        if (addr.equals(name) && Settings.deviceNameCache.containsKey(addr)) {
+            name = (String) Settings.deviceNameCache.get(addr);
+        }
+        addDeviceItem(name, device);
+    }
+
+    public void bluetoothSearchCompleted() {
+        setBannerText(null);
+
+        if (devices.size() == 0) {
+            clearAndRefresh();
+            addItem("No devices found. Make sure the server device is set to visible, then try again.");
+        } else {
+            addItem("Search completed.");
+        }
+    }
+
+    public void bluetoothConnected(String url) {
+        BluetoothHTTP.selectedConnectionUrl = url;
+
+        Screen prev = App.getPreviousScreen();
+
+        if (prev instanceof ConnectionModeScreen) {
+            // Continue the login flow
+            App.replaceScreen(new LoginScreen());
+        }
+        else if (prev == null || prev instanceof AccountListScreen) {
+            // Log into the account that was just selected
+            App.replaceAllScreens(new MainScreen());
+        }
+    }
+
+    public void bluetoothSearchError(Exception e) {
+        bluetoothError("Device search", e);
+    }
+
+    public void bluetoothConnectError(Exception e) {
+        bluetoothError("Connection", e);
+    }
+
+    private void bluetoothError(String heading, Exception e) {
+        e.printStackTrace();
+        setBannerText(null);
+        new DiscordException(heading + " failed", e.toString(), null).show();
+    }
+}
+//#endif
