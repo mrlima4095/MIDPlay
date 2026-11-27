@@ -20,8 +20,9 @@ import midplay.util.Lang;
 
 /**
  * Local Wattpad reading list: stories opened before, each one showing the chapter where the reader
- * stopped. In the normal list, selecting a row resumes it; in the archived list, selecting a row
- * opens the story's chapter list, where the "Continue reading" command resumes from the saved page.
+ * stopped. In the normal list, selecting a row resumes it; the "Open story" command opens the
+ * story's chapter list instead. In the archived list, selecting a row opens the chapter list, where
+ * the "Continue reading" command resumes from the saved page.
  */
 public final class WattpadLibraryScreen extends BaseList {
   private static final int MAX_STORY_BYTES = 400 * 1024;
@@ -30,6 +31,7 @@ public final class WattpadLibraryScreen extends BaseList {
   private static final int SORT_PROGRESS = 2;
 
   private final Command synopsisCommand;
+  private final Command storyCommand;
   private final Command shareCommand;
   private final Command selectCommand;
   private final Command removeCommand;
@@ -51,7 +53,8 @@ public final class WattpadLibraryScreen extends BaseList {
     super(Lang.tr(archived ? "wattpad.archived" : "wattpad.library"), navigator);
     this.archived = archived;
     synopsisCommand = new Command(Lang.tr("wattpad.synopsis"), Command.SCREEN, 1);
-    shareCommand = new Command(Lang.tr("wattpad.share"), Command.SCREEN, 2);
+    storyCommand = new Command(Lang.tr("wattpad.open_story"), Command.SCREEN, 2);
+    shareCommand = new Command(Lang.tr("wattpad.share"), Command.SCREEN, 3);
     selectCommand = new Command(Lang.tr("wattpad.select"), Command.SCREEN, 3);
     removeCommand = new Command(Lang.tr("wattpad.remove"), Command.SCREEN, 4);
     archiveCommand = new Command(Lang.tr("wattpad.archive"), Command.SCREEN, 5);
@@ -86,6 +89,7 @@ public final class WattpadLibraryScreen extends BaseList {
   private void updateCommands() {
     int size = entries.size();
     setCommandVisible(synopsisCommand, size > 0);
+    setCommandVisible(storyCommand, size > 0);
     setCommandVisible(shareCommand, size > 0);
     setCommandVisible(selectCommand, size > 0);
     setCommandVisible(removeCommand, size > 0);
@@ -195,6 +199,8 @@ public final class WattpadLibraryScreen extends BaseList {
     String[] entry = (String[]) entries.elementAt(index);
     if (c == synopsisCommand) {
       loadSynopsis(entry);
+    } else if (c == storyCommand) {
+      open(entry, true);
     } else if (c == shareCommand) {
       share(entry);
     } else if (c == removeCommand) {
@@ -304,11 +310,16 @@ public final class WattpadLibraryScreen extends BaseList {
   }
 
   private void open(final String[] entry) {
+    open(entry, false);
+  }
+
+  /** Opens the saved chapter, or the story's chapter list when {@code storyPage} is set. */
+  private void open(final String[] entry, final boolean storyPage) {
     // Downloaded stories open straight from the card, so the library also works offline.
     String storyId = entry[WattpadProgressManager.ENTRY_ID];
     Vector local = WattpadDownloadManager.getInstance().getLocalParts(storyId);
     if (local != null && local.size() > 0) {
-      openLocal(entry, local);
+      openLocal(entry, local, storyPage);
       return;
     }
     loading = true;
@@ -324,7 +335,7 @@ public final class WattpadLibraryScreen extends BaseList {
                         loading = false;
                         // Do not dismiss the loading alert here. forward() replaces it and pushes
                         // the library (beforeAlert) into the history, so Back returns to the list.
-                        if (archived) {
+                        if (storyPage || archived) {
                           openChapters(entry, text);
                         } else {
                           resume(entry, text);
@@ -348,14 +359,14 @@ public final class WattpadLibraryScreen extends BaseList {
   }
 
   /** Opens a downloaded story without touching the network. */
-  private void openLocal(String[] entry, Vector parts) {
+  private void openLocal(String[] entry, Vector parts, boolean storyPage) {
     String title =
         WattpadDownloadManager.getInstance()
             .getLocalTitle(entry[WattpadProgressManager.ENTRY_ID]);
     if (title.length() == 0) {
       title = entry[WattpadProgressManager.ENTRY_TITLE];
     }
-    if (archived) {
+    if (storyPage || archived) {
       navigator.forward(
           new WattpadStoryScreen(
               navigator, entry[WattpadProgressManager.ENTRY_ID], title, parts));
@@ -364,7 +375,7 @@ public final class WattpadLibraryScreen extends BaseList {
     }
   }
 
-  /** Archived stories open on their chapter list, not directly on the saved reading position. */
+  /** Archived stories and the "open story" command show the chapter list, not the reader. */
   private void openChapters(String[] entry, String json) {
     if (WattpadApi.parseParts(json).size() == 0) {
       String error = WattpadApi.parseError(json);
