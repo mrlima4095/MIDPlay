@@ -105,7 +105,7 @@ public final class StorageScreen extends BaseForm {
   }
 
   private void promptClearHistory() {
-    navigator.showConfirmationAlert(
+    navigator.showYesNoAlert(
         Lang.tr("storage.clear_confirm"),
         new Runnable() {
           public void run() {
@@ -113,8 +113,7 @@ public final class StorageScreen extends BaseForm {
             rebuild();
             navigator.showAlert(Lang.tr("storage.history_cleared"), AlertType.CONFIRMATION);
           }
-        },
-        AlertType.WARNING);
+        });
   }
 
   private void clearHistory() {
