@@ -40,7 +40,8 @@ OPENTTY_RES_DIR="$BUILD_DIR/opentty-res"
 JSR135_STUB_DIR="tools/jsr135-api"
 JSR135_STUB_JAR="$BUILD_DIR/jsr135-api.jar"
 DIST_DIR="dist"
-VERSION="26.11.4"
+VERSION="26.11.37"
+DEPLOY_DIR="${DEPLOY_DIR:-/var/www/opentty/dist}"
 
 # ProGuard (and only ProGuard) runs on any modern JDK.
 RUN_JAVA="${RUN_JAVA:-$(command -v java)}"
@@ -193,6 +194,16 @@ JAR_SIZE="$(wc -c < "$DIST_DIR/MIDPlay.jar" | tr -d ' ')"
   echo "MIDlet-Jar-URL: MIDPlay.jar"
   echo "MIDlet-Jar-Size: $JAR_SIZE"
 } > "$DIST_DIR/MIDPlay.jad"
+
+# ---------------------------------------------------------------------------
+# Keep the live OTA directory in sync on this host. Other machines can point
+# DEPLOY_DIR elsewhere (or to a non-existent path) to skip the copy.
+if [ -d "$DEPLOY_DIR" ] && [ -w "$DEPLOY_DIR" ]; then
+  echo "• Deploy → $DEPLOY_DIR"
+  cp "$DIST_DIR/MIDPlay.jar" "$DIST_DIR/MIDPlay.jad" "$DEPLOY_DIR/"
+else
+  echo "• Skip deploy ($DEPLOY_DIR is not a writable directory)"
+fi
 
 # ---------------------------------------------------------------------------
 echo
