@@ -94,7 +94,9 @@
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
     "reddit": "Reddit",
-    "discord": "Discord"
+    "discord": "Discord",
+    "discofi": "Discofi",
+    "stats": "Statystyki"
   },
   "task_viewer": {
     "title": "Uruchomione zadania",
@@ -265,6 +267,7 @@
     "theme_mode": "Wygląd",
     "theme_color": "Motyw",
     "load_thumbnails": "Ładuj miniatury",
+    "stats_thumbnails": "Ładuj miniatury w statystykach",
     "theme_mode_options": {
       "dark": "Ciemny",
       "light": "Jasny"
@@ -701,6 +704,7 @@
   },
   "wattpad": {
     "title": "Wattpad",
+    "open_story": "Otwórz historię",
     "search_field": "Historia, autor lub tag",
     "stories": "Historie",
     "language_any": "Wszystkie języki",
@@ -847,6 +851,17 @@
     "group_other": "Inne dane",
     "rms": "RMS"
   },
+  "discofi": {
+    "import_legacy": "Importuj ustawienia Discord",
+    "player": "Odtwarzacz",
+    "save_note": "Zapisz notatkę",
+    "import_token_empty": "Wybrana notatka jest pusta",
+    "import_token_note": "Importuj z notatki",
+    "no_notes": "Nie znaleziono notatek",
+    "note": "Notatka",
+    "save_note_done": "Zapisano w notatkach",
+    "save_note_error": "Nie udało się zapisać notatki"
+  },
   "discord": {
     "import_token_title": "Importuj token",
     "import_token_prompt": "Skąd chcesz zaimportować token?",
@@ -871,5 +886,19 @@
     "empty": "Pusty tekst",
     "edit_title": "Edytuj Teleprompter",
     "open": "Otwórz w Teleprompterze"
+  },
+  "stats": {
+    "most_played": "Najczęściej odtwarzane",
+    "recent": "Ostatnio odtwarzane",
+    "artists": "Najpopularniejsi artyści",
+    "view": "Zmień widok",
+    "clear": "Wyczyść statystyki",
+    "clear_confirm": "Wyczyścić wszystkie statystyki odtwarzania?",
+    "status": {
+      "cleared": "Statystyki wyczyszczone"
+    },
+    "plays": "{0} odtworzeń",
+    "empty": "Brak odtworzeń",
+    "anonymous_disabled": "Statystyki nie są dostępne w trybie anonimowym"
   }
 }

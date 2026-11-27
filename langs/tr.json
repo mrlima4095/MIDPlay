@@ -94,7 +94,9 @@
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
     "reddit": "Reddit",
-    "discord": "Discord"
+    "discord": "Discord",
+    "discofi": "Discofi",
+    "stats": "İstatistikler"
   },
   "task_viewer": {
     "title": "Çalışan görevler",
@@ -266,6 +268,7 @@
     "theme_color": "Tema Rengi",
     "use_wifi": "Wi-Fi kullan (Blackberry)",
     "load_thumbnails": "Küçük Resimleri Yükle",
+    "stats_thumbnails": "İstatistiklerde küçük resimleri yükle",
     "theme_mode_options": {
       "light": "Açık",
       "dark": "Koyu"
@@ -701,6 +704,7 @@
   },
   "wattpad": {
     "title": "Wattpad",
+    "open_story": "Hikayeyi aç",
     "search_field": "Hikâye, yazar veya etiket",
     "stories": "Hikâyeler",
     "language_any": "Tüm diller",
@@ -847,6 +851,17 @@
     "group_other": "Diğer veriler",
     "rms": "RMS"
   },
+  "discofi": {
+    "import_legacy": "Discord ayarlarını içe aktar",
+    "player": "Oynatıcı",
+    "save_note": "Notu kaydet",
+    "import_token_empty": "Seçilen not boş",
+    "import_token_note": "Notetan içe aktar",
+    "no_notes": "Not bulunamadı",
+    "note": "Not",
+    "save_note_done": "Notlara kaydedildi",
+    "save_note_error": "Not kaydedilemedi"
+  },
   "discord": {
     "import_token_title": "Token içe aktar",
     "import_token_prompt": "Tokenı nereden içe aktarmak istiyorsunuz?",
@@ -871,5 +886,19 @@
     "empty": "Boş metin",
     "edit_title": "Teleprompter Düzenle",
     "open": "Teleprompterda Aç"
+  },
+  "stats": {
+    "most_played": "En Çok Çalınanlar",
+    "recent": "Son Çalınanlar",
+    "artists": "En Çok Çalınan Sanatçılar",
+    "view": "Görünümü Değiştir",
+    "clear": "İstatistikleri Temizle",
+    "clear_confirm": "Tüm dinleme istatistikleri temizlensin mi?",
+    "status": {
+      "cleared": "İstatistikler temizlendi"
+    },
+    "plays": "{0} çalınma",
+    "empty": "Henüz çalınma kaydı yok",
+    "anonymous_disabled": "İstatistiklere anonim modda erişilemez"
   }
 }

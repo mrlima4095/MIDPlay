@@ -94,7 +94,9 @@
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
     "reddit": "Reddit",
-    "discord": "Discord"
+    "discord": "Discord",
+    "discofi": "Discofi",
+    "stats": "Thống kê"
   },
   "task_viewer": {
     "title": "Tác vụ đang chạy",
@@ -266,6 +268,7 @@
     "theme_color": "Màu chủ đề",
     "use_wifi": "Dùng Wi-Fi (Blackberry)",
     "load_thumbnails": "Hiển thị ảnh thu nhỏ",
+    "stats_thumbnails": "Hiển thị ảnh thu nhỏ trong thống kê",
     "theme_mode_options": {
       "light": "Sáng",
       "dark": "Tối"
@@ -701,6 +704,7 @@
   },
   "wattpad": {
     "title": "Wattpad",
+    "open_story": "Mở truyện",
     "search_field": "Truyện, tác giả hoặc thẻ",
     "stories": "Truyện",
     "language_any": "Tất cả ngôn ngữ",
@@ -847,6 +851,17 @@
     "group_other": "Dữ liệu khác",
     "rms": "RMS"
   },
+  "discofi": {
+    "import_legacy": "Nhập cài đặt Discord",
+    "player": "Trình phát",
+    "save_note": "Lưu ghi chú",
+    "import_token_empty": "Ghi chú đã chọn trống",
+    "import_token_note": "Nhập từ ghi chú",
+    "no_notes": "Không tìm thấy ghi chú",
+    "note": "Ghi chú",
+    "save_note_done": "Đã lưu vào ghi chú",
+    "save_note_error": "Không thể lưu ghi chú"
+  },
   "discord": {
     "import_token_title": "Nhập token",
     "import_token_prompt": "Bạn muốn nhập token từ đâu?",
@@ -871,5 +886,19 @@
     "empty": "Trống",
     "edit_title": "Chỉnh sửa Teleprompter",
     "open": "Mở trong Teleprompter"
+  },
+  "stats": {
+    "most_played": "Nghe nhiều nhất",
+    "recent": "Nghe gần đây",
+    "artists": "Nghệ sĩ nghe nhiều nhất",
+    "view": "Đổi chế độ xem",
+    "clear": "Xóa thống kê",
+    "clear_confirm": "Xóa tất cả thống kê nghe nhạc?",
+    "status": {
+      "cleared": "Đã xóa thống kê"
+    },
+    "plays": "{0} lượt nghe",
+    "empty": "Chưa có lượt nghe nào",
+    "anonymous_disabled": "Không thể truy cập thống kê khi đang ở chế độ ẩn danh"
   }
 }

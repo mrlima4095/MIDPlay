@@ -94,7 +94,9 @@
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
     "reddit": "Reddit",
-    "discord": "Discord"
+    "discord": "Discord",
+    "discofi": "Discofi",
+    "stats": "סטטיסטיקה"
   },
   "task_viewer": {
     "title": "משימות פעילות",
@@ -265,6 +267,7 @@
     "theme_mode": "ערכת נושא",
     "theme_color": "צבע ערכת הנושא",
     "load_thumbnails": "טען תמונות ממוזערות",
+    "stats_thumbnails": "טען תמונות ממוזערות בסטטיסטיקה",
     "theme_mode_options": {
       "light": "בהיר",
       "dark": "כהה"
@@ -701,6 +704,7 @@
   },
   "wattpad": {
     "title": "Wattpad",
+    "open_story": "פתח סיפור",
     "search_field": "סיפור, סופר או תג",
     "stories": "סיפורים",
     "language_any": "כל השפות",
@@ -847,6 +851,17 @@
     "group_other": "נתונים אחרים",
     "rms": "RMS"
   },
+  "discofi": {
+    "import_legacy": "ייבא הגדרות Discord",
+    "player": "נגן",
+    "save_note": "שמור הערה",
+    "import_token_empty": "ההערה שנבחרה ריקה",
+    "import_token_note": "ייבא מהערה",
+    "no_notes": "לא נמצאו הערות",
+    "note": "הערה",
+    "save_note_done": "נשמר בהערות",
+    "save_note_error": "לא ניתן לשמור את ההערה"
+  },
   "discord": {
     "import_token_title": "ייבוא טוקן",
     "import_token_prompt": "מאיפה לייבא את הטוקן?",
@@ -871,5 +886,19 @@
     "empty": "טקסט ריק",
     "edit_title": "ערוך טלפרומפטר",
     "open": "פתח בטלפרומפטר"
+  },
+  "stats": {
+    "most_played": "הושמעו ביותר",
+    "recent": "הושמעו לאחרונה",
+    "artists": "אמנים מובילים",
+    "view": "שינוי תצוגה",
+    "clear": "ניקוי סטטיסטיקה",
+    "clear_confirm": "לנקות את כל נתוני ההשמעה?",
+    "status": {
+      "cleared": "הסטטיסטיקה נוקתה"
+    },
+    "plays": "{0} השמעות",
+    "empty": "אין עדיין השמעות",
+    "anonymous_disabled": "הסטטיסטיקה אינה זמינה במצב אנונימי"
   }
 }

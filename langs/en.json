@@ -103,7 +103,9 @@
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
     "reddit": "Reddit",
-    "discord": "Discord"
+    "discord": "Discord",
+    "discofi": "Discofi",
+    "stats": "Statistics"
   },
   "mpgram": {
     "send_note": "Send note",
@@ -191,6 +193,7 @@
     "mpgram": "MPGram",
     "github": "GitHub",
     "discord": "Discord",
+    "discofi": "Discofi",
     "opentty": "OpenTTY"
   },
   "player": {
@@ -353,6 +356,7 @@
     "theme_color": "Theme Color",
     "use_wifi": "Use Wi-Fi (Blackberry)",
     "load_thumbnails": "Load Thumbnails",
+    "stats_thumbnails": "Load thumbnails in stats",
     "theme_mode_options": {
       "dark": "Dark",
       "light": "Light"
@@ -722,6 +726,7 @@
   },
   "wattpad": {
     "title": "Wattpad",
+    "open_story": "Open story",
     "search_field": "Story, author or tag",
     "stories": "Stories",
     "language_any": "All languages",
@@ -883,6 +888,17 @@
     "group_other": "Other data",
     "rms": "RMS"
   },
+  "discofi": {
+    "import_legacy": "Import Discord settings",
+    "player": "Player",
+    "save_note": "Save note",
+    "import_token_empty": "The selected note is empty",
+    "import_token_note": "Import from note",
+    "no_notes": "No notes found",
+    "note": "Note",
+    "save_note_done": "Saved to notes",
+    "save_note_error": "Could not save note"
+  },
   "discord": {
     "import_token_title": "Import token",
     "import_token_prompt": "Where do you want to import the token from?",
@@ -930,5 +946,19 @@
     "empty": "Empty text",
     "edit_title": "Edit Teleprompter",
     "open": "Open in Teleprompter"
+  },
+  "stats": {
+    "most_played": "Most Played",
+    "recent": "Recently Played",
+    "artists": "Top Artists",
+    "view": "Change View",
+    "clear": "Clear Stats",
+    "clear_confirm": "Clear all listening statistics?",
+    "status": {
+      "cleared": "Statistics cleared"
+    },
+    "plays": "{0} plays",
+    "empty": "No plays recorded yet",
+    "anonymous_disabled": "Statistics are not available in anonymous mode"
   }
 }

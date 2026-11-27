@@ -103,7 +103,9 @@
     "wattpad": "Wattpad",
     "pinterest": "Pinterest",
     "reddit": "Reddit",
-    "discord": "Discord"
+    "discord": "Discord",
+    "discofi": "Discofi",
+    "stats": "Estatísticas"
   },
   "mpgram": {
     "send_note": "Enviar nota",
@@ -191,6 +193,7 @@
     "mpgram": "MPGram",
     "github": "GitHub",
     "discord": "Discord",
+    "discofi": "Discofi",
     "opentty": "OpenTTY"
   },
   "player": {
@@ -353,6 +356,7 @@
     "theme_color": "Cor do Tema",
     "use_wifi": "Usar Wi-Fi (Blackberry)",
     "load_thumbnails": "Carregar Miniaturas",
+    "stats_thumbnails": "Carregar Miniaturas nas Estatísticas",
     "theme_mode_options": {
       "dark": "Escuro",
       "light": "Claro"
@@ -722,6 +726,7 @@
   },
   "wattpad": {
     "title": "Wattpad",
+    "open_story": "Abrir história",
     "search_field": "História, autor ou tag",
     "stories": "Histórias",
     "language_any": "Todos os idiomas",
@@ -883,6 +888,17 @@
     "group_other": "Outros dados",
     "rms": "RMS"
   },
+  "discofi": {
+    "import_legacy": "Importar configurações do Discord",
+    "player": "Player",
+    "save_note": "Salvar nota",
+    "import_token_empty": "A nota selecionada está vazia",
+    "import_token_note": "Importar de nota",
+    "no_notes": "Nenhuma nota encontrada",
+    "note": "Nota",
+    "save_note_done": "Salvo nas notas",
+    "save_note_error": "Não foi possível salvar a nota"
+  },
   "discord": {
     "import_token_title": "Importar token",
     "import_token_prompt": "De onde você quer importar o token?",
@@ -930,5 +946,19 @@
     "empty": "Texto vazio",
     "edit_title": "Editar Teleprompter",
     "open": "Abrir no Teleprompter"
+  },
+  "stats": {
+    "most_played": "Mais Ouvidos",
+    "recent": "Ouvidos Recentemente",
+    "artists": "Artistas Mais Ouvidos",
+    "view": "Alternar Visão",
+    "clear": "Limpar Estatísticas",
+    "clear_confirm": "Limpar todas as estatísticas de reprodução?",
+    "status": {
+      "cleared": "Estatísticas limpas"
+    },
+    "plays": "{0} reproduções",
+    "empty": "Nenhuma reprodução registrada",
+    "anonymous_disabled": "Estatísticas não estão disponíveis no modo anônimo"
   }
 }
