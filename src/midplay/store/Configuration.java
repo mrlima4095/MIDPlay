@@ -18,6 +18,7 @@ public class Configuration {
   public static final String STORAGE_TRACKS = "storage.tracks";
   public static final String STORAGE_LAST_SESSION = "storage.last_session";
   public static final String STORAGE_RECENT = "storage.recent";
+  public static final String STORAGE_STATS = "storage.stats";
   public static final String STORAGE_DOWNLOADS = "storage.downloads";
   public static final String STORAGE_DOWNLOADS_BACKUP = "storage.downloads.bak";
   public static final String STORAGE_NOTES = "storage.notes";
@@ -35,12 +36,14 @@ public class Configuration {
   public static final String MENU_SETTINGS = "menu.settings";
   public static final String MENU_ABOUT = "menu.about";
   public static final String MENU_RECENT = "menu.recent";
+  public static final String MENU_STATS = "menu.stats";
   public static final String MENU_EQUALIZER = "menu.equalizer";
   public static final String MENU_DOWNLOADS = "menu.downloads";
   public static final String MENU_FILES = "menu.files";
   public static final String MENU_MPGRAM = "menu.mpgram";
   public static final String MENU_GITHUB = "menu.github";
   public static final String MENU_DISCORD = "menu.discord";
+  public static final String MENU_DISCOFI = "menu.discofi";
   public static final String MENU_OPENTTY = "menu.opentty";
   public static final String MENU_OPEN_URI = "menu.open_uri";
   public static final String MENU_NOTES = "menu.notes";
@@ -180,6 +183,10 @@ public class Configuration {
   public static final int THUMBNAILS_OFF = 0;
   public static final int THUMBNAILS_ON = 1;
 
+  // Stats thumbnails are opt-in: some devices react to artwork loads with stray list selections.
+  public static final int STATS_THUMBNAILS_OFF = 0;
+  public static final int STATS_THUMBNAILS_ON = 1;
+
   public static final int AB_LOOP_FEATURE_OFF = 0;
   public static final int AB_LOOP_FEATURE_ON = 1;
 
@@ -194,11 +201,13 @@ public class Configuration {
   public static Image settingsIcon;
   public static Image infoIcon;
   public static Image recentIcon;
+  public static Image statsIcon;
   public static Image equalizerIcon;
   public static Image mpgramIcon;
   public static Image githubIcon;
   public static Image openttyIcon;
   public static Image discordIcon;
+  public static Image discofiIcon;
   public static Image notesIcon;
   public static Image tasksIcon;
   public static Image wattpadIcon;
@@ -237,11 +246,13 @@ public class Configuration {
     settingsIcon = region(5, 36, 36);
     infoIcon = region(6, 36, 36);
     recentIcon = region(7, 36, 36);
+    statsIcon = createStatsIcon();
     equalizerIcon = region(8, 36, 36);
     mpgramIcon = Utils.resizeImageToFit(Image.createImage("/m.png"), 36, 36);
     githubIcon = Utils.resizeImageToFit(Image.createImage("/g.png"), 36, 36);
     openttyIcon = Utils.resizeImageToFit(Image.createImage("/opentty.png"), 36, 36);
     discordIcon = Utils.resizeImageToFit(Image.createImage("/discord.png"), 36, 36);
+    discofiIcon = discordIcon;
     notesIcon = createNotesIcon();
     tasksIcon = createTasksIcon();
     wattpadIcon = Utils.resizeImageToFit(Image.createImage("/wattpad.png"), 36, 36);
@@ -281,6 +292,32 @@ public class Configuration {
     graphics.drawLine(20, 30, 30, 20);
     graphics.setColor(0xD37C35);
     graphics.drawLine(29, 19, 30, 20);
+    return image;
+  }
+
+  private static Image createStatsIcon() {
+    Image image = Image.createImage(36, 36);
+    Graphics graphics = image.getGraphics();
+    // White panel with a dark outline.
+    graphics.setColor(0x243447);
+    graphics.fillRoundRect(4, 4, 28, 28, 4, 4);
+    graphics.setColor(0xF4F7FB);
+    graphics.fillRoundRect(3, 3, 28, 28, 4, 4);
+    graphics.setColor(0x52708F);
+    graphics.drawRoundRect(3, 3, 28, 28, 4, 4);
+    // Baseline and ascending bars.
+    graphics.setColor(0x8FA6BC);
+    graphics.drawLine(8, 26, 27, 26);
+    graphics.setColor(0x4B83B5);
+    graphics.fillRoundRect(9, 19, 5, 7, 1, 1);
+    graphics.setColor(0x43A047);
+    graphics.fillRoundRect(16, 14, 5, 12, 1, 1);
+    graphics.setColor(0xF0A83A);
+    graphics.fillRoundRect(23, 9, 5, 17, 1, 1);
+    // Trend line above the bars.
+    graphics.setColor(0xD37C35);
+    graphics.drawLine(10, 16, 17, 11);
+    graphics.drawLine(17, 11, 26, 7);
     return image;
   }
 

@@ -167,20 +167,22 @@ public class MenuManager {
     defaultConfig.add(createMenuItem(Configuration.MENU_FAVORITES, 2, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_DISCOVER_PLAYLISTS, 3, true));
     defaultConfig.add(createMenuItem(Configuration.MENU_RECENT, 4, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_DOWNLOADS, 5, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_FILES, 6, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_EQUALIZER, 7, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_MPGRAM, 8, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_NOTES, 9, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_TASKS, 10, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_WATTPAD, 11, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_PINTEREST, 12, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_REDDIT, 13, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 14, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 15, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_DISCORD, 16, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_OPENTTY, 17, true));
-    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 18, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_STATS, 5, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_DOWNLOADS, 6, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_FILES, 7, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_EQUALIZER, 8, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_MPGRAM, 9, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_NOTES, 10, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_TASKS, 11, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_WATTPAD, 12, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_PINTEREST, 13, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_REDDIT, 14, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_SETTINGS, 15, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_GITHUB, 16, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_DISCORD, 17, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_DISCOFI, 18, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_OPENTTY, 19, true));
+    defaultConfig.add(createMenuItem(Configuration.MENU_ABOUT, 20, true));
     return defaultConfig;
   }
 

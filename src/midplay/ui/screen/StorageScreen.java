@@ -16,6 +16,7 @@ import midplay.store.PinterestSearchHistoryManager;
 import midplay.store.RecentManager;
 import midplay.store.RedditSearchHistoryManager;
 import midplay.store.SettingsManager;
+import midplay.store.StatsManager;
 import midplay.store.UriHistoryManager;
 import midplay.store.WattpadSearchHistoryManager;
 import midplay.ui.BaseForm;
@@ -66,6 +67,7 @@ public final class StorageScreen extends BaseForm {
     Configuration.STORAGE_SETTINGS,
     Configuration.STORAGE_MENU,
     Configuration.STORAGE_RECENT,
+    Configuration.STORAGE_STATS,
     Configuration.STORAGE_LAST_SESSION,
     "open_uri_history",
     "music_search_history",
@@ -118,6 +120,7 @@ public final class StorageScreen extends BaseForm {
   private void clearHistory() {
     try {
       RecentManager.getInstance().clear();
+      StatsManager.getInstance().clear();
       UriHistoryManager.getInstance().clear();
       MusicSearchHistoryManager.getInstance().clear();
       LyricsSearchHistoryManager.getInstance().clear();

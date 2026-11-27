@@ -125,6 +125,18 @@ public class Commands {
     return get("recent.clear", Command.SCREEN, 3);
   }
 
+  public static Command statsView() {
+    return get("stats.view", Command.SCREEN, 3);
+  }
+
+  public static Command statsArtists() {
+    return get("stats.artists", Command.SCREEN, 4);
+  }
+
+  public static Command statsClear() {
+    return get("stats.clear", Command.SCREEN, 5);
+  }
+
   public static Command playerShowPlaylist() {
     return get("player.show_playlist", Command.SCREEN, 9);
   }

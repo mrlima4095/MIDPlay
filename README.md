@@ -36,6 +36,7 @@ This fork builds on upstream MIDPlay 1.7.1:
 - **Translation** — translate notes, Reddit posts and comments through the built-in endpoint.
 - **Menu customization** — hide entries and reorder the main menu.
 - **Playlist improvements** — reorder tracks and create playlists directly from the playlist picker.
+- **Listening stats** — most played tracks, recently played tracks and top artists, with one-tap playback and a clear action that respects anonymous mode.
 - **Configurable services** — pick the music service, and change the HTTP proxy plus the lyrics, translation, Pinterest and Reddit endpoints in Settings.
 
 ## Requirements

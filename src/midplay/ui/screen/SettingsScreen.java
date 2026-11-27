@@ -40,6 +40,7 @@ public final class SettingsScreen extends BaseForm {
   private int discordAutoPrepareIndex;
   private int blackberryWifiIndex = -1;
   private int thumbnailsIndex;
+  private int statsThumbnailsIndex;
   private int abLoopFeatureIndex;
   private int anonymousModeIndex;
 
@@ -54,6 +55,7 @@ public final class SettingsScreen extends BaseForm {
   private int currentMpgramAutoLogin;
   private int currentDiscordAutoPrepare;
   private int currentThumbnails;
+  private int currentStatsThumbnails;
   private int currentAbLoopFeature;
   private int currentAnonymousMode;
   private String currentPlayerMethod;
@@ -147,6 +149,10 @@ public final class SettingsScreen extends BaseForm {
         != togglesGroup.isSelected(thumbnailsIndex)) {
       return true;
     }
+    if ((currentStatsThumbnails == Configuration.STATS_THUMBNAILS_ON)
+        != togglesGroup.isSelected(statsThumbnailsIndex)) {
+      return true;
+    }
     if ((currentAbLoopFeature == Configuration.AB_LOOP_FEATURE_ON)
         != togglesGroup.isSelected(abLoopFeatureIndex)) {
       return true;
@@ -195,6 +201,8 @@ public final class SettingsScreen extends BaseForm {
     mpgramAutoLoginIndex = togglesGroup.append(Lang.tr("settings.mpgram_auto_login"), null);
     discordAutoPrepareIndex = togglesGroup.append(Lang.tr("settings.discord_auto_prepare"), null);
     thumbnailsIndex = togglesGroup.append(Lang.tr("settings.load_thumbnails"), null);
+    statsThumbnailsIndex =
+        togglesGroup.append(Lang.tr("settings.stats_thumbnails"), null);
     abLoopFeatureIndex = togglesGroup.append(Lang.tr("settings.ab_loop"), null);
     anonymousModeIndex = togglesGroup.append(Lang.tr("settings.anonymous_mode"), null);
     if (Utils.isBlackberry) {
@@ -248,6 +256,7 @@ public final class SettingsScreen extends BaseForm {
     currentMpgramAutoLogin = settingsManager.getCurrentMpgramAutoLogin();
     currentDiscordAutoPrepare = settingsManager.getCurrentDiscordAutoPrepare();
     currentThumbnails = settingsManager.getCurrentThumbnails();
+    currentStatsThumbnails = settingsManager.getCurrentStatsThumbnails();
     currentAbLoopFeature = settingsManager.getCurrentAbLoopFeature();
     currentAnonymousMode = settingsManager.getCurrentAnonymousMode();
     currentPlayerMethod = settingsManager.getCurrentPlayerMethod();
@@ -277,6 +286,8 @@ public final class SettingsScreen extends BaseForm {
         currentDiscordAutoPrepare == Configuration.DISCORD_AUTO_PREPARE_ON);
     togglesGroup.setSelectedIndex(
         thumbnailsIndex, currentThumbnails == Configuration.THUMBNAILS_ON);
+    togglesGroup.setSelectedIndex(
+        statsThumbnailsIndex, currentStatsThumbnails == Configuration.STATS_THUMBNAILS_ON);
     togglesGroup.setSelectedIndex(
         abLoopFeatureIndex, currentAbLoopFeature == Configuration.AB_LOOP_FEATURE_ON);
     togglesGroup.setSelectedIndex(
@@ -334,6 +345,10 @@ public final class SettingsScreen extends BaseForm {
           togglesGroup.isSelected(thumbnailsIndex)
               ? Configuration.THUMBNAILS_ON
               : Configuration.THUMBNAILS_OFF;
+      int selectedStatsThumbnails =
+          togglesGroup.isSelected(statsThumbnailsIndex)
+              ? Configuration.STATS_THUMBNAILS_ON
+              : Configuration.STATS_THUMBNAILS_OFF;
       int selectedAbLoop =
           togglesGroup.isSelected(abLoopFeatureIndex)
               ? Configuration.AB_LOOP_FEATURE_ON
@@ -391,6 +406,10 @@ public final class SettingsScreen extends BaseForm {
       if (currentThumbnails != selectedThumbnails) {
         hasChanges = true;
         settingsManager.saveThumbnails(selectedThumbnails);
+      }
+      if (currentStatsThumbnails != selectedStatsThumbnails) {
+        hasChanges = true;
+        settingsManager.saveStatsThumbnails(selectedStatsThumbnails);
       }
       if (currentAbLoopFeature != selectedAbLoop) {
         hasChanges = true;

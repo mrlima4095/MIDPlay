@@ -30,6 +30,7 @@ public class SettingsManager {
   private static int currentMpgramAutoLogin;
   private static int currentDiscordAutoPrepare;
   private static int currentThumbnails;
+  private static int currentStatsThumbnails;
   private static boolean currentEqEnabled;
   private static int currentEqPreset; // -1 = manual/custom levels
   private static int[] currentEqLevels;
@@ -151,6 +152,8 @@ public class SettingsManager {
     currentDiscordAutoPrepare =
         settings.getInt("discordAutoPrepare", Configuration.DISCORD_AUTO_PREPARE_OFF);
     currentThumbnails = settings.getInt("thumbnails", Configuration.THUMBNAILS_ON);
+    currentStatsThumbnails =
+        settings.getInt("statsThumbnails", Configuration.STATS_THUMBNAILS_OFF);
     currentEqEnabled = settings.getBoolean("eqEnabled", false);
     currentEqPreset = settings.getInt("eqPreset", -1);
     currentEqLevels = parseLevelsCsv(settings.getString("eqLevels", ""));
@@ -217,6 +220,7 @@ public class SettingsManager {
     settings.put("mpgramAutoLogin", Configuration.MPGRAM_AUTO_LOGIN_OFF);
     settings.put("discordAutoPrepare", Configuration.DISCORD_AUTO_PREPARE_OFF);
     settings.put("thumbnails", Configuration.THUMBNAILS_ON);
+    settings.put("statsThumbnails", Configuration.STATS_THUMBNAILS_OFF);
     settings.put("eqEnabled", false);
     settings.put("eqPreset", -1);
     settings.put("eqLevels", "");
@@ -677,6 +681,10 @@ public class SettingsManager {
     currentThumbnails = thumbnails;
   }
 
+  public void saveStatsThumbnails(int enabled) throws RecordStoreException {
+    saveSetting("statsThumbnails", enabled);
+    currentStatsThumbnails = enabled;
+  }
 
   public void saveAbLoopFeature(int enabled) throws RecordStoreException {
     saveSetting("abLoopFeature", enabled);
@@ -800,6 +808,14 @@ public class SettingsManager {
 
   public int getCurrentThumbnails() {
     return currentThumbnails;
+  }
+
+  public int getCurrentStatsThumbnails() {
+    return currentStatsThumbnails;
+  }
+
+  public boolean isStatsThumbnailsEnabled() {
+    return currentStatsThumbnails == Configuration.STATS_THUMBNAILS_ON;
   }
 
   public int getCurrentAbLoopFeature() {

@@ -9,6 +9,7 @@ import midplay.net.JsonOperation;
 import midplay.player.PlayerScreen;
 import midplay.store.Configuration;
 import midplay.store.RecentManager;
+import midplay.store.StatsManager;
 import midplay.util.Lang;
 
 public final class PlayerNavHelper {
@@ -29,6 +30,12 @@ public final class PlayerNavHelper {
 
   public static void playTrackFromList(
       String title, Tracks tracks, int index, long positionMicros, Navigator navigator) {
+    Track[] selected = tracks != null ? tracks.getTracks() : null;
+    if (selected != null && index >= 0 && index < selected.length) {
+      // Count the track as soon as the user taps it; playback start is a fallback for
+      // auto-advanced tracks and is deduplicated by StatsManager.
+      StatsManager.getInstance().recordTrack(selected[index]);
+    }
     PlayerScreen playerScreen = MIDPlay.getPlayerScreen();
     if (playerScreen != null) {
       playerScreen.change(title, tracks, index, positionMicros, navigator);

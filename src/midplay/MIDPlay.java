@@ -23,11 +23,13 @@ import midplay.player.PlayerScreen;
 import midplay.store.Configuration;
 import midplay.store.DownloadManager;
 import midplay.store.FavoritesManager;
+import midplay.store.HistoryPrivacy;
 import midplay.store.JsonRecordStore;
 import midplay.store.LastSessionManager;
 import midplay.store.NotesManager;
 import midplay.store.RecentManager;
 import midplay.store.SettingsManager;
+import midplay.store.StatsManager;
 import midplay.store.TasksManager;
 import midplay.ui.Commands;
 import midplay.ui.MainMenuScreen;
@@ -39,6 +41,7 @@ import midplay.ui.UriRouter;
 import midplay.ui.screen.EqualizerScreen;
 import midplay.ui.screen.FavoritesScreen;
 import midplay.ui.screen.RecentListScreen;
+import midplay.ui.screen.StatsScreen;
 import midplay.ui.screen.SearchScreen;
 import midplay.ui.screen.SettingsScreen;
 import midplay.ui.screen.DownloadsScreen;
@@ -127,6 +130,7 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     registerMenuAction(Configuration.MENU_FAVORITES);
     registerMenuAction(Configuration.MENU_DISCOVER_PLAYLISTS);
     registerMenuAction(Configuration.MENU_RECENT);
+    registerMenuAction(Configuration.MENU_STATS);
     registerMenuAction(Configuration.MENU_DOWNLOADS);
     registerMenuAction(Configuration.MENU_FILES);
     registerMenuAction(Configuration.MENU_SETTINGS);
@@ -352,8 +356,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
    * false} when the text is not a known shortcut, so the caller can treat it as a real URI.
    *
    * <p>Accepted shortcuts: {@code wattpad}, {@code pinterest}, {@code reddit}, {@code mpgram},
-   * {@code notes}, {@code tasks} and {@code playing}. The {@code htop} diagnostic and the
-   * {@code speedtest} tool are handled by the Open URI screen itself.
+   * {@code notes}, {@code tasks}, {@code playing} and {@code stats}. The {@code htop} diagnostic
+   * and the {@code speedtest} tool are handled by the Open URI screen itself.
    */
   public boolean openInternalUri(String uri) {
     String key = internalUriKey(uri);
@@ -393,6 +397,9 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     if (key.equalsIgnoreCase("playing")) {
       return Configuration.MENU_NOW_PLAYING;
     }
+    if (key.equalsIgnoreCase("stats")) {
+      return Configuration.MENU_STATS;
+    }
     if (key.equalsIgnoreCase("teleprompter")) {
       return Configuration.MENU_TELEPROMPTER;
     }
@@ -408,6 +415,8 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
       goToDiscoverPlaylistsScreen();
     } else if (Configuration.MENU_RECENT.equals(key)) {
       goToRecentScreen();
+    } else if (Configuration.MENU_STATS.equals(key)) {
+      goToStatsScreen();
     } else if (Configuration.MENU_DOWNLOADS.equals(key)) {
       goToDownloadsScreen();
     } else if (Configuration.MENU_FILES.equals(key)) {
@@ -691,6 +700,10 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
     } catch (Exception e) {
     }
     try {
+      StatsManager.getInstance().close();
+    } catch (Exception e) {
+    }
+    try {
       DownloadManager.getInstance().cleanup();
     } catch (Exception e) {
     }
@@ -808,6 +821,14 @@ public class MIDPlay extends MIDlet implements MainMenuScreen.MenuHost, MP.Host,
   private void goToRecentScreen() {
     RecentListScreen recentScreen = new RecentListScreen(navigator);
     navigator.forward(recentScreen);
+  }
+
+  private void goToStatsScreen() {
+    if (HistoryPrivacy.isAnonymous()) {
+      navigator.showAlert(Lang.tr("stats.anonymous_disabled"), AlertType.INFO);
+      return;
+    }
+    navigator.forward(new StatsScreen(navigator));
   }
 
   private void goToDownloadsScreen() {

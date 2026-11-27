@@ -15,6 +15,7 @@ import midplay.net.MediaHttpClient;
 import midplay.store.AbLoopStore;
 import midplay.store.Configuration;
 import midplay.store.SettingsManager;
+import midplay.store.StatsManager;
 import midplay.util.Lang;
 import midplay.util.Utils;
 
@@ -928,6 +929,7 @@ public class PlayerGUI implements PlayerListener {
       }
     }
     startTimer();
+    StatsManager.getInstance().recordTrack(getTrackForSession(sessionId));
     setStatusByKey(Configuration.PLAYER_STATUS_PLAYING);
     commandWorker.enqueue(CommandWorker.APPLY_PENDING, sessionId);
 
