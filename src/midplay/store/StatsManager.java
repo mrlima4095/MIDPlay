@@ -3,7 +3,6 @@ package midplay.store;
 import cc.nnproject.json.JSON;
 import cc.nnproject.json.JSONArray;
 import cc.nnproject.json.JSONObject;
-import javax.microedition.rms.RecordStoreException;
 import midplay.model.ArtistStats;
 import midplay.model.StatsEntry;
 import midplay.model.Track;
@@ -54,48 +53,54 @@ public class StatsManager {
    * short per-track dedupe window prevents those two events from counting twice.
    */
   public void recordTrack(Track track) {
-    if (track == null || HistoryPrivacy.isAnonymous()) {
-      return;
-    }
-    String key = identityKey(track);
-    long now = System.currentTimeMillis();
-    if (wasCountedRecently(key, now)) {
-      return;
-    }
-    rememberCount(key, now);
+    // Statistics are best-effort. A failed RMS write (including SecurityException on devices
+    // that deny record-store access at runtime) must never stop the user from playing a track.
+    try {
+      if (track == null || HistoryPrivacy.isAnonymous()) {
+        return;
+      }
+      String key = identityKey(track);
+      long now = System.currentTimeMillis();
+      if (wasCountedRecently(key, now)) {
+        return;
+      }
+      rememberCount(key, now);
 
-    JSONArray arr = items();
-    int existingIndex = -1;
-    int nextCount = 1;
-    for (int i = 0; i < arr.size(); i++) {
-      try {
-        JSONObject existing = arr.getObject(i);
-        Track other = Track.fromJSON(existing.getObject("track"));
-        if (track.isSame(other)) {
-          existingIndex = i;
-          nextCount = existing.getInt("count", 0) + 1;
-          break;
+      JSONArray arr = items();
+      int existingIndex = -1;
+      int nextCount = 1;
+      for (int i = 0; i < arr.size(); i++) {
+        try {
+          JSONObject existing = arr.getObject(i);
+          Track other = Track.fromJSON(existing.getObject("track"));
+          if (track.isSame(other)) {
+            existingIndex = i;
+            nextCount = existing.getInt("count", 0) + 1;
+            break;
+          }
+        } catch (Exception e) {
         }
-      } catch (Exception e) {
       }
-    }
 
-    JSONObject entry = new JSONObject();
-    entry.put("track", track.toJSON());
-    entry.put("count", nextCount);
-    entry.put("last", System.currentTimeMillis());
+      JSONObject entry = new JSONObject();
+      entry.put("track", track.toJSON());
+      entry.put("count", nextCount);
+      entry.put("last", System.currentTimeMillis());
 
-    JSONArray next = new JSONArray();
-    next.add(entry);
-    int carried = 0;
-    for (int i = 0; i < arr.size() && carried < MAX_ENTRIES - 1; i++) {
-      if (i == existingIndex) {
-        continue;
+      JSONArray next = new JSONArray();
+      next.add(entry);
+      int carried = 0;
+      for (int i = 0; i < arr.size() && carried < MAX_ENTRIES - 1; i++) {
+        if (i == existingIndex) {
+          continue;
+        }
+        next.add(arr.getObject(i));
+        carried++;
       }
-      next.add(arr.getObject(i));
-      carried++;
+      save(next);
+    } catch (Exception e) {
+      // Keep playback working even when the device rejects stats storage.
     }
-    save(next);
   }
 
   public StatsEntry[] getMostPlayed() {
@@ -356,13 +361,12 @@ public class StatsManager {
     return value == null ? "" : value.trim();
   }
 
-  /** Stats are small and infrequent, so write them immediately instead of relying on the async writer. */
+  /**
+   * Queue the write like the other history stores. Keeping RMS I/O off the command thread avoids
+   * runtime permission errors surfacing as a SecurityException when the user taps Play.
+   */
   private void save(JSONArray arr) {
     cached = arr;
-    try {
-      storage.save(arr.toString());
-    } catch (RecordStoreException e) {
-      // Keep the in-memory copy; the next play or clear retries the write.
-    }
+    storage.saveAsync(arr.toString());
   }
 }

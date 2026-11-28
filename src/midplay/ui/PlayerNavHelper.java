@@ -44,8 +44,12 @@ public final class PlayerNavHelper {
     Track[] selected = tracks != null ? tracks.getTracks() : null;
     if (selected != null && index >= 0 && index < selected.length) {
       // Count the track as soon as the user taps it; playback start is a fallback for
-      // auto-advanced tracks and is deduplicated by StatsManager.
-      StatsManager.getInstance().recordTrack(selected[index]);
+      // auto-advanced tracks and is deduplicated by StatsManager. Statistics are optional,
+      // so a device that refuses RMS access must still let the track play.
+      try {
+        StatsManager.getInstance().recordTrack(selected[index]);
+      } catch (Exception e) {
+      }
     }
     PlayerScreen playerScreen = MIDPlay.getPlayerScreen();
     if (playerScreen != null) {

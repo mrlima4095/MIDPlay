@@ -929,7 +929,11 @@ public class PlayerGUI implements PlayerListener {
       }
     }
     startTimer();
-    StatsManager.getInstance().recordTrack(getTrackForSession(sessionId));
+    try {
+      StatsManager.getInstance().recordTrack(getTrackForSession(sessionId));
+    } catch (Exception e) {
+      // Stats must never interrupt playback on devices with restrictive RMS permissions.
+    }
     setStatusByKey(Configuration.PLAYER_STATUS_PLAYING);
     commandWorker.enqueue(CommandWorker.APPLY_PENDING, sessionId);
 
