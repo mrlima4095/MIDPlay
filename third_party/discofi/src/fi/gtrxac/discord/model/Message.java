@@ -19,27 +19,27 @@ public class Message {
     public static final int TYPE_BOOSTED_LEVEL_2 = 10;
     public static final int TYPE_BOOSTED_LEVEL_3 = 11;
 
-    public String id;
+    public long id;
     public User author;
     public String content;
     public boolean showAuthor;
     public String timestamp;
     public Vector attachments;
-    public String channelID;
+    public long channelID;
 
     public boolean isStatus;
     public boolean isForwarded;
     public boolean isReply;
 
-    public String replyID;
+    public long replyID;
     public User replyAuthor;
     public String replyContent;
 
     public Message(JSONObject data) {
-        id = data.getString("id");
+        id = Long.parseLong(data.getString("id"));
         author = new User(data.getObject("author"));
         timestamp = DiscordUtil.formatTimestamp(id, Settings.use12hTime);
-        channelID = data.getString("channel_id", null);
+        channelID = Long.parseLong(data.getString("channel_id", null));
 
         JSONObject contentObject = getContentObject(data);
 
@@ -146,7 +146,7 @@ public class Message {
     private String parseStatusMessage(JSONObject data, int type) {
         // Status message -> determine content by message type
         String target = "(unknown)";
-        String targetID = null;
+        long targetID = 0;
 
         try {
             JSONObject targetData = data.getArray("mentions").getObject(0);
@@ -161,7 +161,7 @@ public class Message {
                 return "added " + target + " to the group";
             }
             case TYPE_REMOVED: {
-                if (author.id.equals(targetID)) {
+                if (author.id == targetID) {
                     return "left the group";
                 }
                 return "removed " + target + " from the group";
@@ -201,13 +201,13 @@ public class Message {
      * Determine whether or not the author/timestamp row should be shown for
      * this message.
      *
-     * @param above        The message shown above this message.
-     * @param clusterStart The ID of the top-most message in this message cluster.
+     * @param above          The message shown above this message.
+     * @param clusterStartId The ID of the top-most message in this message cluster.
      * @return true if author should be shown, false if messages are "merged"
      */
-    public boolean shouldShowAuthor(Message above, String clusterStart) {
+    public boolean shouldShowAuthor(Message above, long clusterStartId) {
         // Different authors -> true
-        if (!above.author.id.equals(author.id)) return true;
+        if (above.author.id != author.id) return true;
 
         // This message is a reply -> true
         if (isReply) return true;
@@ -219,8 +219,8 @@ public class Message {
         if (isStatus || above.isStatus) return true;
 
         // Finally, check if message was sent more than 7 minutes after the first message of the cluster
-        long thisMsgTime = Long.parseLong(id) >> 22;
-        long firstMsgTime = Long.parseLong(clusterStart) >> 22;
+        long thisMsgTime = id >> 22;
+        long firstMsgTime = clusterStartId >> 22;
         return (thisMsgTime - firstMsgTime > 7*60*1000);
     }
 
@@ -232,7 +232,7 @@ public class Message {
         if (acc == null) return false;
 
         try {
-            return acc.getUserID().equals(author.id);
+            return acc.getUserID() == author.id;
         }
         catch (DiscordException e) {
             e.printStackTrace();

@@ -348,8 +348,8 @@ public class MessageItem extends Item {
         Screen curr = App.getCurrentScreen();
 
         if (curr instanceof ChatScreen) {
-            String replyID = message.replyID;
-            if (replyID == null) return;
+            long replyID = message.replyID;
+            if (replyID == 0) return;
 
             ChatScreen chatScreen = (ChatScreen) curr;
 
@@ -363,7 +363,7 @@ public class MessageItem extends Item {
             // For inbox tab: open chat and go to that message
             // For now, this only works if the channel is in a cached guild
             Account acc = Accounts.getActive();
-            Channel channel = acc.channelCache.getChannelByID(null, message.channelID);
+            Channel channel = acc.channelCache.getChannelByID(0, message.channelID);
             if (channel == null) return;
             
             App.pushScreen(new ChatScreen(

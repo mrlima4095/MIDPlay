@@ -3,7 +3,7 @@ package fi.gtrxac.discord.model;
 import cc.nnproject.json.*;
 
 public class User {
-    public String id;
+    public long id;
     public String name;
     public String iconHash;
 
@@ -12,7 +12,7 @@ public class User {
     // public String initials;
 
     public User(JSONObject data) {
-        id = data.getString("id");
+        id = Long.parseLong(data.getString("id"));
 
         name = data.getString("global_name", null);
         if (name == null) {
@@ -36,6 +36,6 @@ public class User {
         // }
         // initials = initialsBuf.toString();
 
-        // iconColor = Util.hsvToRgb((int) Long.parseLong(id) % 360, 192, 208);
+        // iconColor = Util.hsvToRgb((int) id % 360, 192, 208);
     }
 }

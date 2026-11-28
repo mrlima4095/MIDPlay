@@ -17,25 +17,26 @@ public class ChannelCache extends LRUCache {
         super(CACHE_SIZE);
     }
 
-    public void readSaveData(DataInputStream saveDataStream) throws IOException {
+    public void readSaveData(DataInputStream saveDataStream, int saveDataVersion) throws IOException {
         cache.clear();
 
         int numEntries = saveDataStream.readInt();
 
         for (int i = 0; i < numEntries; i++) {
-            String guildID = Long.toString(saveDataStream.readLong());
+            long guildID = saveDataStream.readLong();
             long lastUsed = (long) saveDataStream.readInt();
             
             int numCategories = saveDataStream.readShort();
             Vector categories = new Vector(numCategories);
 
             for (int j = 0; j < numCategories; j++) {
-                ChannelCategory category = new ChannelCategory(saveDataStream);
+                ChannelCategory category = new ChannelCategory(saveDataStream, saveDataVersion);
                 categories.addElement(category);
             }
 
             LRUCacheEntry entry = new LRUCacheEntry(categories, lastUsed);
-            set(guildID, entry);
+            Long key = new Long(guildID);
+            set(key, entry);
         }
     }
 
@@ -43,7 +44,8 @@ public class ChannelCache extends LRUCache {
         saveDataStream.writeInt(cache.size());
 
         for (Enumeration e = cache.keys(); e.hasMoreElements(); ) {
-            String guildID = (String) e.nextElement();
+            Long guildID = (Long) e.nextElement();
+
             LRUCacheEntry entry = (LRUCacheEntry) cache.get(guildID);
             Vector categories = (Vector) entry.getObjectWithoutUpdate();
 
@@ -51,7 +53,7 @@ public class ChannelCache extends LRUCache {
             // relative to the 0 usage counter of the next session
             long lastUsed = entry.getLastUsed() - LRUCacheEntry.getUsageCounter();
 
-            saveDataStream.writeLong(Long.parseLong(guildID));
+            saveDataStream.writeLong(guildID.longValue());
             saveDataStream.writeInt((int) lastUsed);
             saveDataStream.writeShort(categories.size());
             
@@ -62,25 +64,32 @@ public class ChannelCache extends LRUCache {
         }
     }
 
-    public Vector get(String guildID) {
-        return (Vector) super.get(guildID);
+    public Vector get(long guildID) {
+        Long key = new Long(guildID);
+        return (Vector) super.get(key);
+    }
+
+    public void set(long guildID, Vector channels) {
+        Long key = new Long(guildID);
+        set(key, channels);
     }
 
     /**
      * Find a channel by its ID in all cached guilds, first searching the primary guild if specified.
      */
-    public Channel getChannelByID(String primaryGuildID, String channelID) {
-        if (channelID == null) return null;
+    public Channel getChannelByID(long primaryGuildID, long channelID) {
+        if (channelID == 0) return null;
 
-        if (primaryGuildID != null) {
+        if (primaryGuildID != 0) {
             Channel result = getChannelByIDInGuild(primaryGuildID, channelID);
             if (result != null) return result;
         }
 
         for (Enumeration e = cache.keys(); e.hasMoreElements(); ) {
-            String guildID = (String) e.nextElement();
+            Long key = (Long) e.nextElement();
+            long guildID = key.longValue();
 
-            if (primaryGuildID != null && guildID.equals(primaryGuildID)) continue;
+            if (primaryGuildID != 0 && guildID == primaryGuildID) continue;
 
             Channel result = getChannelByIDInGuild(guildID, channelID);
             if (result != null) return result;
@@ -92,8 +101,8 @@ public class ChannelCache extends LRUCache {
     /**
      * Find a channel by ID in the specified guild.
      */
-    public Channel getChannelByIDInGuild(String guildID, String channelID) {
-        if (guildID == null || channelID == null) return null;
+    public Channel getChannelByIDInGuild(long guildID, long channelID) {
+        if (guildID == 0 || channelID == 0) return null;
 
         Vector categories = get(guildID);
 
@@ -103,7 +112,7 @@ public class ChannelCache extends LRUCache {
             for (int j = 0; j < category.children.size(); j++) {
                 Channel channel = (Channel) category.children.elementAt(j);
 
-                if (channel.id.equals(channelID)) return channel;
+                if (channel.id == channelID) return channel;
             }
         }
 

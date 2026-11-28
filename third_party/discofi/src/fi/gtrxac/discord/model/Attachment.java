@@ -12,7 +12,7 @@ public class Attachment {
         ".mp4", ".3gp", ".webm", ".mov", ".m4v", ".mkv", ".avi", ".gifv"
     };
 
-    public String id;
+    public long id;
     public String filename;
     public String contentType;
     public int size;
@@ -40,7 +40,7 @@ public class Attachment {
         proxyUrl = data.getString("proxy_url", null);
 
         if (!isEmbed) {
-            id = data.getString("id", null);
+            id = Long.parseLong(data.getString("id", null));
             filename = data.getString("filename", "attachment");
             size = data.getInt("size", 0);
         }

@@ -110,11 +110,18 @@ public class MessageParser {
 
     private boolean parseChannelMention(String channelID) {
         Account acc = Accounts.getActive();
-        Channel channel = acc.channelCache.getChannelByID(null, channelID);
 
-        if (channel != null) {
-            outputContent.append(channel.name);
-            return true;
+        try {
+            long id = Long.parseLong(channelID);
+            Channel channel = acc.channelCache.getChannelByID(0, id);
+
+            if (channel != null) {
+                outputContent.append(channel.getNameForMention());
+                return true;
+            }
+        }
+        catch (NumberFormatException e) {
+            return false;
         }
 
         if (!isValidID(channelID)) return false;

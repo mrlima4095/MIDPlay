@@ -5,13 +5,13 @@ import java.io.*;
 import cc.nnproject.json.*;
 
 public class ChannelCategory {
-    public String id;
+    public long id;
     public String name;
     public Vector children;
 
     public ChannelCategory(JSONObject data) {
         this(data.getString("name"));
-        this.id = data.getString("id");
+        this.id = Long.parseLong(data.getString("id"));
     }
 
     public ChannelCategory(String name) {
@@ -19,11 +19,11 @@ public class ChannelCategory {
         this.children = new Vector();
     }
 
-    public ChannelCategory(DataInputStream saveDataStream) throws IOException {
+    public ChannelCategory(DataInputStream saveDataStream, int saveDataVersion) throws IOException {
         boolean isDefaultCategory = saveDataStream.readBoolean();
 
         if (!isDefaultCategory) {
-            id = Long.toString(saveDataStream.readLong());
+            id = saveDataStream.readLong();
             name = saveDataStream.readUTF();
         }
 
@@ -31,18 +31,18 @@ public class ChannelCategory {
         children = new Vector(numChildren);
 
         for (int i = 0; i < numChildren; i++) {
-            children.addElement(new Channel(saveDataStream));
+            children.addElement(new Channel(saveDataStream, saveDataVersion));
         }
     }
 
     public void writeSaveData(DataOutputStream saveDataStream) throws IOException {
-        if (id == null && name == null) {
+        if (id == 0 && name == null) {
             // default category without ID/name
             saveDataStream.writeBoolean(true);
         }
         else {
             saveDataStream.writeBoolean(false);
-            saveDataStream.writeLong(Long.parseLong(id));
+            saveDataStream.writeLong(id);
             saveDataStream.writeUTF(name);
         }
 

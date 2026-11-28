@@ -21,7 +21,7 @@ public class DiscordException extends Exception {
             this.friendlyMessage = "Invalid session";
             this.tips.addElement("log in again");
             this.tips.addElement("if you're using token login, make sure the token is written correctly");
-            this.tips.addElement("use a different connection method");
+            this.tips.addElement("use a different network or connection method");
             this.tips.addElement("use a different account");
         }
         else if (message.startsWith("java.io.IOException") || message.indexOf("UnknownHost") != -1 || message.indexOf("SocketException") != -1) {

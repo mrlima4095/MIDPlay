@@ -634,6 +634,11 @@ def patch_message_box(text):
         "import javax.microedition.lcdui.*;\nimport midplay.util.Lang;",
         "MessageBox Lang import",
     )
+    # Upstream 1.1.0+ formats channel names through getNameForTitle().
+    text = text.replace(
+        '"Message " + screen.channel.name',
+        '"Message " + screen.channel.getNameForTitle()',
+    )
     text = replace_once(
         text,
         "import discofi.bluewap.ui.AppCanvas;",

@@ -8,11 +8,11 @@ import java.io.*;
  */
 
 public class Guild {
-    public String id;
+    public long id;
     private String name;
 
     public Guild(JSONObject data) {
-        id = data.getString("id");
+        id = Long.parseLong(data.getString("id"));
 
         if (data.has("name")) {
             name = data.getString("name");
@@ -26,12 +26,12 @@ public class Guild {
     }
 
     public Guild(DataInputStream saveDataStream) throws IOException {
-        id = Long.toString(saveDataStream.readLong());
+        id = saveDataStream.readLong();
         name = saveDataStream.readUTF();
     }
 
     public void writeSaveData(DataOutputStream saveDataStream) throws IOException {
-        saveDataStream.writeLong(Long.parseLong(id));
+        saveDataStream.writeLong(id);
         saveDataStream.writeUTF(name);
     }
 

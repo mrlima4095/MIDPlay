@@ -55,22 +55,22 @@ public class ChatScreen extends ListScreen implements CommandListener {
 
     public ChatScreen(Channel channel) {
         // By default, fetch latest messages
-        this(channel, null, null, 0);
+        this(channel, null, 0, 0);
     }
 
-    public ChatScreen(Channel channel, String paginationType, String paginationMessage, int newPage) {
+    public ChatScreen(Channel channel, String paginationType, long paginationMessageId, int newPage) {
         super(0, Fonts.height/4);
-        setTitle(channel.name);
+        setTitle(channel.getNameForTitle());
 
         this.channel = channel;
 
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
 
-        fetchMessages(paginationType, paginationMessage, newPage, true);
+        fetchMessages(paginationType, paginationMessageId, newPage, true);
     }
 
-    public void fetchMessages(String paginationType, String paginationMessage, int newPage, boolean showLoadingAnimation) {
+    public void fetchMessages(String paginationType, long paginationMessageId, int newPage, boolean showLoadingAnimation) {
         removeCommand(sendCommand);
         removeCommand(replyCommand);
         removeCommand(refreshCommand);
@@ -86,7 +86,7 @@ public class ChatScreen extends ListScreen implements CommandListener {
         HTTPThread h = new HTTPThread(HTTPThread.ACTION_FETCH_MESSAGES, this);
         h.channel = channel;
         h.paginationType = paginationType;
-        h.paginationMessage = paginationMessage;
+        h.paginationMessageId = paginationMessageId;
         h.newPage = newPage;
         h.start();
 
@@ -152,7 +152,7 @@ public class ChatScreen extends ListScreen implements CommandListener {
                 break;
             }
             case CMD_REFRESH: {
-                fetchMessages(null, null, 0, false);
+                fetchMessages(null, 0, 0, false);
                 break;
             }
             case CMD_DELETE_PROMPT_YES: {
@@ -303,7 +303,7 @@ public class ChatScreen extends ListScreen implements CommandListener {
 
         Message first = (Message) messages.elementAt(0);
         Message above = first;
-        String clusterStartID = first.id;
+        long clusterStartID = first.id;
         first.showAuthor = true;
 
         if (messages.size() == 1) return;
@@ -322,7 +322,7 @@ public class ChatScreen extends ListScreen implements CommandListener {
     /**
      * Return true on success, i.e. if the message is on the current page
      */
-    public boolean jumpToMessage(String messageID) {
+    public boolean jumpToMessage(long messageID) {
         // Recalc to make sure correct item heights are used to calculate scroll
         recalcNow();
 
@@ -330,7 +330,7 @@ public class ChatScreen extends ListScreen implements CommandListener {
             Item item = (Item) items.elementAt(i);
 
             if (!(item instanceof MessageItem)) continue;
-            if (!((MessageItem) item).message.id.equals(messageID)) continue;
+            if (((MessageItem) item).message.id != messageID) continue;
 
             setHighlightedItem(item);
             return true;

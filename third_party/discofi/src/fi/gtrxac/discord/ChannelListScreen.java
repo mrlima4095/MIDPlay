@@ -81,7 +81,7 @@ public class ChannelListScreen extends ListScreen implements CommandListener {
             for (int j = 0; j < category.children.size(); j++) {
                 Channel channel = (Channel) category.children.elementAt(j);
 
-                addItem(new ListItem(channel.name, channel));
+                addItem(new ListItem(channel.getNameForList(), channel));
             }
         }
     }

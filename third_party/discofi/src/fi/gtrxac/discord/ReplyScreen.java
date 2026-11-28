@@ -18,7 +18,7 @@ public class ReplyScreen extends ListScreen implements CommandListener {
 
     public ReplyScreen(Channel channel, Message replyTarget, String messageDraft) {
         super();
-        String title = "Message " + channel.name;
+        String title = "Message " + channel.getNameForTitle();
         setTitle(title);
 
         this.channel = channel;
@@ -57,7 +57,7 @@ public class ReplyScreen extends ListScreen implements CommandListener {
                 HTTPThread h = new HTTPThread(HTTPThread.ACTION_SEND_MESSAGE, App.getPreviousScreen());
                 h.channel = channel;
                 h.message = messageField.getValue();
-                h.recipientMessage = replyTarget.id;
+                h.recipientMessageId = replyTarget.id;
                 h.sendPing = mentionGroup.getTickedIndex() == 0;
                 h.start();
 

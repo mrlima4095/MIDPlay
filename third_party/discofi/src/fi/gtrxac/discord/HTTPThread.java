@@ -35,9 +35,9 @@ public class HTTPThread extends Thread {
     public Channel channel;
     public String message;
     public String paginationType;
-    public String paginationMessage;
+    public long paginationMessageId;
     public int newPage;
-	public String recipientMessage;
+	public long recipientMessageId;
 	public boolean sendPing;
     public IconRequest iconRequest;
 	public Attachment attachment;
@@ -317,7 +317,7 @@ public class HTTPThread extends Thread {
     private void groupChannelsIntoCategories(Vector channels, Vector categories) {
         for (int i = 0; i < channels.size(); i++) {
             JSONObject channelJson = (JSONObject) channels.elementAt(i);
-            String parentID = channelJson.getString("parent_id", null);
+            long parentID = Long.parseLong(channelJson.getString("parent_id", null));
 
             // Fallback to default (topmost) category
             ChannelCategory parentCategory = (ChannelCategory) categories.elementAt(0);
@@ -326,7 +326,7 @@ public class HTTPThread extends Thread {
             for (int j = 1; j < categories.size(); j++) {
                 ChannelCategory category = (ChannelCategory) categories.elementAt(j);
 
-                if (category.id.equals(parentID)) {
+                if (category.id == parentID) {
                     parentCategory = category;
                     break;
                 }
@@ -341,7 +341,7 @@ public class HTTPThread extends Thread {
         ChatScreen chatScreen = (ChatScreen) callerScreen;
 
         try {
-            String url = createFetchMessagesUrl(channel.id, paginationType, paginationMessage);
+            String url = createFetchMessagesUrl(channel.id, paginationType, paginationMessageId);
             JSONArray messagesJson = (JSONArray) acc.fetchJSON(url);
 
             chatScreen.page = newPage;
@@ -350,13 +350,13 @@ public class HTTPThread extends Thread {
             if ("after".equals(paginationType)) {
                 // If we loaded a non-full page of messages and the anchor
                 // message is still visible, scroll to it, else scroll to top.
-                if (!chatScreen.jumpToMessage(paginationMessage)) {
+                if (!chatScreen.jumpToMessage(paginationMessageId)) {
                     chatScreen.setHighlightedIndex(0);
                 }
             }
             else if ("around".equals(paginationType)) {
                 // Scroll to the anchor message that we jumped to
-                chatScreen.jumpToMessage(paginationMessage);
+                chatScreen.jumpToMessage(paginationMessageId);
             }
             else {
                 // "before" or not specified -> Scroll to bottom
@@ -374,7 +374,7 @@ public class HTTPThread extends Thread {
         }
     }
 
-    private String createFetchMessagesUrl(String channelID, String paginationType, String paginationMessage) {
+    private String createFetchMessagesUrl(long channelID, String paginationType, long paginationMessageId) {
         StringBuffer url = new StringBuffer()
             .append("/channels/")
             .append(channel.id)
@@ -384,7 +384,7 @@ public class HTTPThread extends Thread {
 
         if (paginationType != null) {
             url.append('?').append(paginationType)
-                .append('=').append(paginationMessage);
+                .append('=').append(paginationMessageId);
 
             hasParameter = true;
         }
@@ -405,7 +405,7 @@ public class HTTPThread extends Thread {
 
         try {
             chatScreen.setBannerText("Sending message");
-            acc.sendMessage(channel, message, recipientMessage, sendPing);
+            acc.sendMessage(channel, message, recipientMessageId, sendPing);
 
             chatScreen.messageDraft = "";
         }
@@ -413,7 +413,7 @@ public class HTTPThread extends Thread {
             chatScreen.setBannerText(null);
         }
 
-        chatScreen.fetchMessages(null, null, 0, false);
+        chatScreen.fetchMessages(null, 0, 0, false);
     }
 
     private void runFetchIcon() {
@@ -530,7 +530,7 @@ public class HTTPThread extends Thread {
             chatScreen.setBannerText(null);
         }
 
-        chatScreen.fetchMessages(null, null, 0, false);
+        chatScreen.fetchMessages(null, 0, 0, false);
     }
 
     private void throwUnsupportedMethodException(String title, String description) throws DiscordException {

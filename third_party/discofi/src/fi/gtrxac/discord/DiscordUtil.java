@@ -15,7 +15,7 @@ public class DiscordUtil {
         return result;
     }
 
-    public static String getUserIDFromToken(String token) throws DiscordException {
+    public static long getUserIDFromToken(String token) throws DiscordException {
         int b64idLength = token.indexOf('.');
 
         if (b64idLength < 20) {
@@ -30,7 +30,7 @@ public class DiscordUtil {
         String id = new String(idBytes);
 
         try {
-            return Long.toString(Long.parseLong(id));
+            return Long.parseLong(id);
         }
         catch (Exception e) {
             throw new DiscordException(
@@ -67,8 +67,8 @@ public class DiscordUtil {
 
     public static final long DISCORD_EPOCH = 1420070400000L;
 
-    public static String formatTimestamp(String id, boolean use12hTime) {
-        long timestamp = (Long.parseLong(id) >> 22) + DISCORD_EPOCH;
+    public static String formatTimestamp(long id, boolean use12hTime) {
+        long timestamp = (id >> 22) + DISCORD_EPOCH;
         return Util.formatTimestamp(timestamp, use12hTime);
     }
 }

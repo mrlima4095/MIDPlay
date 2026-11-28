@@ -14,21 +14,18 @@ public class DMChannel extends Channel {
 
     public DMChannel(JSONObject data) {
         super(data);
-        isGroup = data.getInt("type") == 3;
+        isGroup = data.getInt("type", TYPE_DM) == TYPE_GROUP_DM;
 
-        String msgIdStr = data.getString("last_message_id");
+        String msgIdStr = data.getString("last_message_id", null);
+
         if (msgIdStr != null) {
             lastMessageID = Long.parseLong(msgIdStr);
         } else {
-            lastMessageID = Long.parseLong(id);
+            lastMessageID = id;
         }
 
         if (isGroup) populateGroupInfo(data);
         else populateRecipientInfo(data);
-    }
-
-    protected boolean nameHasHashtag() {
-        return false;
     }
 
     private void populateGroupInfo(JSONObject data) {
@@ -68,7 +65,7 @@ public class DMChannel extends Channel {
     }
 
     public DMChannel(DataInputStream saveDataStream) throws IOException {
-        id = Long.toString(saveDataStream.readLong());
+        id = saveDataStream.readLong();
         name = saveDataStream.readUTF();
         username = saveDataStream.readUTF();
         isGroup = saveDataStream.readBoolean();
@@ -78,15 +75,27 @@ public class DMChannel extends Channel {
     }
 
     public void writeSaveData(DataOutputStream saveDataStream) throws IOException {
-        saveDataStream.writeLong(Long.parseLong(id));
+        saveDataStream.writeLong(id);
         saveDataStream.writeUTF(name);
         saveDataStream.writeUTF((username != null) ? username : "");
         saveDataStream.writeBoolean(isGroup);
         saveDataStream.writeLong(lastMessageID);
     }
 
-    public String getName() {
+    public String getNameForMention() {
         if (name == null) return "(unknown)";
-        return name;
+        return "@" + name;
+    }
+
+    public String getNameForNotification() {
+        return (name != null) ? name : "(unknown)";
+    }
+
+    public String getNameForList() {
+        return getNameForNotification();
+    }
+
+    protected String getNamePrefix() {
+        return !isGroup ? "@" : "";
     }
 }

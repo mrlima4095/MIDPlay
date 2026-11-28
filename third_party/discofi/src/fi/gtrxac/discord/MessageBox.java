@@ -11,7 +11,7 @@ public class MessageBox extends TextBox implements CommandListener {
     private ChatScreen screen;
 
     public MessageBox(ChatScreen screen, String content) {
-        super("Message " + screen.channel.name, content, 2000, 0);
+        super("Message " + screen.channel.getNameForTitle(), content, 2000, 0);
 
         this.screen = screen;
 

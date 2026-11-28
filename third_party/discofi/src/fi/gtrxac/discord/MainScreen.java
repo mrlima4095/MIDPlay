@@ -111,7 +111,7 @@ public class MainScreen extends TabbedListScreen implements CommandListener, Lis
         for (int i = 0; i < dmChannels.size(); i++) {
             DMChannel c = (DMChannel) dmChannels.elementAt(i);
             
-            dmsTab.addItem(new ListItem(c.getName(), c));
+            dmsTab.addItem(new ListItem(c.getNameForList(), c));
         }
     }
 

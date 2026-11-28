@@ -1,5 +1,6 @@
 package fi.gtrxac.discord.model;
 
+import fi.gtrxac.discord.Account;
 import cc.nnproject.json.*;
 import java.io.*;
 
@@ -14,35 +15,90 @@ public class Channel {
     public static final int TYPE_GUILD_FORUM = 15;
     public static final int TYPE_GUILD_MEDIA = 16;
 
-    public String id;
-    public String name;
+    public long id;
+    protected String name;
     public int type;
 
     public Channel() {}
 
     public Channel(JSONObject data) {
-        id = data.getString("id");
+        id = Long.parseLong(data.getString("id"));
         type = data.getInt("type", 0);
-        name = data.getString("name", null);
-
-        if (nameHasHashtag()) name = "#" + name;
+        setName(data.getString("name", null));
     }
 
-    public Channel(DataInputStream saveDataStream) throws IOException {
-        id = Long.toString(saveDataStream.readLong());
+    public Channel(DataInputStream saveDataStream, int saveDataVersion) throws IOException {
+        id = saveDataStream.readLong();
         type = saveDataStream.readUnsignedByte();
-        name = saveDataStream.readUTF();
+        setName(saveDataStream.readUTF());
+
+        // Remove hashtag from old save data. Hashtag is now dynamically added
+        // rather than contained in the name field directly.
+        if (saveDataVersion < Account.VERSION_REMOVED_HASHTAG_FROM_CHANNELS &&
+            name != null && name.startsWith("#")) {
+
+            setName(name.substring(1));
+        }
     }
 
     public void writeSaveData(DataOutputStream saveDataStream) throws IOException {
-        saveDataStream.writeLong(Long.parseLong(id));
+        saveDataStream.writeLong(id);
         saveDataStream.writeByte(type);
         saveDataStream.writeUTF(name);
     }
 
-    protected boolean nameHasHashtag() {
-        // Categories also wouldn't have a hashtag but we don't 
-        // create Channel objects from those
-        return type != TYPE_GUILD_VOICE;
+    public void setName(String newName) {
+        name = newName;
+
+        // For the purposes of our client, a blank name (like an unnamed group chat)
+        // will have the same behavior as no name, so we can easily replace with "(unknown)"
+        if (name != null && name.trim().length() == 0) {
+            name = null;
+        }
+    }
+
+    /**
+     * Get raw unformatted name of the channel that is used for loading/saving data.
+     * The raw name may be null, but the other getName methods will always return a valid string.
+     */
+    public String getRawName() {
+        return name;
+    }
+
+    /**
+     * Get display name of the channel that is shown in title bar.
+     */
+    public String getNameForTitle() {
+        if (name == null) return "(unknown)";
+        return getNamePrefix() + name;
+    }
+
+    /**
+     * Get display name of the channel that is shown in messages mentioning this channel.
+     */
+    public String getNameForMention() {
+        if (name == null) return "(unknown)";
+        // Always with a #, even for voice channels
+        return "#" + name;
+    }
+
+    /**
+     * Get display name of the channel that is shown in notifications.
+     */
+    public String getNameForNotification() {
+        return getNameForTitle();
+    }
+
+    /**
+     * Get display name of the channel that is shown in lists.
+     */
+    public String getNameForList() {
+        return getNameForTitle();
+    }
+
+    protected String getNamePrefix() {
+        // Voice channels don't have a #. Category channels also wouldn't have a #,
+        // but we don't create Channel objects from those, so they are not checked here.
+        return (type != TYPE_GUILD_VOICE) ? "#" : "";
     }
 }

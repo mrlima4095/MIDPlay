@@ -26,7 +26,8 @@ public class Account {
     public static final int VERSION_ADDED_CHANNEL_CACHE = 2;
     public static final int VERSION_ADDED_CDN_URL = 3;
     public static final int VERSION_ADDED_MEDIA_PROXY_URL = 4;
-    public static final int VERSION_CURRENT = 4;
+    public static final int VERSION_REMOVED_HASHTAG_FROM_CHANNELS = 5;
+    public static final int VERSION_CURRENT = 5;
 
     public static final String DEFAULT_CDN_PROXY_URL = "http://cdn.gtrxac.fi";
     public static final String DEFAULT_MEDIA_PROXY_URL = "http://media.discordapp.net";
@@ -77,7 +78,7 @@ public class Account {
         }
 
         if (version >= VERSION_ADDED_CHANNEL_CACHE) {
-            channelCache.readSaveData(saveDataStream);
+            channelCache.readSaveData(saveDataStream, version);
         }
 
         if (version >= VERSION_ADDED_CDN_URL) {
@@ -120,10 +121,10 @@ public class Account {
 
     public String getDisplayTitle() throws DiscordException {
         if (username != null) return username;
-        return getUserID();
+        return Long.toString(getUserID());
     }
 
-    public String getUserID() throws DiscordException {
+    public long getUserID() throws DiscordException {
         return DiscordUtil.getUserIDFromToken(token);
     }
 
@@ -323,12 +324,12 @@ public class Account {
             JSONArray guildIds = guildFolders.getObject(i).getArray("guild_ids");
 
             for (int j = 0; j < guildIds.size(); j++) {
-                String guildId = guildIds.getString(j);
+                long guildId = Long.parseLong(guildIds.getString(j));
 
                 for (int k = 0; k < guildsUnsorted.size(); k++) {
                     Guild guild = (Guild) guildsUnsorted.elementAt(k);
 
-                    if (guild.id.equals(guildId)) {
+                    if (guild.id == guildId) {
                         guilds.addElement(guild);
                         guildsUnsorted.removeElementAt(k);
                         break;
@@ -413,7 +414,7 @@ public class Account {
     /**
      * Send a message to a channel. Returns the created message.
      */
-    public Message sendMessage(Channel channel, String content, String recipientMessageId, boolean mention) throws DiscordException {
+    public Message sendMessage(Channel channel, String content, long recipientMessageId, boolean mention) throws DiscordException {
         boolean isDM = (channel instanceof DMChannel);
 
         JSONObject body = new JSONObject();
@@ -423,9 +424,9 @@ public class Account {
         body.put("tts", false);
 
         // Reply
-        if (recipientMessageId != null) {
+        if (recipientMessageId != 0) {
             JSONObject ref = new JSONObject();
-            ref.put("message_id", recipientMessageId);
+            ref.put("message_id", Long.toString(recipientMessageId));
             body.put("message_reference", ref);
 
             if (!mention && !isDM) {
@@ -443,7 +444,7 @@ public class Account {
      * Tell the API that the user is typing in a channel. Discord clears the
      * indicator automatically after about ten seconds.
      */
-    public void sendTyping(String channelId) {
+    public void sendTyping(long channelId) {
         try {
             HTTP h = createApiRequest("POST", "/channels/" + channelId + "/typing");
             h.setData("");
